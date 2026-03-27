@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'services/app_provider.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('tr_TR', null);
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -17,21 +15,25 @@ void main() async {
     ),
   );
 
-  runApp(const KaloriAIApp());
+  runApp(const EatiqApp());
 }
 
-class KaloriAIApp extends StatelessWidget {
-  const KaloriAIApp({super.key});
+class EatiqApp extends StatelessWidget {
+  const EatiqApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AppProvider(),
-      child: MaterialApp(
-        title: 'KaloriAI',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        home: const HomeScreen(),
+      child: Consumer<AppProvider>(
+        builder: (context, provider, _) => MaterialApp(
+          title: 'eatiq',
+          debugShowCheckedModeBanner: false,
+          themeMode: provider.themeMode,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          home: const SplashScreen(),
+        ),
       ),
     );
   }

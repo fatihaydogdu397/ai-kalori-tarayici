@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../services/app_provider.dart';
 import '../theme/app_theme.dart';
@@ -24,12 +23,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
+    final iconBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
+    final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
+
     return Scaffold(
+      backgroundColor: bg,
       appBar: AppBar(
-        title: const Text('Geçmiş Analizler'),
+        backgroundColor: bg,
+        title: Text('History', style: TextStyle(color: textPrimary, fontWeight: FontWeight.w700, fontSize: 17)),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: Icon(Icons.chevron_left_rounded, color: textMuted, size: 26),
         ),
       ),
       body: Consumer<AppProvider>(
@@ -40,38 +49,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppTheme.card,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.history_rounded,
-                        color: AppTheme.textSecondary, size: 40),
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+                    child: Icon(Icons.history_rounded, color: textMuted, size: 36),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Henüz analiz yok',
-                    style: TextStyle(
-                      color: AppTheme.textPrimary,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Yemek tarayarak başla!',
-                    style: TextStyle(color: AppTheme.textSecondary),
-                  ),
+                  Text('No history yet', style: TextStyle(color: textPrimary, fontSize: 17, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  Text('Scan a meal to get started!', style: TextStyle(color: textMuted, fontSize: 13)),
                 ],
               ),
             );
           }
 
-          // Tarihe göre grupla
+          // Group by date
           final grouped = <String, List<dynamic>>{};
           for (final a in provider.history) {
-            final key = DateFormat('d MMMM yyyy', 'tr_TR').format(a.analyzedAt);
+            final dt = a.analyzedAt as DateTime;
+            final key = '${dt.day}/${dt.month}/${dt.year}';
             grouped.putIfAbsent(key, () => []).add(a);
           }
 
@@ -81,8 +77,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             itemBuilder: (context, index) {
               final date = grouped.keys.elementAt(index);
               final items = grouped[date]!;
-              final totalCal = items.fold<double>(
-                  0, (sum, a) => sum + (a.totalCalories as double));
+              final totalCal = items.fold<double>(0, (sum, a) => sum + (a.totalCalories as double));
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,25 +87,72 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          date,
-                          style: const TextStyle(
-                            color: AppTheme.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          '${totalCal.toStringAsFixed(0)} kcal toplam',
-                          style: const TextStyle(
-                            color: AppTheme.primary,
-                            fontSize: 12,
-                          ),
-                        ),
+                        Text(date, style: TextStyle(color: textMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+                        Text('${totalCal.toStringAsFixed(0)} kcal total', style: TextStyle(color: calColor, fontSize: 12)),
                       ],
                     ),
                   ),
-                  ...items.map((a) => _buildCard(a, provider, context)),
+                  ...items.map((a) => Dismissible(
+                        key: Key(a.id),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          decoration: BoxDecoration(
+                            color: AppColors.coral.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.delete_rounded, color: AppColors.coral, size: 24),
+                        ),
+                        onDismissed: (_) => provider.deleteAnalysis(a.id),
+                        child: GestureDetector(
+                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(analysis: a))),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(12),
+                              border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+                            ),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: _thumb(a.imagePath, iconBg, textMuted),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        a.summary.length > 50 ? '${a.summary.substring(0, 50)}...' : a.summary,
+                                        style: TextStyle(color: textPrimary, fontSize: 13, fontWeight: FontWeight.w500),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        '${a.analyzedAt.hour.toString().padLeft(2, '0')}:${a.analyzedAt.minute.toString().padLeft(2, '0')}',
+                                        style: TextStyle(color: textMuted, fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      a.totalCalories.toStringAsFixed(0),
+                                      style: TextStyle(color: calColor, fontWeight: FontWeight.w800, fontSize: 17),
+                                    ),
+                                    Text('kcal', style: TextStyle(color: textMuted, fontSize: 10)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )),
                 ],
               );
             },
@@ -120,100 +162,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  Widget _buildCard(analysis, AppProvider provider, BuildContext context) {
-    return Dismissible(
-      key: Key(analysis.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: AppTheme.error.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.delete_rounded,
-            color: AppTheme.error, size: 28),
-      ),
-      onDismissed: (_) => provider.deleteAnalysis(analysis.id),
-      child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ResultScreen(analysis: analysis),
-          ),
-        ),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppTheme.card,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: _buildThumb(analysis.imagePath),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      analysis.summary.length > 50
-                          ? '${analysis.summary.substring(0, 50)}...'
-                          : analysis.summary,
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('HH:mm').format(analysis.analyzedAt),
-                      style: const TextStyle(
-                          color: AppTheme.textSecondary, fontSize: 11),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    '${analysis.totalCalories.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: AppTheme.accent,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const Text(
-                    'kcal',
-                    style: TextStyle(
-                        color: AppTheme.textSecondary, fontSize: 10),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildThumb(String path) {
+  Widget _thumb(String path, Color bg, Color iconColor) {
     final file = File(path);
     if (file.existsSync()) {
-      return Image.file(file, width: 56, height: 56, fit: BoxFit.cover);
+      return Image.file(file, width: 50, height: 50, fit: BoxFit.cover);
     }
     return Container(
-      width: 56,
-      height: 56,
-      color: AppTheme.surface,
-      child: const Icon(Icons.restaurant, color: AppTheme.primary, size: 24),
+      width: 50,
+      height: 50,
+      color: bg,
+      child: Icon(Icons.restaurant, color: iconColor, size: 22),
     );
   }
 }

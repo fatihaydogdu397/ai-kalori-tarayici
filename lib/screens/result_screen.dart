@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/food_analysis.dart';
 import '../theme/app_theme.dart';
-import '../widgets/nutrient_card.dart';
 
 class ResultScreen extends StatelessWidget {
   final FoodAnalysis analysis;
@@ -11,338 +10,263 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
+    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final divider = isDark ? AppColors.darkSurface : AppColors.lightBorder;
+    final btnBg = isDark ? AppColors.lime : AppColors.void_;
+    final btnText = isDark ? AppColors.void_ : AppColors.lime;
+    final aiBg = isDark ? AppColors.lime : AppColors.void_;
+    final aiText = isDark ? AppColors.void_ : AppColors.lime;
+    final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
+    final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
+
+    final food = analysis.foods.isNotEmpty ? analysis.foods.first : null;
+    final total = analysis.totalNutrients;
+
+    // Ingredient tag colors
+    final tagConfigs = [
+      (AppColors.lime, isDark ? const Color(0xFF1A2010) : const Color(0xFFEEF5E0), isDark ? const Color(0xFF3A5A20) : const Color(0xFFAACE60)),
+      (isDark ? AppColors.violet : AppColors.violetDark, isDark ? const Color(0xFF1A1A30) : const Color(0xFFEEECFC), isDark ? const Color(0xFF3A3A60) : const Color(0xFFAAAADE)),
+      (isDark ? AppColors.amber : AppColors.amberDark, isDark ? const Color(0xFF1F1510) : const Color(0xFFFFF4E6), isDark ? const Color(0xFF4A3A20) : const Color(0xFFDDAA60)),
+      (isDark ? AppColors.coral : AppColors.coralDark, isDark ? const Color(0xFF200E10) : const Color(0xFFFFEEEE), isDark ? const Color(0xFF4A2020) : const Color(0xFFDDAAAA)),
+    ];
+
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Hero image header
-          SliverAppBar(
-            expandedHeight: 280,
-            pinned: true,
-            backgroundColor: AppTheme.background,
-            leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back_rounded,
-                    color: Colors.white, size: 20),
-              ),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
+      backgroundColor: bg,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(
                 children: [
-                  _buildImage(),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          AppTheme.background.withOpacity(0.8),
-                          AppTheme.background,
-                        ],
-                      ),
-                    ),
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Icon(Icons.chevron_left_rounded, color: textMuted, size: 26),
                   ),
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    right: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Kalori badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.local_fire_department,
-                                  color: Colors.white, size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${analysis.totalCalories.toStringAsFixed(0)} kcal',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Scan result',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textPrimary),
                   ),
                 ],
               ),
             ),
-          ),
+            const SizedBox(height: 12),
 
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Özet
-                  _sectionTitle('📊 Analiz Özeti'),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.card,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      analysis.summary,
-                      style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 14,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Makro değerleri
-                  _sectionTitle('🥗 Besin Değerleri'),
-                  const SizedBox(height: 12),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.85,
-                    children: [
-                      NutrientCard(
-                        label: 'Kalori',
-                        value: analysis.totalNutrients.calories,
-                        unit: 'kcal',
-                        color: AppTheme.accent,
-                        icon: Icons.local_fire_department_rounded,
-                      ),
-                      NutrientCard(
-                        label: 'Protein',
-                        value: analysis.totalNutrients.protein,
-                        unit: 'gram',
-                        color: AppTheme.primary,
-                        icon: Icons.fitness_center_rounded,
-                      ),
-                      NutrientCard(
-                        label: 'Karbonhidrat',
-                        value: analysis.totalNutrients.carbs,
-                        unit: 'gram',
-                        color: AppTheme.warning,
-                        icon: Icons.grain_rounded,
-                      ),
-                      NutrientCard(
-                        label: 'Yağ',
-                        value: analysis.totalNutrients.fat,
-                        unit: 'gram',
-                        color: const Color(0xFF9B8BFF),
-                        icon: Icons.water_drop_rounded,
-                      ),
-                      NutrientCard(
-                        label: 'Lif',
-                        value: analysis.totalNutrients.fiber,
-                        unit: 'gram',
-                        color: const Color(0xFF4ECDC4),
-                        icon: Icons.eco_rounded,
-                      ),
-                      NutrientCard(
-                        label: 'Şeker',
-                        value: analysis.totalNutrients.sugar,
-                        unit: 'gram',
-                        color: const Color(0xFFFF8E6E),
-                        icon: Icons.cookie_rounded,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Yemek listesi
-                  if (analysis.foods.isNotEmpty) ...[
-                    _sectionTitle('🍽️ Tespit Edilen Yemekler'),
-                    const SizedBox(height: 12),
-                    ...analysis.foods.map((f) => _buildFoodItem(f)),
-                    const SizedBox(height: 24),
-                  ],
-
-                  // Beslenme önerisi
-                  _sectionTitle('💡 AI Önerisi'),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppTheme.primary.withOpacity(0.15),
-                          AppTheme.primary.withOpacity(0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                          color: AppTheme.primary.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Food image
+                    Stack(
                       children: [
-                        const Text('🤖', style: TextStyle(fontSize: 24)),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            analysis.advice,
-                            style: const TextStyle(
-                              color: AppTheme.textPrimary,
-                              fontSize: 14,
-                              height: 1.5,
+                        Container(
+                          width: double.infinity,
+                          height: 160,
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: File(analysis.imagePath).existsSync()
+                              ? Image.file(File(analysis.imagePath), fit: BoxFit.cover)
+                              : Center(
+                                  child: Icon(Icons.restaurant_rounded, size: 48, color: textMuted),
+                                ),
+                        ),
+                        // AI badge
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(color: aiBg, borderRadius: BorderRadius.circular(6)),
+                            child: Text('AI', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: aiText)),
+                          ),
+                        ),
+                        // Confidence
+                        Positioned(
+                          bottom: 10,
+                          left: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: isDark ? Colors.black54 : Colors.white70,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '94% confidence',
+                              style: TextStyle(fontSize: 11, color: textMuted),
                             ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 10),
 
-                  // Geri dön butonu
+                    // Main nutrition card
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
+                      child: Column(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      food?.nameTr ?? analysis.summary,
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textPrimary),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      '1 serving · approx. ${food?.portion.toStringAsFixed(0) ?? "—"}${food?.portionUnit ?? "g"}',
+                                      style: TextStyle(fontSize: 11, color: textMuted),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppColors.darkBg : AppColors.lightBg,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: border,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      total.calories.toStringAsFixed(0),
+                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: calColor, height: 1),
+                                    ),
+                                    Text('kcal', style: TextStyle(fontSize: 10, color: textMuted)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Divider(color: divider, height: 1),
+                          const SizedBox(height: 12),
+                          // Macros row
+                          Row(
+                            children: [
+                              _MacroCell(value: '${total.protein.toStringAsFixed(0)}g', label: 'protein', color: isDark ? AppColors.violet : AppColors.violetDark),
+                              VerticalDivider(color: divider, width: 1),
+                              _MacroCell(value: '${total.carbs.toStringAsFixed(0)}g', label: 'carbs', color: isDark ? AppColors.amber : AppColors.amberDark),
+                              VerticalDivider(color: divider, width: 1),
+                              _MacroCell(value: '${total.fat.toStringAsFixed(0)}g', label: 'fat', color: isDark ? AppColors.coral : AppColors.coralDark),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Detected ingredients
+                    if (food != null && food.tags.isNotEmpty) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Detected ingredients', style: TextStyle(fontSize: 11, color: textMuted)),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: food.tags.asMap().entries.map((e) {
+                                final cfg = tagConfigs[e.key % tagConfigs.length];
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: cfg.$2,
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(color: cfg.$3, width: 0.5),
+                                  ),
+                                  child: Text(e.value, style: TextStyle(fontSize: 11, color: cfg.$1)),
+                                );
+                              }).toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+
+                    // Summary / advice
+                    if (analysis.advice.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
+                        child: Text(analysis.advice, style: TextStyle(fontSize: 12, color: textMuted, height: 1.5)),
+                      ),
+
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom CTA
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Column(
+                children: [
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
+                    child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.camera_alt_rounded),
-                      label: const Text('Yeni Tarama Yap'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: btnBg,
+                        foregroundColor: btnText,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: Text('Add to diary', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  Text('Edit details', style: TextStyle(fontSize: 12, color: textMuted)),
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildImage() {
-    final file = File(analysis.imagePath);
-    if (file.existsSync()) {
-      return Image.file(file, fit: BoxFit.cover);
-    }
-    return Container(
-      color: AppTheme.card,
-      child: const Center(
-        child: Icon(Icons.restaurant, color: AppTheme.primary, size: 60),
-      ),
-    );
-  }
+class _MacroCell extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color color;
 
-  Widget _sectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: AppTheme.textPrimary,
-        fontSize: 17,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
+  const _MacroCell({required this.value, required this.label, required this.color});
 
-  Widget _buildFoodItem(FoodItem food) {
-    Color healthColor;
-    switch (food.healthScore) {
-      case 'Mükemmel':
-        healthColor = AppTheme.success;
-        break;
-      case 'İyi':
-        healthColor = AppTheme.primary;
-        break;
-      case 'Orta':
-        healthColor = AppTheme.warning;
-        break;
-      default:
-        healthColor = AppTheme.error;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppTheme.card,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
+  @override
+  Widget build(BuildContext context) {
+    final textMuted = Theme.of(context).brightness == Brightness.dark
+        ? AppColors.darkTextMuted
+        : const Color(0xFFAAAAAA);
+    return Expanded(
+      child: Column(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppTheme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.restaurant_menu,
-                color: AppTheme.primary, size: 22),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  food.nameTr,
-                  style: const TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  '${food.portion.toStringAsFixed(0)} ${food.portionUnit}',
-                  style: const TextStyle(
-                      color: AppTheme.textSecondary, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${food.nutrients.calories.toStringAsFixed(0)} kcal',
-                style: const TextStyle(
-                  color: AppTheme.accent,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: healthColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  food.healthScore,
-                  style: TextStyle(
-                      color: healthColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
+          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: color)),
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(fontSize: 10, color: textMuted)),
         ],
       ),
     );

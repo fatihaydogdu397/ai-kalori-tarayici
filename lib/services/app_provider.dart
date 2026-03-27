@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/food_analysis.dart';
 import 'claude_service.dart';
 import 'database_service.dart';
@@ -8,6 +9,13 @@ enum AnalysisState { idle, loading, success, error }
 class AppProvider extends ChangeNotifier {
   final _claudeService = ClaudeService();
   final _dbService = DatabaseService();
+
+  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode get themeMode => _themeMode;
+  void toggleTheme() {
+    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    notifyListeners();
+  }
 
   AnalysisState _state = AnalysisState.idle;
   FoodAnalysis? _currentAnalysis;
