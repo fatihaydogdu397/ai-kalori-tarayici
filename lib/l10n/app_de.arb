@@ -1,0 +1,260 @@
+{
+  "@@locale": "de",
+  "appName": "eatiq",
+  "tagline": "Mach ein Foto. Wisse, was du isst.",
+  "getStarted": "Loslegen",
+  "alreadyHaveAccount": "Hast du schon ein Konto?",
+  "signIn": "Anmelden",
+  "skip": "Überspringen",
+  "continueBtn": "Weiter",
+  "letsGo": "Los geht's",
+  "back": "Zurück",
+  "save": "Speichern",
+  "done": "Fertig",
+  "cancel": "Abbrechen",
+  "onboardingHello": "Hallo! 👋",
+  "onboardingNameSub": "Lernen wir uns kennen. Wie heißt du?",
+  "onboardingNameHint": "Deinen Namen eingeben...",
+  "onboardingNameRequired": "Bitte gib deinen Namen ein",
+  "onboardingBody": "Kenne deinen Körper",
+  "onboardingBodySub": "Berechnen wir dein Kalorienziel.",
+  "onboardingGoal": "Was ist dein Ziel?",
+  "onboardingGoalSub": "Wir passen dein Kalorienziel entsprechend an.",
+  "onboardingTheme": "Erscheinungsbild",
+  "onboardingThemeSub": "Du kannst das später ändern.",
+  "male": "Männlich",
+  "female": "Weiblich",
+  "age": "Alter",
+  "height": "Größe",
+  "weight": "Gewicht",
+  "ageUnit": "J.",
+  "heightUnit": "cm",
+  "weightUnit": "kg",
+  "goalLose": "Abnehmen",
+  "goalLoseSub": "Langsam mit Kaloriendefizit",
+  "goalMaintain": "Gewicht halten",
+  "goalMaintainSub": "Ausgewogene und gesunde Ernährung",
+  "goalGain": "Zunehmen",
+  "goalGainSub": "Muskelmasse aufbauen",
+  "dark": "Dunkel",
+  "light": "Hell",
+  "greeting": "Hallo, {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultName": "du",
+  "caloriestoday": "Kalorien heute",
+  "todaysMeals": "Heutige Mahlzeiten",
+  "noMeals": "Noch keine Mahlzeiten.\nTippe die Kamera, um deine erste Mahlzeit zu scannen!",
+  "protein": "Eiweiß",
+  "carbs": "Kohlenhydrate",
+  "fat": "Fett",
+  "water": "Wasser",
+  "analyzing": "Analysiere...",
+  "analyzingSub": "KI berechnet deine Nährstoffe",
+  "camera": "Kamera",
+  "gallery": "Galerie",
+  "home": "Startseite",
+  "scan": "Scannen",
+  "progress": "Fortschritt",
+  "profile": "Profil",
+  "weeklyCalories": "Wöchentliche Kalorien",
+  "macroBreakdown": "Makro-Aufschlüsselung",
+  "avgCalories": "Ø Kalorien",
+  "totalScans": "Gesamt-Scans",
+  "thisWeek": "Diese Woche",
+  "profileTitle": "Profil",
+  "editProfile": "Bearbeiten",
+  "calorieGoal": "Kalorienziel",
+  "language": "Sprache",
+  "appearance": "Erscheinungsbild",
+  "premium": "Premium",
+  "premiumSub": "Unbegrenzte Scans & Funktionen",
+  "waterAdd": "Wasser hinzufügen",
+  "waterGoal": "Wasserзiel",
+  "waterGlasses": "{count} Gläser",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReached": "Tageslimit erreicht",
+  "limitReachedSub": "Du hast heute 5 kostenlose Scans verwendet.\nScanne unbegrenzt mit eatiq Pro.",
+  "unlimitedScans": "Unbegrenzte KI-Scans",
+  "unlimitedHistory": "Unbegrenzte Historie",
+  "weeklyReport": "Wöchentlicher KI-Bericht",
+  "turkishDB": "Türkische Lebensmitteldatenbank",
+  "goProBtn": "Pro werden — ₺149/Monat",
+  "yearlyDiscount": "44% sparen mit ₺999/Jahr",
+  "minutesAgo": "vor {min} Min.",
+  "@minutesAgo": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "vor {hr} Std.",
+  "@hoursAgo": {
+    "placeholders": {
+      "hr": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "Vor {count} Tagen",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monday": "Mo",
+  "tuesday": "Di",
+  "wednesday": "Mi",
+  "thursday": "Do",
+  "friday": "Fr",
+  "saturday": "Sa",
+  "sunday": "So",
+  "errorGeneric": "Etwas ist schiefgelaufen",
+  "retry": "Nochmal versuchen",
+  "mealBreakfast": "Frühstück",
+  "mealLunch": "Mittagessen",
+  "mealDinner": "Abendessen",
+  "mealSnack": "Snack",
+  "settings": "Einstellungen",
+  "unitSystem": "Maßsystem",
+  "reminders": "Erinnerungen",
+  "notifications": "Benachrichtigungen",
+  "dailyCalorieGoal": "Tägliches Kalorienziel",
+  "calorieRange": "Zwischen 1200 – 4000 kcal",
+  "selectLanguage": "Sprache wählen",
+  "manual": "Manuell",
+  "analysisResult": "Analyseergebnis",
+  "detectedIngredients": "Erkannte Zutaten",
+  "addedToLog": "Zum Tagebuch hinzugefügt ✓",
+  "historyTitle": "Verlauf",
+  "noScansYet": "Noch keine Scans",
+  "scanFirstMeal": "Scanne deine erste Mahlzeit!",
+  "scanCount": "{count} Scans",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyAnalysis": "Körperanalyse",
+  "idealWeight": "Idealgewicht",
+  "gender": "Geschlecht",
+  "goalLabel": "Ziel",
+  "basalMetabolicRate": "Grundumsatz",
+  "dailyNeeds": "Tagesziel",
+  "bodyInfo": "Körperinformationen",
+  "mealNameLabel": "Mahlzeitenname",
+  "categoryLabel": "Kategorie",
+  "portionWeightLabel": "Portionsgewicht (g) — optional",
+  "portionHint": "Bei Eingabe werden Makros überprüft",
+  "macrosLabel": "Makros (g) — optional",
+  "editMeal": "Mahlzeit bearbeiten",
+  "addManualMeal": "Mahlzeit manuell hinzufügen",
+  "update": "Aktualisieren",
+  "bmiLabel": "BMI",
+  "bmiUnderweight": "Untergewicht",
+  "bmiNormal": "Idealgewicht",
+  "bmiOverweight": "Übergewicht",
+  "bmiObese": "Fettleibigkeit",
+  "bmiMorbidObese": "Starke Fettleibigkeit",
+  "bmiUnderweightDesc": "Leicht unter deinem Idealgewicht",
+  "bmiNormalDesc": "Super! Du bist im gesunden Gewichtsbereich 🎯",
+  "bmiOverweightDesc": "Leicht über dem gesunden Gewicht",
+  "bmiObeseDesc": "Wir empfehlen dir, für deine Gesundheit Gewicht zu verlieren",
+  "bmiMorbidObeseDesc": "Bitte konsultiere einen Arzt",
+  "addMeal": "+ Hinzufügen",
+  "favorites": "FAVORITEN",
+  "addMealShort": "+ Hinzufügen",
+  "mealFallback": "Mahlzeit",
+  "month01": "Jan",
+  "month02": "Feb",
+  "month03": "Mär",
+  "month04": "Apr",
+  "month05": "Mai",
+  "month06": "Jun",
+  "month07": "Jul",
+  "month08": "Aug",
+  "month09": "Sep",
+  "month10": "Okt",
+  "month11": "Nov",
+  "month12": "Dez",
+  "validRequired": "Pflichtfeld",
+  "validNumber": "Gültige Zahl eingeben",
+  "validPositive": "Muss größer als null sein",
+  "validNegative": "Darf nicht negativ sein",
+  "validPortionRange": "Muss zwischen 1–5000g liegen",
+  "validMacroMax": "{macro} darf 1000g nicht überschreiten",
+  "@validMacroMax": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroPortion": "{macro} darf das Portionsgewicht ({portion}g) nicht überschreiten",
+  "@validMacroPortion": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      },
+      "portion": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroTotal": "Gesamte Makros ({total}g) überschreiten das Portionsgewicht",
+  "@validMacroTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "validCalRequired": "Kalorien erforderlich",
+  "validCalMax": "Eine einzelne Mahlzeit darf 5000 kcal nicht überschreiten",
+  "validCalInconsistent": "Inkonsistent mit Makros (geschätzt ~{estimated} kcal)",
+  "@validCalInconsistent": {
+    "placeholders": {
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "hintMealName": "z.B. Haferflocken, Hähnchen...",
+  "hintCalories": "z.B. 350",
+  "hintPortion": "z.B. 200",
+  "hintProtein": "Eiweiß",
+  "hintCarbs": "Kohlenhydrate",
+  "hintFat": "Fett",
+  "unitMetric": "Metrisch",
+  "unitImperial": "Imperial",
+  "userFallback": "Du",
+  "mealNameRequired": "Mahlzeitenname erforderlich",
+  "themeDark": "Dunkel",
+  "themeLight": "Hell",
+  "today": "Heute",
+  "yesterday": "Gestern",
+  "appleHealth": "Apple Health",
+  "appleHealthSub": "Mahlzeiten & Wasser synchronisieren",
+  "appleHealthDenied": "Apple Health-Berechtigung verweigert. Öffne Einstellungen → Datenschutz → Health → Eatiq.",
+  "goToSettings": "Einstellungen öffnen",
+  "barcode": "Barcode",
+  "barcodeHint": "Barcode im Rahmen ausrichten",
+  "barcodeSearching": "Produkt wird gesucht...",
+  "barcodeNotFound": "Produkt nicht gefunden. Manuelle Eingabe versuchen."
+}

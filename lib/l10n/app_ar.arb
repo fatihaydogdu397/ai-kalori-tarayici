@@ -1,0 +1,260 @@
+{
+  "@@locale": "ar",
+  "appName": "eatiq",
+  "tagline": "التقط صورة. اعرف ما تأكله.",
+  "getStarted": "ابدأ",
+  "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+  "signIn": "تسجيل الدخول",
+  "skip": "تخطي",
+  "continueBtn": "متابعة",
+  "letsGo": "هيا نبدأ",
+  "back": "رجوع",
+  "save": "حفظ",
+  "done": "تم",
+  "cancel": "إلغاء",
+  "onboardingHello": "مرحباً! 👋",
+  "onboardingNameSub": "دعنا نتعرف عليك. ما اسمك؟",
+  "onboardingNameHint": "اكتب اسمك...",
+  "onboardingNameRequired": "الرجاء إدخال اسمك",
+  "onboardingBody": "تعرف على جسمك",
+  "onboardingBodySub": "دعنا نحسب هدفك اليومي من السعرات.",
+  "onboardingGoal": "ما هو هدفك؟",
+  "onboardingGoalSub": "سنضبط هدف السعرات الحرارية وفقاً لذلك.",
+  "onboardingTheme": "المظهر",
+  "onboardingThemeSub": "يمكنك تغييره لاحقاً.",
+  "male": "ذكر",
+  "female": "أنثى",
+  "age": "العمر",
+  "height": "الطول",
+  "weight": "الوزن",
+  "ageUnit": "سنة",
+  "heightUnit": "سم",
+  "weightUnit": "كغ",
+  "goalLose": "خسارة الوزن",
+  "goalLoseSub": "بعجز سعري تدريجي",
+  "goalMaintain": "الحفاظ على الوزن",
+  "goalMaintainSub": "تغذية متوازنة وصحية",
+  "goalGain": "زيادة الوزن",
+  "goalGainSub": "بناء الكتلة العضلية",
+  "dark": "داكن",
+  "light": "فاتح",
+  "greeting": "مرحباً، {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultName": "أنت",
+  "caloriestoday": "سعرات اليوم",
+  "todaysMeals": "وجبات اليوم",
+  "noMeals": "لم تُضف وجبات بعد.\nافتح الكاميرا وامسح أول طعام!",
+  "protein": "بروتين",
+  "carbs": "كارب",
+  "fat": "دهون",
+  "water": "ماء",
+  "analyzing": "جارٍ التحليل...",
+  "analyzingSub": "يحسب الذكاء الاصطناعي القيم الغذائية",
+  "camera": "كاميرا",
+  "gallery": "معرض",
+  "home": "الرئيسية",
+  "scan": "مسح",
+  "progress": "التقدم",
+  "profile": "الملف",
+  "weeklyCalories": "سعرات الأسبوع",
+  "macroBreakdown": "توزيع المغذيات",
+  "avgCalories": "متوسط السعرات",
+  "totalScans": "إجمالي المسح",
+  "thisWeek": "هذا الأسبوع",
+  "profileTitle": "الملف الشخصي",
+  "editProfile": "تعديل",
+  "calorieGoal": "هدف السعرات",
+  "language": "اللغة",
+  "appearance": "المظهر",
+  "premium": "مميز",
+  "premiumSub": "مسح غير محدود وميزات إضافية",
+  "waterAdd": "إضافة ماء",
+  "waterGoal": "هدف الماء",
+  "waterGlasses": "{count} أكواب",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReached": "وصلت إلى الحد اليومي",
+  "limitReachedSub": "لقد استخدمت 5 عمليات مسح مجانية اليوم.\nامسح بلا حدود مع eatiq Pro.",
+  "unlimitedScans": "مسح ذكاء اصطناعي غير محدود",
+  "unlimitedHistory": "سجل غير محدود",
+  "weeklyReport": "تقرير أسبوعي بالذكاء الاصطناعي",
+  "turkishDB": "قاعدة بيانات الطعام التركي",
+  "goProBtn": "Pro — اشترك الآن",
+  "yearlyDiscount": "وفّر 44% بالاشتراك السنوي",
+  "minutesAgo": "منذ {min} دقيقة",
+  "@minutesAgo": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "منذ {hr} ساعة",
+  "@hoursAgo": {
+    "placeholders": {
+      "hr": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "منذ {count} أيام",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monday": "الإثنين",
+  "tuesday": "الثلاثاء",
+  "wednesday": "الأربعاء",
+  "thursday": "الخميس",
+  "friday": "الجمعة",
+  "saturday": "السبت",
+  "sunday": "الأحد",
+  "errorGeneric": "حدث خطأ",
+  "retry": "إعادة المحاولة",
+  "mealBreakfast": "إفطار",
+  "mealLunch": "غداء",
+  "mealDinner": "عشاء",
+  "mealSnack": "وجبة خفيفة",
+  "settings": "الإعدادات",
+  "unitSystem": "نظام القياس",
+  "reminders": "التذكيرات",
+  "notifications": "الإشعارات",
+  "dailyCalorieGoal": "هدف السعرات اليومي",
+  "calorieRange": "بين 1200 – 4000 سعرة",
+  "selectLanguage": "اختر اللغة",
+  "manual": "يدوي",
+  "analysisResult": "نتيجة التحليل",
+  "detectedIngredients": "المكونات المكتشفة",
+  "addedToLog": "تمت الإضافة إلى السجل ✓",
+  "historyTitle": "السجل",
+  "noScansYet": "لا توجد عمليات مسح بعد",
+  "scanFirstMeal": "امسح وجبتك الأولى!",
+  "scanCount": "{count} عمليات مسح",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyAnalysis": "تحليل الجسم",
+  "idealWeight": "الوزن المثالي",
+  "gender": "الجنس",
+  "goalLabel": "الهدف",
+  "basalMetabolicRate": "معدل الأيض الأساسي",
+  "dailyNeeds": "الهدف اليومي",
+  "bodyInfo": "معلومات الجسم",
+  "mealNameLabel": "اسم الوجبة",
+  "categoryLabel": "الفئة",
+  "portionWeightLabel": "وزن الحصة (جم) — اختياري",
+  "portionHint": "إذا أدخلت، سيتم التحقق من الماكروز",
+  "macrosLabel": "الماكروز (جم) — اختياري",
+  "editMeal": "تعديل الوجبة",
+  "addManualMeal": "إضافة وجبة يدوياً",
+  "update": "تحديث",
+  "bmiLabel": "مؤشر كتلة الجسم",
+  "bmiUnderweight": "نحيف",
+  "bmiNormal": "الوزن المثالي",
+  "bmiOverweight": "زيادة في الوزن",
+  "bmiObese": "سمنة",
+  "bmiMorbidObese": "سمنة مفرطة",
+  "bmiUnderweightDesc": "أنت أقل قليلاً من وزنك المثالي",
+  "bmiNormalDesc": "رائع! أنت في نطاق الوزن الصحي 🎯",
+  "bmiOverweightDesc": "أنت بعيد قليلاً عن الوزن الصحي",
+  "bmiObeseDesc": "ننصح بفقدان الوزن من أجل صحتك",
+  "bmiMorbidObeseDesc": "يرجى استشارة متخصص رعاية صحية",
+  "addMeal": "+ إضافة",
+  "favorites": "المفضلة",
+  "addMealShort": "+ إضافة",
+  "mealFallback": "وجبة",
+  "month01": "يناير",
+  "month02": "فبراير",
+  "month03": "مارس",
+  "month04": "أبريل",
+  "month05": "مايو",
+  "month06": "يونيو",
+  "month07": "يوليو",
+  "month08": "أغسطس",
+  "month09": "سبتمبر",
+  "month10": "أكتوبر",
+  "month11": "نوفمبر",
+  "month12": "ديسمبر",
+  "validRequired": "حقل مطلوب",
+  "validNumber": "أدخل رقماً صحيحاً",
+  "validPositive": "يجب أن يكون أكبر من الصفر",
+  "validNegative": "لا يمكن أن يكون سالباً",
+  "validPortionRange": "يجب أن يكون بين 1–5000g",
+  "validMacroMax": "{macro} لا يمكن أن يتجاوز 1000g",
+  "@validMacroMax": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroPortion": "{macro} لا يمكن أن يتجاوز وزن الحصة ({portion}g)",
+  "@validMacroPortion": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      },
+      "portion": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroTotal": "إجمالي المغذيات الكبرى ({total}g) يتجاوز وزن الحصة",
+  "@validMacroTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "validCalRequired": "السعرات الحرارية مطلوبة",
+  "validCalMax": "لا يمكن أن تتجاوز وجبة واحدة 5000 سعرة حرارية",
+  "validCalInconsistent": "غير متسق مع المغذيات الكبرى (المقدر ~{estimated} kcal)",
+  "@validCalInconsistent": {
+    "placeholders": {
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "hintMealName": "مثال: الشوفان، الدجاج...",
+  "hintCalories": "مثال: 350",
+  "hintPortion": "مثال: 200",
+  "hintProtein": "بروتين",
+  "hintCarbs": "كربوهيدرات",
+  "hintFat": "دهون",
+  "unitMetric": "متري",
+  "unitImperial": "إمبريالي",
+  "userFallback": "أنت",
+  "mealNameRequired": "اسم الوجبة مطلوب",
+  "themeDark": "داكن",
+  "themeLight": "فاتح",
+  "today": "اليوم",
+  "yesterday": "أمس",
+  "appleHealth": "Apple Health",
+  "appleHealthSub": "مزامنة الوجبات والماء",
+  "appleHealthDenied": "تم رفض إذن Apple Health. افتح الإعدادات → الخصوصية → الصحة → Eatiq.",
+  "goToSettings": "فتح الإعدادات",
+  "barcode": "الباركود",
+  "barcodeHint": "ضع الباركود داخل الإطار",
+  "barcodeSearching": "جارٍ البحث عن المنتج...",
+  "barcodeNotFound": "المنتج غير موجود. جرّب الإدخال اليدوي."
+}

@@ -1,0 +1,260 @@
+{
+  "@@locale": "tr",
+  "appName": "eatiq",
+  "tagline": "Fotoğraf çek. Ne yediğini öğren.",
+  "getStarted": "Başla",
+  "alreadyHaveAccount": "Zaten hesabın var mı?",
+  "signIn": "Giriş yap",
+  "skip": "Atla",
+  "continueBtn": "Devam",
+  "letsGo": "Başlayalım",
+  "back": "Geri",
+  "save": "Kaydet",
+  "done": "Tamam",
+  "cancel": "İptal",
+  "onboardingHello": "Merhaba! 👋",
+  "onboardingNameSub": "Seni tanıyalım. Adın ne?",
+  "onboardingNameHint": "Adını yaz...",
+  "onboardingNameRequired": "Lütfen adını gir",
+  "onboardingBody": "Vücudunu tanı",
+  "onboardingBodySub": "Kalori hedefini hesaplayalım.",
+  "onboardingGoal": "Hedefin ne?",
+  "onboardingGoalSub": "Kalori hedefini buna göre ayarlayacağız.",
+  "onboardingTheme": "Görünüm",
+  "onboardingThemeSub": "İstersen sonra da değiştirebilirsin.",
+  "male": "Erkek",
+  "female": "Kadın",
+  "age": "Yaş",
+  "height": "Boy",
+  "weight": "Kilo",
+  "ageUnit": "yaş",
+  "heightUnit": "cm",
+  "weightUnit": "kg",
+  "goalLose": "Kilo ver",
+  "goalLoseSub": "Kalori açığıyla yavaş yavaş",
+  "goalMaintain": "Kilonu koru",
+  "goalMaintainSub": "Dengeli ve sağlıklı beslen",
+  "goalGain": "Kilo al",
+  "goalGainSub": "Kas kütlesi kazan",
+  "dark": "Dark",
+  "light": "Light",
+  "greeting": "Merhaba, {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultName": "Sen",
+  "caloriestoday": "Bugünkü kalori",
+  "todaysMeals": "Bugünkü öğünler",
+  "noMeals": "Henüz öğün eklenmedi.\nKamerayı açarak ilk yemeğini tara!",
+  "protein": "Protein",
+  "carbs": "Karb",
+  "fat": "Yağ",
+  "water": "Su",
+  "analyzing": "Analiz ediliyor...",
+  "analyzingSub": "AI besin değerlerini hesaplıyor",
+  "camera": "Kamera",
+  "gallery": "Galeri",
+  "home": "Ana Sayfa",
+  "scan": "Tara",
+  "progress": "İlerleme",
+  "profile": "Profil",
+  "weeklyCalories": "Haftalık Kalori",
+  "macroBreakdown": "Makro Dağılım",
+  "avgCalories": "Ort. Kalori",
+  "totalScans": "Toplam Tarama",
+  "thisWeek": "Bu Hafta",
+  "profileTitle": "Profil",
+  "editProfile": "Düzenle",
+  "calorieGoal": "Kalori Hedefi",
+  "language": "Dil",
+  "appearance": "Görünüm",
+  "premium": "Premium",
+  "premiumSub": "Sınırsız tarama & özellikler",
+  "waterAdd": "Su ekle",
+  "waterGoal": "Su Hedefi",
+  "waterGlasses": "{count} bardak",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReached": "Günlük limitine ulaştın",
+  "limitReachedSub": "Bugün 5 ücretsiz taramayı kullandın.\neatiq Pro ile sınırsız tara.",
+  "unlimitedScans": "Sınırsız AI tarama",
+  "unlimitedHistory": "Sınırsız geçmiş",
+  "weeklyReport": "Haftalık AI raporu",
+  "turkishDB": "Türk yemek veritabanı",
+  "goProBtn": "₺149/ay — Pro'ya Geç",
+  "yearlyDiscount": "₺999/yıl ile %44 tasarruf et",
+  "minutesAgo": "{min} dk önce",
+  "@minutesAgo": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{hr} sa önce",
+  "@hoursAgo": {
+    "placeholders": {
+      "hr": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} gün önce",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monday": "Pzt",
+  "tuesday": "Sal",
+  "wednesday": "Çar",
+  "thursday": "Per",
+  "friday": "Cum",
+  "saturday": "Cmt",
+  "sunday": "Paz",
+  "errorGeneric": "Bir hata oluştu",
+  "retry": "Tekrar dene",
+  "mealBreakfast": "Kahvaltı",
+  "mealLunch": "Öğle",
+  "mealDinner": "Akşam",
+  "mealSnack": "Atıştırmalık",
+  "settings": "Ayarlar",
+  "unitSystem": "Ölçü Birimi",
+  "reminders": "Hatırlatıcılar",
+  "notifications": "Bildirimler",
+  "dailyCalorieGoal": "Günlük Kalori Hedefi",
+  "calorieRange": "1200 – 4000 kcal arasında",
+  "selectLanguage": "Dil Seç",
+  "manual": "Manuel",
+  "analysisResult": "Analiz Sonucu",
+  "detectedIngredients": "Tespit edilen malzemeler",
+  "addedToLog": "Günlüğe Eklendi ✓",
+  "historyTitle": "Geçmiş",
+  "noScansYet": "Henüz tarama yok",
+  "scanFirstMeal": "İlk yemeğini tara!",
+  "scanCount": "{count} tarama",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyAnalysis": "Vücut Analizi",
+  "idealWeight": "İdeal Kilo",
+  "gender": "Cinsiyet",
+  "goalLabel": "Hedef",
+  "basalMetabolicRate": "Bazal Metabolizma",
+  "dailyNeeds": "Günlük Hedef",
+  "bodyInfo": "Vücut Bilgileri",
+  "mealNameLabel": "Öğün Adı",
+  "categoryLabel": "Kategori",
+  "portionWeightLabel": "Porsiyon Ağırlığı (g) — opsiyonel",
+  "portionHint": "Girersen makrolar buna göre kontrol edilir",
+  "macrosLabel": "Makrolar (g) — opsiyonel",
+  "editMeal": "Öğünü Düzenle",
+  "addManualMeal": "Manuel Öğün Ekle",
+  "update": "Güncelle",
+  "bmiLabel": "VKİ",
+  "bmiUnderweight": "Zayıf",
+  "bmiNormal": "İdeal Kilo",
+  "bmiOverweight": "Fazla Kilolu",
+  "bmiObese": "Obezite",
+  "bmiMorbidObese": "Ciddi Obezite",
+  "bmiUnderweightDesc": "İdeal kilonun biraz altındasınız",
+  "bmiNormalDesc": "Harika! Sağlıklı kilo aralığındasınız 🎯",
+  "bmiOverweightDesc": "Sağlıklı kiloya biraz uzaktasınız",
+  "bmiObeseDesc": "Sağlığın için kilo vermenizi öneririz",
+  "bmiMorbidObeseDesc": "Bir sağlık uzmanına danışmanızı öneririz",
+  "addMeal": "+ Ekle",
+  "favorites": "FAVORİLER",
+  "addMealShort": "+ Ekle",
+  "mealFallback": "Öğün",
+  "month01": "Oca",
+  "month02": "Şub",
+  "month03": "Mar",
+  "month04": "Nis",
+  "month05": "May",
+  "month06": "Haz",
+  "month07": "Tem",
+  "month08": "Ağu",
+  "month09": "Eyl",
+  "month10": "Eki",
+  "month11": "Kas",
+  "month12": "Ara",
+  "validRequired": "Gerekli alan",
+  "validNumber": "Geçerli sayı gir",
+  "validPositive": "Sıfırdan büyük olmalı",
+  "validNegative": "Negatif olamaz",
+  "validPortionRange": "1–5000g arası olmalı",
+  "validMacroMax": "{macro} 1000g'ı geçemez",
+  "@validMacroMax": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroPortion": "{macro} porsiyon ağırlığını ({portion}g) geçemez",
+  "@validMacroPortion": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      },
+      "portion": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroTotal": "Toplam makro ({total}g) porsiyon ağırlığını aşıyor",
+  "@validMacroTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "validCalRequired": "Kalori gerekli",
+  "validCalMax": "Tek öğün 5000 kcal'yi geçemez",
+  "validCalInconsistent": "Makrolarla tutarsız (tahmini ~{estimated} kcal)",
+  "@validCalInconsistent": {
+    "placeholders": {
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "hintMealName": "ör. Yulaf ezmesi, Tavuk...",
+  "hintCalories": "ör. 350",
+  "hintPortion": "ör. 200",
+  "hintProtein": "Protein",
+  "hintCarbs": "Karb",
+  "hintFat": "Yağ",
+  "unitMetric": "Metrik",
+  "unitImperial": "İmperial",
+  "userFallback": "Sen",
+  "mealNameRequired": "Öğün adı gerekli",
+  "themeDark": "Koyu",
+  "themeLight": "Açık",
+  "today": "Bugün",
+  "yesterday": "Dün",
+  "appleHealth": "Apple Health",
+  "appleHealthSub": "Öğün ve su senkronizasyonu",
+  "appleHealthDenied": "Apple Health izni reddedildi. Lütfen Ayarlar → Gizlilik → Sağlık → Eatiq yolundan erişime izin verin.",
+  "goToSettings": "Ayarları Aç",
+  "barcode": "Barkod",
+  "barcodeHint": "Barkodu çerçeve içine hizalayın",
+  "barcodeSearching": "Ürün aranıyor...",
+  "barcodeNotFound": "Ürün bulunamadı. Manuel giriş deneyin."
+}

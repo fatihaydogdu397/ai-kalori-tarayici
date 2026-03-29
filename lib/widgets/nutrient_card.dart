@@ -19,12 +19,15 @@ class NutrientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +39,7 @@ class NutrientCard extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: AppTheme.textSecondary,
+                  color: textSecondary,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
@@ -55,7 +58,7 @@ class NutrientCard extends StatelessWidget {
           Text(
             unit,
             style: TextStyle(
-              color: AppTheme.textSecondary,
+              color: textSecondary,
               fontSize: 10,
             ),
           ),

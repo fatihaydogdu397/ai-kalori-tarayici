@@ -1,3 +1,27 @@
+enum MealCategory { breakfast, lunch, dinner, snack }
+
+extension MealCategoryX on MealCategory {
+  String get key => name; // 'breakfast', 'lunch', etc.
+
+  static MealCategory fromString(String? s) {
+    switch (s) {
+      case 'breakfast': return MealCategory.breakfast;
+      case 'lunch':     return MealCategory.lunch;
+      case 'dinner':    return MealCategory.dinner;
+      default:          return MealCategory.snack;
+    }
+  }
+
+  /// Auto-detect based on hour of day
+  static MealCategory fromTime(DateTime dt) {
+    final h = dt.hour;
+    if (h >= 6 && h < 11)  return MealCategory.breakfast;
+    if (h >= 11 && h < 15) return MealCategory.lunch;
+    if (h >= 18 && h < 23) return MealCategory.dinner;
+    return MealCategory.snack;
+  }
+}
+
 class NutrientInfo {
   final double calories;
   final double protein;
@@ -77,6 +101,8 @@ class FoodAnalysis {
   final String summary;
   final String advice;
   final DateTime analyzedAt;
+  final MealCategory mealCategory;
+  final bool isFavorite;
 
   FoodAnalysis({
     required this.id,
@@ -86,7 +112,16 @@ class FoodAnalysis {
     required this.summary,
     required this.advice,
     required this.analyzedAt,
-  });
+    MealCategory? mealCategory,
+    this.isFavorite = false,
+  }) : mealCategory = mealCategory ?? MealCategoryX.fromTime(analyzedAt);
+
+  FoodAnalysis copyWith({bool? isFavorite}) => FoodAnalysis(
+    id: id, imagePath: imagePath, foods: foods,
+    totalNutrients: totalNutrients, summary: summary, advice: advice,
+    analyzedAt: analyzedAt, mealCategory: mealCategory,
+    isFavorite: isFavorite ?? this.isFavorite,
+  );
 
   double get totalCalories => totalNutrients.calories;
 
@@ -102,6 +137,8 @@ class FoodAnalysis {
         'totalFat': totalNutrients.fat,
         'totalFiber': totalNutrients.fiber,
         'totalSugar': totalNutrients.sugar,
+        'mealCategory': mealCategory.key,
+        'isFavorite': isFavorite ? 1 : 0,
       };
 
   factory FoodAnalysis.fromMap(Map<String, dynamic> map) {
@@ -120,6 +157,8 @@ class FoodAnalysis {
       summary: map['summary'] ?? '',
       advice: map['advice'] ?? '',
       analyzedAt: DateTime.parse(map['analyzedAt']),
+      mealCategory: MealCategoryX.fromString(map['mealCategory'] as String?),
+      isFavorite: (map['isFavorite'] as int? ?? 0) == 1,
     );
   }
 }

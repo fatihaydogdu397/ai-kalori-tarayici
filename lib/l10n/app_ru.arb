@@ -1,0 +1,260 @@
+{
+  "@@locale": "ru",
+  "appName": "eatiq",
+  "tagline": "Сфотографируй. Узнай, что ешь.",
+  "getStarted": "Начать",
+  "alreadyHaveAccount": "Уже есть аккаунт?",
+  "signIn": "Войти",
+  "skip": "Пропустить",
+  "continueBtn": "Продолжить",
+  "letsGo": "Поехали",
+  "back": "Назад",
+  "save": "Сохранить",
+  "done": "Готово",
+  "cancel": "Отмена",
+  "onboardingHello": "Привет! 👋",
+  "onboardingNameSub": "Давай познакомимся. Как тебя зовут?",
+  "onboardingNameHint": "Введи своё имя...",
+  "onboardingNameRequired": "Пожалуйста, введи своё имя",
+  "onboardingBody": "Узнай своё тело",
+  "onboardingBodySub": "Рассчитаем твою цель по калориям.",
+  "onboardingGoal": "Какова твоя цель?",
+  "onboardingGoalSub": "Скорректируем цель по калориям в соответствии с ней.",
+  "onboardingTheme": "Внешний вид",
+  "onboardingThemeSub": "Можно изменить позже.",
+  "male": "Мужской",
+  "female": "Женский",
+  "age": "Возраст",
+  "height": "Рост",
+  "weight": "Вес",
+  "ageUnit": "лет",
+  "heightUnit": "см",
+  "weightUnit": "кг",
+  "goalLose": "Похудеть",
+  "goalLoseSub": "С постепенным дефицитом калорий",
+  "goalMaintain": "Поддержать вес",
+  "goalMaintainSub": "Сбалансированное и здоровое питание",
+  "goalGain": "Набрать вес",
+  "goalGainSub": "Наращивание мышечной массы",
+  "dark": "Тёмная",
+  "light": "Светлая",
+  "greeting": "Привет, {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultName": "Ты",
+  "caloriestoday": "Калории сегодня",
+  "todaysMeals": "Приёмы пищи сегодня",
+  "noMeals": "Приёмы пищи ещё не добавлены.\nОткрой камеру и отсканируй первое блюдо!",
+  "protein": "Белки",
+  "carbs": "Углев",
+  "fat": "Жиры",
+  "water": "Вода",
+  "analyzing": "Анализируется...",
+  "analyzingSub": "ИИ рассчитывает питательную ценность",
+  "camera": "Камера",
+  "gallery": "Галерея",
+  "home": "Главная",
+  "scan": "Сканер",
+  "progress": "Прогресс",
+  "profile": "Профиль",
+  "weeklyCalories": "Калории за неделю",
+  "macroBreakdown": "Распределение макросов",
+  "avgCalories": "Ср. калории",
+  "totalScans": "Всего сканирований",
+  "thisWeek": "На этой неделе",
+  "profileTitle": "Профиль",
+  "editProfile": "Изменить",
+  "calorieGoal": "Цель по калориям",
+  "language": "Язык",
+  "appearance": "Внешний вид",
+  "premium": "Премиум",
+  "premiumSub": "Безлимитное сканирование и функции",
+  "waterAdd": "Добавить воду",
+  "waterGoal": "Цель по воде",
+  "waterGlasses": "{count} стаканов",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReached": "Достигнут дневной лимит",
+  "limitReachedSub": "Сегодня использовано 5 бесплатных сканирований.\nСканируй безлимитно с eatiq Pro.",
+  "unlimitedScans": "Безлимитное AI-сканирование",
+  "unlimitedHistory": "Безлимитная история",
+  "weeklyReport": "Еженедельный AI-отчёт",
+  "turkishDB": "База турецких блюд",
+  "goProBtn": "Pro — Подписаться",
+  "yearlyDiscount": "Экономия 44% при годовой подписке",
+  "minutesAgo": "{min} мин назад",
+  "@minutesAgo": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{hr} ч назад",
+  "@hoursAgo": {
+    "placeholders": {
+      "hr": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} дней назад",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monday": "Пн",
+  "tuesday": "Вт",
+  "wednesday": "Ср",
+  "thursday": "Чт",
+  "friday": "Пт",
+  "saturday": "Сб",
+  "sunday": "Вс",
+  "errorGeneric": "Произошла ошибка",
+  "retry": "Повторить",
+  "mealBreakfast": "Завтрак",
+  "mealLunch": "Обед",
+  "mealDinner": "Ужин",
+  "mealSnack": "Перекус",
+  "settings": "Настройки",
+  "unitSystem": "Система единиц",
+  "reminders": "Напоминания",
+  "notifications": "Уведомления",
+  "dailyCalorieGoal": "Дневная цель по калориям",
+  "calorieRange": "От 1200 до 4000 ккал",
+  "selectLanguage": "Выбрать язык",
+  "manual": "Вручную",
+  "analysisResult": "Результат анализа",
+  "detectedIngredients": "Обнаруженные ингредиенты",
+  "addedToLog": "Добавлено в дневник ✓",
+  "historyTitle": "История",
+  "noScansYet": "Сканирований пока нет",
+  "scanFirstMeal": "Сканируйте первый приём пищи!",
+  "scanCount": "{count} сканирований",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyAnalysis": "Анализ тела",
+  "idealWeight": "Идеальный вес",
+  "gender": "Пол",
+  "goalLabel": "Цель",
+  "basalMetabolicRate": "Базальный метаболизм",
+  "dailyNeeds": "Дневная цель",
+  "bodyInfo": "Параметры тела",
+  "mealNameLabel": "Название блюда",
+  "categoryLabel": "Категория",
+  "portionWeightLabel": "Вес порции (г) — необязательно",
+  "portionHint": "При вводе макросы будут проверены",
+  "macrosLabel": "Макросы (г) — необязательно",
+  "editMeal": "Редактировать блюдо",
+  "addManualMeal": "Добавить блюдо вручную",
+  "update": "Обновить",
+  "bmiLabel": "ИМТ",
+  "bmiUnderweight": "Недостаток веса",
+  "bmiNormal": "Идеальный вес",
+  "bmiOverweight": "Избыточный вес",
+  "bmiObese": "Ожирение",
+  "bmiMorbidObese": "Тяжёлое ожирение",
+  "bmiUnderweightDesc": "Немного ниже идеального веса",
+  "bmiNormalDesc": "Отлично! Вы в здоровом диапазоне веса 🎯",
+  "bmiOverweightDesc": "Немного выше здорового веса",
+  "bmiObeseDesc": "Рекомендуем похудеть для здоровья",
+  "bmiMorbidObeseDesc": "Пожалуйста, проконсультируйтесь с врачом",
+  "addMeal": "+ Добавить",
+  "favorites": "ИЗБРАННОЕ",
+  "addMealShort": "+ Добавить",
+  "mealFallback": "Приём пищи",
+  "month01": "Янв",
+  "month02": "Фев",
+  "month03": "Мар",
+  "month04": "Апр",
+  "month05": "Май",
+  "month06": "Июн",
+  "month07": "Июл",
+  "month08": "Авг",
+  "month09": "Сен",
+  "month10": "Окт",
+  "month11": "Ноя",
+  "month12": "Дек",
+  "validRequired": "Обязательное поле",
+  "validNumber": "Введите корректное число",
+  "validPositive": "Должно быть больше нуля",
+  "validNegative": "Не может быть отрицательным",
+  "validPortionRange": "Должно быть от 1 до 5000г",
+  "validMacroMax": "{macro} не может превышать 1000г",
+  "@validMacroMax": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroPortion": "{macro} не может превышать вес порции ({portion}г)",
+  "@validMacroPortion": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      },
+      "portion": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroTotal": "Общие макросы ({total}г) превышают вес порции",
+  "@validMacroTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "validCalRequired": "Калории обязательны",
+  "validCalMax": "Один приём пищи не может превышать 5000 ккал",
+  "validCalInconsistent": "Несоответствие с макросами (оценка ~{estimated} ккал)",
+  "@validCalInconsistent": {
+    "placeholders": {
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "hintMealName": "напр. Овсянка, Курица...",
+  "hintCalories": "напр. 350",
+  "hintPortion": "напр. 200",
+  "hintProtein": "Белки",
+  "hintCarbs": "Углеводы",
+  "hintFat": "Жиры",
+  "unitMetric": "Метрическая",
+  "unitImperial": "Имперская",
+  "userFallback": "Ты",
+  "mealNameRequired": "Название блюда обязательно",
+  "themeDark": "Тёмная",
+  "themeLight": "Светлая",
+  "today": "Сегодня",
+  "yesterday": "Вчера",
+  "appleHealth": "Apple Health",
+  "appleHealthSub": "Синхронизация еды и воды",
+  "appleHealthDenied": "Доступ к Apple Health отклонён. Откройте Настройки → Конфиденциальность → Здоровье → Eatiq.",
+  "goToSettings": "Открыть Настройки",
+  "barcode": "Штрихкод",
+  "barcodeHint": "Совместите штрихкод с рамкой",
+  "barcodeSearching": "Поиск продукта...",
+  "barcodeNotFound": "Продукт не найден. Попробуйте ручной ввод."
+}

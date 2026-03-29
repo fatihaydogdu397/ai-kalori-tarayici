@@ -1,0 +1,260 @@
+{
+  "@@locale": "ka",
+  "appName": "eatiq",
+  "tagline": "გადაიღე ფოტო. გაიგე რას ჭამ.",
+  "getStarted": "დაწყება",
+  "alreadyHaveAccount": "უკვე გაქვს ანგარიში?",
+  "signIn": "შესვლა",
+  "skip": "გამოტოვება",
+  "continueBtn": "გაგრძელება",
+  "letsGo": "დავიწყოთ",
+  "back": "უკან",
+  "save": "შენახვა",
+  "done": "მზადაა",
+  "cancel": "გაუქმება",
+  "onboardingHello": "გამარჯობა! 👋",
+  "onboardingNameSub": "გავიცნოთ ერთმანეთი. შენი სახელი?",
+  "onboardingNameHint": "დაწერე სახელი...",
+  "onboardingNameRequired": "გთხოვ შეიყვანო სახელი",
+  "onboardingBody": "შეიცანი შენი სხეული",
+  "onboardingBodySub": "გამოვთვალოთ კალორიების მიზანი.",
+  "onboardingGoal": "შენი მიზანი?",
+  "onboardingGoalSub": "კალორიების მიზანი ამის მიხედვით დაიყენება.",
+  "onboardingTheme": "გარეგნობა",
+  "onboardingThemeSub": "მოგვიანებით შეგიძლია შეცვალო.",
+  "male": "მამრობითი",
+  "female": "მდედრობითი",
+  "age": "ასაკი",
+  "height": "სიმაღლე",
+  "weight": "წონა",
+  "ageUnit": "წ.",
+  "heightUnit": "სმ",
+  "weightUnit": "კგ",
+  "goalLose": "წონის დაკლება",
+  "goalLoseSub": "ნელ-ნელა კალორიების დეფიციტით",
+  "goalMaintain": "წონის შენარჩუნება",
+  "goalMaintainSub": "დაბალანსებული და ჯანსაღი კვება",
+  "goalGain": "წონის მომატება",
+  "goalGainSub": "კუნთის მასის მომატება",
+  "dark": "Dark",
+  "light": "Light",
+  "greeting": "გამარჯობა, {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultName": "შენ",
+  "caloriestoday": "დღევანდელი კალორიები",
+  "todaysMeals": "დღევანდელი კვება",
+  "noMeals": "კვება ჯერ არ არის დამატებული.\nდაასკანირე პირველი საჭმელი!",
+  "protein": "ცილა",
+  "carbs": "ნახშირწყლები",
+  "fat": "ცხიმი",
+  "water": "წყალი",
+  "analyzing": "ანალიზი...",
+  "analyzingSub": "AI ითვლის საკვებ ღირებულებებს",
+  "camera": "კამერა",
+  "gallery": "გალერეა",
+  "home": "მთავარი",
+  "scan": "სკანირება",
+  "progress": "პროგრესი",
+  "profile": "პროფილი",
+  "weeklyCalories": "კვირის კალორიები",
+  "macroBreakdown": "მაკრო განაწილება",
+  "avgCalories": "საშ. კალორია",
+  "totalScans": "სულ სკანირება",
+  "thisWeek": "ამ კვირაში",
+  "profileTitle": "პროფილი",
+  "editProfile": "რედაქტირება",
+  "calorieGoal": "კალორიების მიზანი",
+  "language": "ენა",
+  "appearance": "გარეგნობა",
+  "premium": "Premium",
+  "premiumSub": "შეუზღუდავი სკანირება და ფუნქციები",
+  "waterAdd": "წყლის დამატება",
+  "waterGoal": "წყლის მიზანი",
+  "waterGlasses": "{count} ჭიქა",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReached": "დღიური ლიმიტი ამოიწურა",
+  "limitReachedSub": "დღეს გამოიყენე 5 უფასო სკანირება.\nსკანირე შეუზღუდავად eatiq Pro-ით.",
+  "unlimitedScans": "შეუზღუდავი AI სკანირება",
+  "unlimitedHistory": "შეუზღუდავი ისტორია",
+  "weeklyReport": "AI კვირის ანგარიში",
+  "turkishDB": "თურქული საჭმლის მონაცემთა ბაზა",
+  "goProBtn": "Pro-ზე გადასვლა — ₺149/თვ",
+  "yearlyDiscount": "დაზოგე 44% ₺999/წელიწადით",
+  "minutesAgo": "{min} წუთის წინ",
+  "@minutesAgo": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "{hr} სთ წინ",
+  "@hoursAgo": {
+    "placeholders": {
+      "hr": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "{count} დღის წინ",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monday": "ორშ",
+  "tuesday": "სამ",
+  "wednesday": "ოთხ",
+  "thursday": "ხუთ",
+  "friday": "პარ",
+  "saturday": "შაბ",
+  "sunday": "კვი",
+  "errorGeneric": "შეცდომა მოხდა",
+  "retry": "სცადე თავიდან",
+  "mealBreakfast": "საუზმე",
+  "mealLunch": "სადილი",
+  "mealDinner": "ვახშამი",
+  "mealSnack": "სნეკი",
+  "settings": "პარამეტრები",
+  "unitSystem": "საზომი სისტემა",
+  "reminders": "შეხსენებები",
+  "notifications": "შეტყობინებები",
+  "dailyCalorieGoal": "დღიური კალორიების მიზანი",
+  "calorieRange": "1200 – 4000 კკალ შორის",
+  "selectLanguage": "ენის არჩევა",
+  "manual": "ხელით",
+  "analysisResult": "ანალიზის შედეგი",
+  "detectedIngredients": "გამოვლენილი ინგრედიენტები",
+  "addedToLog": "დღიურში დაემატა ✓",
+  "historyTitle": "ისტორია",
+  "noScansYet": "სკანირება ჯერ არ ყოფილა",
+  "scanFirstMeal": "დაასკანირე პირველი საჭმელი!",
+  "scanCount": "{count} სკანირება",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyAnalysis": "სხეულის ანალიზი",
+  "idealWeight": "იდეალური წონა",
+  "gender": "სქესი",
+  "goalLabel": "მიზანი",
+  "basalMetabolicRate": "ბაზალური მეტაბოლიზმი",
+  "dailyNeeds": "დღიური მიზანი",
+  "bodyInfo": "სხეულის მონაცემები",
+  "mealNameLabel": "კვების სახელი",
+  "categoryLabel": "კატეგორია",
+  "portionWeightLabel": "პორციის წონა (გ) — სურვილისამებრ",
+  "portionHint": "თუ შეიყვანთ, მაკროები გადამოწმდება",
+  "macrosLabel": "მაკროები (გ) — სურვილისამებრ",
+  "editMeal": "კვების რედაქტირება",
+  "addManualMeal": "კვების ხელით დამატება",
+  "update": "განახლება",
+  "bmiLabel": "სმი",
+  "bmiUnderweight": "წონის ნაკლებობა",
+  "bmiNormal": "იდეალური წონა",
+  "bmiOverweight": "ჭარბი წონა",
+  "bmiObese": "სიმსუქნე",
+  "bmiMorbidObese": "მძიმე სიმსუქნე",
+  "bmiUnderweightDesc": "იდეალურ წონაზე ოდნავ ქვემოთ ხარ",
+  "bmiNormalDesc": "შესანიშნავია! ჯანსაღი წონის დიაპაზონში ხარ 🎯",
+  "bmiOverweightDesc": "ჯანსაღ წონაზე ოდნავ მეტი გაქვს",
+  "bmiObeseDesc": "ჯანმრთელობისთვის წონის დაკლება გირჩევ",
+  "bmiMorbidObeseDesc": "გთხოვ, ექიმს მიმართო",
+  "addMeal": "+ დამატება",
+  "favorites": "რჩეულები",
+  "addMealShort": "+ დამატება",
+  "mealFallback": "კვება",
+  "month01": "იან",
+  "month02": "თებ",
+  "month03": "მარ",
+  "month04": "აპრ",
+  "month05": "მაი",
+  "month06": "ივნ",
+  "month07": "ივლ",
+  "month08": "აგვ",
+  "month09": "სექ",
+  "month10": "ოქტ",
+  "month11": "ნოვ",
+  "month12": "დეკ",
+  "validRequired": "სავალდებულო ველი",
+  "validNumber": "შეიყვანეთ სწორი რიცხვი",
+  "validPositive": "ნულზე მეტი უნდა იყოს",
+  "validNegative": "არ შეიძლება იყოს უარყოფითი",
+  "validPortionRange": "1–5000გ შორის უნდა იყოს",
+  "validMacroMax": "{macro} 1000გ-ს არ შეიძლება გადააჭარბოს",
+  "@validMacroMax": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroPortion": "{macro} პორციის წონას ({portion}გ) არ შეიძლება გადააჭარბოს",
+  "@validMacroPortion": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      },
+      "portion": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroTotal": "მთლიანი მაკრო ({total}გ) პორციის წონას აღემატება",
+  "@validMacroTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "validCalRequired": "კალორიები სავალდებულოა",
+  "validCalMax": "ერთი კვება 5000 კკალ-ს არ შეიძლება გადააჭარბოს",
+  "validCalInconsistent": "მაკრონებთან შეუსაბამო (სავარაუდო ~{estimated} კკალ)",
+  "@validCalInconsistent": {
+    "placeholders": {
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "hintMealName": "მაგ. შვრია, ქათამი...",
+  "hintCalories": "მაგ. 350",
+  "hintPortion": "მაგ. 200",
+  "hintProtein": "ცილა",
+  "hintCarbs": "ნახშირწყლები",
+  "hintFat": "ცხიმი",
+  "unitMetric": "მეტრული",
+  "unitImperial": "საიმპერიო",
+  "userFallback": "შენ",
+  "mealNameRequired": "კვების სახელი სავალდებულოა",
+  "themeDark": "მუქი",
+  "themeLight": "ღია",
+  "today": "დღეს",
+  "yesterday": "გუშინ",
+  "appleHealth": "Apple Health",
+  "appleHealthSub": "კვება და წყალი სინქრონი",
+  "appleHealthDenied": "Apple Health წვდომა უარყოფილია. გახსენით პარამეტრები → კონფიდენციალურობა → ჯანმრთელობა → Eatiq.",
+  "goToSettings": "პარამეტრების გახსნა",
+  "barcode": "შტრიხკოდი",
+  "barcodeHint": "შტრიხკოდი ჩარჩოში მოათავსეთ",
+  "barcodeSearching": "პროდუქტი ეძებება...",
+  "barcodeNotFound": "პროდუქტი ვერ მოიძებნა. სცადეთ ხელით შეყვანა."
+}

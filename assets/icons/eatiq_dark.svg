@@ -1,0 +1,14 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="dots" x="0" y="0" width="52" height="52" patternUnits="userSpaceOnUse">
+      <circle cx="26" cy="26" r="6" fill="#C8F135" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="1024" height="1024" fill="#0F0F14"/>
+  <rect width="1024" height="1024" fill="url(#dots)"/>
+  <rect x="72" y="352" width="880" height="320" rx="160" fill="#1C1C2A" stroke="#C8F135" stroke-width="22"/>
+  <text x="512" y="570" text-anchor="middle" font-size="210" font-weight="900"
+        font-family="Arial Black, Arial, Helvetica, sans-serif" letter-spacing="-4">
+    <tspan fill="#F0EEF8">eat</tspan><tspan fill="#C8F135">iq</tspan>
+  </text>
+</svg>

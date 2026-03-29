@@ -19,6 +19,11 @@ class CalorieRing extends StatelessWidget {
     final percent = (consumed / goal).clamp(0.0, 1.0);
     final remaining = (goal - consumed).clamp(0, goal);
     final isOver = consumed > goal;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textSecondary = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final progressColor = isDark ? AppColors.lime : AppColors.void_;
+    final bgColor = isDark ? AppColors.darkSurface : AppColors.lightSurface;
 
     return CircularPercentIndicator(
       radius: size / 2,
@@ -29,16 +34,16 @@ class CalorieRing extends StatelessWidget {
         children: [
           Text(
             consumed.toStringAsFixed(0),
-            style: const TextStyle(
-              color: AppTheme.textPrimary,
+            style: TextStyle(
+              color: textPrimary,
               fontSize: 28,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const Text(
+          Text(
             'kcal',
             style: TextStyle(
-              color: AppTheme.textSecondary,
+              color: textSecondary,
               fontSize: 12,
             ),
           ),
@@ -46,15 +51,15 @@ class CalorieRing extends StatelessWidget {
           Text(
             isOver ? 'Aşıldı!' : '${remaining.toStringAsFixed(0)} kaldı',
             style: TextStyle(
-              color: isOver ? AppTheme.error : AppTheme.textSecondary,
+              color: isOver ? AppColors.coral : textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
           ),
         ],
       ),
-      progressColor: isOver ? AppTheme.error : AppTheme.primary,
-      backgroundColor: AppTheme.surface,
+      progressColor: isOver ? AppColors.coral : progressColor,
+      backgroundColor: bgColor,
       circularStrokeCap: CircularStrokeCap.round,
       animation: true,
       animationDuration: 1000,

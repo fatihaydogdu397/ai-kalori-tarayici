@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:http/http.dart' as http;
 import '../models/food_analysis.dart';
 
@@ -11,8 +12,13 @@ class ClaudeService {
   static const String _model = 'claude-opus-4-5';
 
   Future<FoodAnalysis> analyzeFood(String imagePath) async {
-    final imageFile = File(imagePath);
-    final imageBytes = await imageFile.readAsBytes();
+    final result = await FlutterImageCompress.compressWithFile(
+      imagePath,
+      minWidth: 800,
+      minHeight: 800,
+      quality: 70,
+    );
+    final imageBytes = result ?? await File(imagePath).readAsBytes();
     final base64Image = base64Encode(imageBytes);
 
     final ext = imagePath.split('.').last.toLowerCase();

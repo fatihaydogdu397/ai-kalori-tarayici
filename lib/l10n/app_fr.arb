@@ -1,0 +1,260 @@
+{
+  "@@locale": "fr",
+  "appName": "eatiq",
+  "tagline": "Prenez une photo. Connaissez ce que vous mangez.",
+  "getStarted": "Commencer",
+  "alreadyHaveAccount": "Vous avez déjà un compte ?",
+  "signIn": "Se connecter",
+  "skip": "Passer",
+  "continueBtn": "Continuer",
+  "letsGo": "C'est parti",
+  "back": "Retour",
+  "save": "Enregistrer",
+  "done": "Terminé",
+  "cancel": "Annuler",
+  "onboardingHello": "Bonjour ! 👋",
+  "onboardingNameSub": "Faisons connaissance. Quel est votre prénom ?",
+  "onboardingNameHint": "Tapez votre prénom...",
+  "onboardingNameRequired": "Veuillez entrer votre prénom",
+  "onboardingBody": "Connaissez votre corps",
+  "onboardingBodySub": "Calculons votre objectif calorique.",
+  "onboardingGoal": "Quel est votre objectif ?",
+  "onboardingGoalSub": "Nous ajusterons votre cible calorique en conséquence.",
+  "onboardingTheme": "Apparence",
+  "onboardingThemeSub": "Vous pouvez changer cela plus tard.",
+  "male": "Homme",
+  "female": "Femme",
+  "age": "Âge",
+  "height": "Taille",
+  "weight": "Poids",
+  "ageUnit": "ans",
+  "heightUnit": "cm",
+  "weightUnit": "kg",
+  "goalLose": "Perdre du poids",
+  "goalLoseSub": "Lentement avec un déficit calorique",
+  "goalMaintain": "Maintenir le poids",
+  "goalMaintainSub": "Alimentation équilibrée et saine",
+  "goalGain": "Prendre du poids",
+  "goalGainSub": "Construire de la masse musculaire",
+  "dark": "Sombre",
+  "light": "Clair",
+  "greeting": "Bonjour, {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "defaultName": "vous",
+  "caloriestoday": "Calories aujourd'hui",
+  "todaysMeals": "Repas d'aujourd'hui",
+  "noMeals": "Aucun repas enregistré.\nAppuyez sur la caméra pour scanner votre premier repas !",
+  "protein": "Protéines",
+  "carbs": "Glucides",
+  "fat": "Lipides",
+  "water": "Eau",
+  "analyzing": "Analyse en cours...",
+  "analyzingSub": "L'IA calcule vos nutriments",
+  "camera": "Caméra",
+  "gallery": "Galerie",
+  "home": "Accueil",
+  "scan": "Scanner",
+  "progress": "Progrès",
+  "profile": "Profil",
+  "weeklyCalories": "Calories hebdomadaires",
+  "macroBreakdown": "Répartition des macros",
+  "avgCalories": "Moy. Calories",
+  "totalScans": "Scans totaux",
+  "thisWeek": "Cette semaine",
+  "profileTitle": "Profil",
+  "editProfile": "Modifier",
+  "calorieGoal": "Objectif calorique",
+  "language": "Langue",
+  "appearance": "Apparence",
+  "premium": "Premium",
+  "premiumSub": "Scans illimités & fonctionnalités",
+  "waterAdd": "Ajouter de l'eau",
+  "waterGoal": "Objectif eau",
+  "waterGlasses": "{count} verres",
+  "@waterGlasses": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "limitReached": "Limite quotidienne atteinte",
+  "limitReachedSub": "Vous avez utilisé 5 scans gratuits aujourd'hui.\nScannez sans limite avec eatiq Pro.",
+  "unlimitedScans": "Scans IA illimités",
+  "unlimitedHistory": "Historique illimité",
+  "weeklyReport": "Rapport IA hebdomadaire",
+  "turkishDB": "Base de données cuisine turque",
+  "goProBtn": "Passer Pro — ₺149/mois",
+  "yearlyDiscount": "Économisez 44% avec ₺999/an",
+  "minutesAgo": "il y a {min} min",
+  "@minutesAgo": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "hoursAgo": "il y a {hr} h",
+  "@hoursAgo": {
+    "placeholders": {
+      "hr": {
+        "type": "int"
+      }
+    }
+  },
+  "daysAgo": "Il y a {count} jours",
+  "@daysAgo": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "monday": "Lun",
+  "tuesday": "Mar",
+  "wednesday": "Mer",
+  "thursday": "Jeu",
+  "friday": "Ven",
+  "saturday": "Sam",
+  "sunday": "Dim",
+  "errorGeneric": "Une erreur s'est produite",
+  "retry": "Réessayer",
+  "mealBreakfast": "Petit-déjeuner",
+  "mealLunch": "Déjeuner",
+  "mealDinner": "Dîner",
+  "mealSnack": "Collation",
+  "settings": "Paramètres",
+  "unitSystem": "Système d'unités",
+  "reminders": "Rappels",
+  "notifications": "Notifications",
+  "dailyCalorieGoal": "Objectif calorique journalier",
+  "calorieRange": "Entre 1200 – 4000 kcal",
+  "selectLanguage": "Choisir la langue",
+  "manual": "Manuel",
+  "analysisResult": "Résultat de l'analyse",
+  "detectedIngredients": "Ingrédients détectés",
+  "addedToLog": "Ajouté au journal ✓",
+  "historyTitle": "Historique",
+  "noScansYet": "Aucun scan pour l'instant",
+  "scanFirstMeal": "Scannez votre premier repas !",
+  "scanCount": "{count} scans",
+  "@scanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bodyAnalysis": "Analyse corporelle",
+  "idealWeight": "Poids idéal",
+  "gender": "Genre",
+  "goalLabel": "Objectif",
+  "basalMetabolicRate": "Métabolisme de base",
+  "dailyNeeds": "Objectif quotidien",
+  "bodyInfo": "Informations corporelles",
+  "mealNameLabel": "Nom du repas",
+  "categoryLabel": "Catégorie",
+  "portionWeightLabel": "Poids de la portion (g) — optionnel",
+  "portionHint": "Si vous entrez des données, les macros seront vérifiés",
+  "macrosLabel": "Macros (g) — optionnel",
+  "editMeal": "Modifier le repas",
+  "addManualMeal": "Ajouter un repas manuellement",
+  "update": "Mettre à jour",
+  "bmiLabel": "IMC",
+  "bmiUnderweight": "Insuffisance pondérale",
+  "bmiNormal": "Poids idéal",
+  "bmiOverweight": "Surpoids",
+  "bmiObese": "Obésité",
+  "bmiMorbidObese": "Obésité sévère",
+  "bmiUnderweightDesc": "Légèrement en dessous de votre poids idéal",
+  "bmiNormalDesc": "Super ! Vous êtes dans une fourchette de poids saine 🎯",
+  "bmiOverweightDesc": "Légèrement au-dessus du poids sain",
+  "bmiObeseDesc": "Nous recommandons de perdre du poids pour votre santé",
+  "bmiMorbidObeseDesc": "Veuillez consulter un professionnel de santé",
+  "addMeal": "+ Ajouter",
+  "favorites": "FAVORIS",
+  "addMealShort": "+ Ajouter",
+  "mealFallback": "Repas",
+  "month01": "Jan",
+  "month02": "Fév",
+  "month03": "Mar",
+  "month04": "Avr",
+  "month05": "Mai",
+  "month06": "Jun",
+  "month07": "Jul",
+  "month08": "Aoû",
+  "month09": "Sep",
+  "month10": "Oct",
+  "month11": "Nov",
+  "month12": "Déc",
+  "validRequired": "Champ obligatoire",
+  "validNumber": "Entrer un nombre valide",
+  "validPositive": "Doit être supérieur à zéro",
+  "validNegative": "Ne peut pas être négatif",
+  "validPortionRange": "Doit être entre 1–5000g",
+  "validMacroMax": "{macro} ne peut pas dépasser 1000g",
+  "@validMacroMax": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroPortion": "{macro} ne peut pas dépasser le poids de la portion ({portion}g)",
+  "@validMacroPortion": {
+    "placeholders": {
+      "macro": {
+        "type": "String"
+      },
+      "portion": {
+        "type": "String"
+      }
+    }
+  },
+  "validMacroTotal": "Les macros totales ({total}g) dépassent le poids de la portion",
+  "@validMacroTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "validCalRequired": "Calories requises",
+  "validCalMax": "Un seul repas ne peut pas dépasser 5000 kcal",
+  "validCalInconsistent": "Incohérent avec les macros (estimé ~{estimated} kcal)",
+  "@validCalInconsistent": {
+    "placeholders": {
+      "estimated": {
+        "type": "String"
+      }
+    }
+  },
+  "hintMealName": "ex. Flocons d'avoine, Poulet...",
+  "hintCalories": "ex. 350",
+  "hintPortion": "ex. 200",
+  "hintProtein": "Protéines",
+  "hintCarbs": "Glucides",
+  "hintFat": "Lipides",
+  "unitMetric": "Métrique",
+  "unitImperial": "Impérial",
+  "userFallback": "Toi",
+  "mealNameRequired": "Nom du repas requis",
+  "themeDark": "Sombre",
+  "themeLight": "Clair",
+  "today": "Aujourd'hui",
+  "yesterday": "Hier",
+  "appleHealth": "Apple Santé",
+  "appleHealthSub": "Synchroniser repas & eau",
+  "appleHealthDenied": "Accès Apple Santé refusé. Ouvrez Réglages → Confidentialité → Santé → Eatiq.",
+  "goToSettings": "Ouvrir Réglages",
+  "barcode": "Code-barres",
+  "barcodeHint": "Alignez le code-barres dans le cadre",
+  "barcodeSearching": "Recherche du produit...",
+  "barcodeNotFound": "Produit introuvable. Essayez la saisie manuelle."
+}

@@ -2,11 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../models/food_analysis.dart';
 import '../theme/app_theme.dart';
+import '../generated/app_localizations.dart';
+import 'manual_entry_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   final FoodAnalysis analysis;
+  final bool allowRetry;
 
-  const ResultScreen({super.key, required this.analysis});
+  const ResultScreen({super.key, required this.analysis, this.allowRetry = false});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +29,6 @@ class ResultScreen extends StatelessWidget {
     final food = analysis.foods.isNotEmpty ? analysis.foods.first : null;
     final total = analysis.totalNutrients;
 
-    // Ingredient tag colors
     final tagConfigs = [
       (AppColors.lime, isDark ? const Color(0xFF1A2010) : const Color(0xFFEEF5E0), isDark ? const Color(0xFF3A5A20) : const Color(0xFFAACE60)),
       (isDark ? AppColors.violet : AppColors.violetDark, isDark ? const Color(0xFF1A1A30) : const Color(0xFFEEECFC), isDark ? const Color(0xFF3A3A60) : const Color(0xFFAAAADE)),
@@ -34,6 +36,7 @@ class ResultScreen extends StatelessWidget {
       (isDark ? AppColors.coral : AppColors.coralDark, isDark ? const Color(0xFF200E10) : const Color(0xFFFFEEEE), isDark ? const Color(0xFF4A2020) : const Color(0xFFDDAAAA)),
     ];
 
+    final l = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: bg,
       body: SafeArea(
@@ -49,9 +52,36 @@ class ResultScreen extends StatelessWidget {
                     child: Icon(Icons.chevron_left_rounded, color: textMuted, size: 26),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    'Scan result',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textPrimary),
+                  Text(l.analysisResult, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textPrimary)),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () async {
+                      final updated = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ManualEntryScreen(existing: analysis),
+                        ),
+                      );
+                      if (updated == true && context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.edit_rounded, size: 13, color: textMuted),
+                          const SizedBox(width: 4),
+                          Text(l.editProfile, style: TextStyle(fontSize: 12, color: textMuted, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -67,21 +97,21 @@ class ResultScreen extends StatelessWidget {
                     // Food image
                     Stack(
                       children: [
-                        Container(
-                          width: double.infinity,
-                          height: 160,
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.darkCard : AppColors.lightSurface,
-                            borderRadius: BorderRadius.circular(14),
+                        Hero(
+                          tag: 'food_image_${analysis.id}',
+                          child: Container(
+                            width: double.infinity,
+                            height: 160,
+                            decoration: BoxDecoration(
+                              color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            child: File(analysis.imagePath).existsSync()
+                                ? Image.file(File(analysis.imagePath), fit: BoxFit.cover)
+                                : Center(child: Icon(Icons.restaurant_rounded, size: 48, color: textMuted)),
                           ),
-                          clipBehavior: Clip.hardEdge,
-                          child: File(analysis.imagePath).existsSync()
-                              ? Image.file(File(analysis.imagePath), fit: BoxFit.cover)
-                              : Center(
-                                  child: Icon(Icons.restaurant_rounded, size: 48, color: textMuted),
-                                ),
                         ),
-                        // AI badge
                         Positioned(
                           top: 10,
                           right: 10,
@@ -89,22 +119,6 @@ class ResultScreen extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(color: aiBg, borderRadius: BorderRadius.circular(6)),
                             child: Text('AI', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: aiText)),
-                          ),
-                        ),
-                        // Confidence
-                        Positioned(
-                          bottom: 10,
-                          left: 10,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: isDark ? Colors.black54 : Colors.white70,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              '94% confidence',
-                              style: TextStyle(fontSize: 11, color: textMuted),
-                            ),
                           ),
                         ),
                       ],
@@ -130,7 +144,7 @@ class ResultScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
-                                      '1 serving · approx. ${food?.portion.toStringAsFixed(0) ?? "—"}${food?.portionUnit ?? "g"}',
+                                      '1 porsiyon · ~${food?.portion.toStringAsFixed(0) ?? "—"}${food?.portionUnit ?? "g"}',
                                       style: TextStyle(fontSize: 11, color: textMuted),
                                     ),
                                   ],
@@ -158,14 +172,13 @@ class ResultScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           Divider(color: divider, height: 1),
                           const SizedBox(height: 12),
-                          // Macros row
                           Row(
                             children: [
                               _MacroCell(value: '${total.protein.toStringAsFixed(0)}g', label: 'protein', color: isDark ? AppColors.violet : AppColors.violetDark),
                               VerticalDivider(color: divider, width: 1),
-                              _MacroCell(value: '${total.carbs.toStringAsFixed(0)}g', label: 'carbs', color: isDark ? AppColors.amber : AppColors.amberDark),
+                              _MacroCell(value: '${total.carbs.toStringAsFixed(0)}g', label: 'karbonhidrat', color: isDark ? AppColors.amber : AppColors.amberDark),
                               VerticalDivider(color: divider, width: 1),
-                              _MacroCell(value: '${total.fat.toStringAsFixed(0)}g', label: 'fat', color: isDark ? AppColors.coral : AppColors.coralDark),
+                              _MacroCell(value: '${total.fat.toStringAsFixed(0)}g', label: 'yağ', color: isDark ? AppColors.coral : AppColors.coralDark),
                             ],
                           ),
                         ],
@@ -181,7 +194,7 @@ class ResultScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Detected ingredients', style: TextStyle(fontSize: 11, color: textMuted)),
+                            Text(l.detectedIngredients, style: TextStyle(fontSize: 11, color: textMuted)),
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 6,
@@ -205,7 +218,7 @@ class ResultScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                     ],
 
-                    // Summary / advice
+                    // Advice
                     if (analysis.advice.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -223,22 +236,43 @@ class ResultScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(context, false),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: btnBg,
                         foregroundColor: btnText,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
                       ),
-                      child: Text('Add to diary', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
+                      child: Text(l.addedToLog, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text('Edit details', style: TextStyle(fontSize: 12, color: textMuted)),
+                  if (allowRetry) ...[
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.camera_alt_rounded, size: 16, color: textMuted),
+                            const SizedBox(width: 6),
+                            Text('Tekrar Analiz Et', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textMuted)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -250,17 +284,13 @@ class ResultScreen extends StatelessWidget {
 }
 
 class _MacroCell extends StatelessWidget {
-  final String value;
-  final String label;
+  final String value, label;
   final Color color;
-
   const _MacroCell({required this.value, required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    final textMuted = Theme.of(context).brightness == Brightness.dark
-        ? AppColors.darkTextMuted
-        : const Color(0xFFAAAAAA);
+    final textMuted = Theme.of(context).brightness == Brightness.dark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
     return Expanded(
       child: Column(
         children: [
