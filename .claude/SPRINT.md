@@ -23,7 +23,15 @@
 
 ---
 
-## 🚧 Sprint 6 — Aktif
+## ✅ Tamamlanan (Sprint 6 — Kısmi)
+- Analiz sonucu düzenleme + porsiyon slider (Gemini)
+- Kilo takibi DB + grafik (Gemini)
+- AI prompt öğün adı iyileştirmesi (Claude)
+- Hardcoded string → l10n fix (Claude)
+
+---
+
+## 🚧 Sprint 6 — Devam Ediyor
 
 ### #1 Haftalık/Aylık Progress Grafikleri
 **OWNER: Claude**
@@ -133,17 +141,18 @@
 
 | # | Görev | Kim | Durum |
 |---|-------|-----|-------|
-| 1 | Haftalık/Aylık Grafikler | **Claude** | ⏳ |
-| 2 | Analiz Sonucu Düzenleme | **Claude** | ⏳ |
-| 3 | Kilo Takibi | **Claude** | ⏳ |
-| 4 | RevenueCat App Store | **Fatih** | ⏳ |
-| 5 | kUseMockData = false | **Gemini** | ❌ İptal — canlıya almadan önce yapılacak |
+| 1 | Haftalık/Aylık Grafikler | **Claude** | ✅ Tamamlandı |
+| 2 | Analiz Sonucu Düzenleme | **Gemini** | ✅ Tamamlandı |
+| 3 | Kilo Takibi | **Gemini** | ✅ Tamamlandı |
+| 4 | RevenueCat App Store | **Fatih** | ⏳ App Store hesabı bekleniyor |
+| 5 | kUseMockData = false | — | ❌ İptal — canlıya almadan önce |
 | 6 | App Store Screenshots + Metadata (TR+EN) | **Gemini** | ⏳ |
-| 7 | Günlük AI Bildirimi | **Claude** | ⏳ |
-| 8 | Android kamera + CAMERA izni (AndroidManifest) | **Gemini** | ⏳ |
-| 9 | Android Widget (home_widget Android tarafı) | **Gemini** | ✅ Tamamlandı |
-| 10 | ARB çevirileri — yeni key'ler eklendikçe 10 dile | **Gemini** | 🔄 Sürekli |
-| 11 | Responsive Yazı ve Layout Mimarisi | **Gemini** | ⏳ |
+| 7 | Günlük AI Bildirimi (dinamik) | **Claude** | ⏳ |
+| 8 | Android kamera izni (AndroidManifest) | **Gemini** | ✅ Tamamlandı |
+| 9 | Android Widget | **Gemini** | ✅ Tamamlandı |
+| 10 | ARB çevirileri | **Gemini** | 🔄 Sürekli |
+| 11 | PurchaseService dotenv'e geçiş | **Claude** | ⏳ 🔴 Kritik |
+| 12 | Geçmişten Hızlı Ekle (Bugüne Ekle butonu) | **Claude** | ⏳ |
 
 ---
 
