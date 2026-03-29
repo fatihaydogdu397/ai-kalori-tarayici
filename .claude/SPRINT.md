@@ -124,7 +124,7 @@
 | 2 | Analiz Sonucu Düzenleme | **Claude** | ⏳ |
 | 3 | Kilo Takibi | **Claude** | ⏳ |
 | 4 | RevenueCat App Store | **Fatih** | ⏳ |
-| 5 | kUseMockData = false | **Gemini** | ⏳ |
+| 5 | kUseMockData = false | **Gemini** | ❌ İptal — canlıya almadan önce yapılacak |
 | 6 | App Store Screenshots + Metadata (TR+EN) | **Gemini** | ⏳ |
 | 7 | Günlük AI Bildirimi | **Claude** | ⏳ |
 | 8 | Android kamera + CAMERA izni (AndroidManifest) | **Gemini** | ⏳ |
