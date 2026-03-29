@@ -16,7 +16,7 @@ class DatabaseService {
 
     return openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE analyses (
@@ -42,6 +42,13 @@ class DatabaseService {
             liters REAL
           )
         ''');
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS weight_log (
+            id TEXT PRIMARY KEY,
+            date TEXT NOT NULL,
+            weight REAL NOT NULL
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -58,6 +65,15 @@ class DatabaseService {
         }
         if (oldVersion < 4) {
           await db.execute('ALTER TABLE analyses ADD COLUMN isFavorite INTEGER DEFAULT 0');
+        }
+        if (oldVersion < 5) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS weight_log (
+              id TEXT PRIMARY KEY,
+              date TEXT NOT NULL,
+              weight REAL NOT NULL
+            )
+          ''');
         }
       },
     );
@@ -224,4 +240,83 @@ class DatabaseService {
       };
     }).toList();
   }
+
+  /// Returns a list of maps with aggregated nutrition data for the last 30 days.
+  Future<List<Map<String, dynamic>>> getMonthlyStats() async {
+    final db = await database;
+    final now = DateTime.now();
+
+    final dates = List.generate(30, (i) {
+      final d = now.subtract(Duration(days: 29 - i));
+      return '${d.year.toString().padLeft(4, '0')}-'
+          '${d.month.toString().padLeft(2, '0')}-'
+          '${d.day.toString().padLeft(2, '0')}';
+    });
+
+    final startOfRange =
+        DateTime(now.year, now.month, now.day).subtract(const Duration(days: 29));
+    final endOfRange =
+        DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    final rows = await db.rawQuery('''
+      SELECT
+        SUBSTR(analyzedAt, 1, 10) as date,
+        SUM(totalCalories) as calories,
+        SUM(totalProtein) as protein,
+        SUM(totalCarbs) as carbs,
+        SUM(totalFat) as fat
+      FROM analyses
+      WHERE analyzedAt BETWEEN ? AND ?
+      GROUP BY SUBSTR(analyzedAt, 1, 10)
+    ''', [startOfRange.toIso8601String(), endOfRange.toIso8601String()]);
+
+    final Map<String, Map<String, dynamic>> indexed = {
+      for (final row in rows) row['date'] as String: row,
+    };
+
+    return dates.map((date) {
+      if (indexed.containsKey(date)) {
+        final row = indexed[date]!;
+        return <String, dynamic>{
+          'date': date,
+          'calories': (row['calories'] as num?)?.toDouble() ?? 0.0,
+          'protein': (row['protein'] as num?)?.toDouble() ?? 0.0,
+          'carbs': (row['carbs'] as num?)?.toDouble() ?? 0.0,
+          'fat': (row['fat'] as num?)?.toDouble() ?? 0.0,
+        };
+      }
+      return <String, dynamic>{
+        'date': date,
+        'calories': 0.0,
+        'protein': 0.0,
+        'carbs': 0.0,
+        'fat': 0.0,
+      };
+    }).toList();
+  }
+
+  // --- KİLO METOTLARI ---
+  Future<void> saveWeight(double weight, DateTime date) async {
+    final db = await database;
+    // Aynı güne kaydedilmiş veri varsa, onu ezelim (saat, dakika kırparak aynı gün yapalım)
+    final dateString = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T00:00:00.000";
+    
+    // Check if exists
+    final existing = await db.query('weight_log', where: 'date = ?', whereArgs: [dateString]);
+    if (existing.isNotEmpty) {
+      await db.update('weight_log', {'weight': weight}, where: 'date = ?', whereArgs: [dateString]);
+    } else {
+      await db.insert('weight_log', {
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'date': dateString,
+        'weight': weight,
+      });
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getWeightLogs() async {
+    final db = await database;
+    return await db.query('weight_log', orderBy: 'date ASC');
+  }
 }
+

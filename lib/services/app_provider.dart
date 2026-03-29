@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_analysis.dart';
@@ -201,11 +200,15 @@ class AppProvider extends ChangeNotifier {
   double _weight = 0;
   String _gender = '';
   String _goal = '';
+  
+  // Weight tracking history
+  List<Map<String, dynamic>> _weightLogs = [];
+  List<Map<String, dynamic>> get weightLogs => _weightLogs;
 
   String get userName => _userName;
   int get age => _age;
-  double get height => _height; // cm
-  double get weight => _weight; // kg
+  double get height => _height; 
+  double get weight => _weight;
   String get gender => _gender;
   String get goal => _goal;
 
@@ -232,6 +235,28 @@ class AppProvider extends ChangeNotifier {
     _gender = prefs.getString('gender') ?? '';
     _goal = prefs.getString('goal') ?? '';
     _healthEnabled = await _healthService.isEnabled();
+    await loadWeightLogs();
+    notifyListeners();
+  }
+
+  Future<void> loadWeightLogs() async {
+    _weightLogs = await _dbService.getWeightLogs();
+    notifyListeners();
+  }
+
+  Future<void> logWeight(double newWeight, DateTime date) async {
+    // Profildeki güncel kiloyu da değiştir
+    _weight = newWeight;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('weight', newWeight);
+    
+    // DB'ye logla
+    await _dbService.saveWeight(newWeight, date);
+    
+    // Geçmişi RAM'de tazele
+    await loadWeightLogs();
+    
+    // TODO: Apple Health / Google Fit aktarımı yapılabilir
     notifyListeners();
   }
 
@@ -271,6 +296,10 @@ class AppProvider extends ChangeNotifier {
     _weight = weight;
     _gender = gender;
     _goal = goal;
+    
+    // Ayrıca bu değişikliği (veya mevcut kiloyu) DB'de Kilo Logu olarak sakla
+    await logWeight(weight, DateTime.now());
+    
     notifyListeners();
   }
 
@@ -319,7 +348,7 @@ class AppProvider extends ChangeNotifier {
 
   // Freemium — günlük 5 ücretsiz tarama
   static const int freeDailyLimit = 5;
-  bool _isPremium = false;
+  final bool _isPremium = false;
   bool get isPremium => _isPremium;
 
   Future<int> _getTodayScanCount() async {
@@ -445,6 +474,15 @@ class AppProvider extends ChangeNotifier {
   /// Loads the last 7 days of aggregated nutrition data from the database.
   Future<void> loadWeeklyStats() async {
     _weeklyStats = await _dbService.getWeeklyStats();
+    notifyListeners();
+  }
+
+  List<Map<String, dynamic>> _monthlyStats = [];
+  List<Map<String, dynamic>> get monthlyStats => _monthlyStats;
+
+  /// Loads the last 30 days of aggregated nutrition data from the database.
+  Future<void> loadMonthlyStats() async {
+    _monthlyStats = await _dbService.getMonthlyStats();
     notifyListeners();
   }
 }
