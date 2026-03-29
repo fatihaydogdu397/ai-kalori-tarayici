@@ -20,19 +20,19 @@ class FoodApiService {
       final product = json['product'] as Map<String, dynamic>;
       final n = (product['nutriments'] as Map<String, dynamic>?) ?? {};
 
-      double _d(String key) => (n[key] as num?)?.toDouble() ?? 0.0;
+      double d(String key) => (n[key] as num?)?.toDouble() ?? 0.0;
 
       // Per 100g değerlerini kullan, serving_size varsa onu dönüştür
       final servingStr = (product['serving_size'] as String?) ?? '';
       final servingG = _parseGrams(servingStr) ?? 100.0;
       final factor = servingG / 100.0;
 
-      final cal  = (_d('energy-kcal_100g') > 0 ? _d('energy-kcal_100g') : _d('energy_100g') / 4.184) * factor;
-      final prot = _d('proteins_100g') * factor;
-      final carb = _d('carbohydrates_100g') * factor;
-      final fat  = _d('fat_100g') * factor;
-      final fib  = _d('fiber_100g') * factor;
-      final sug  = _d('sugars_100g') * factor;
+      final cal  = (d('energy-kcal_100g') > 0 ? d('energy-kcal_100g') : d('energy_100g') / 4.184) * factor;
+      final prot = d('proteins_100g') * factor;
+      final carb = d('carbohydrates_100g') * factor;
+      final fat  = d('fat_100g') * factor;
+      final fib  = d('fiber_100g') * factor;
+      final sug  = d('sugars_100g') * factor;
 
       final name = (product['product_name'] as String?)?.trim() ?? 'Ürün ($barcode)';
 

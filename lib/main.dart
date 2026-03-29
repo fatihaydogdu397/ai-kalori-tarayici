@@ -11,6 +11,7 @@ import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'dev/mock_data.dart';
 import 'services/notification_service.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,32 +45,39 @@ class EatiqApp extends StatelessWidget {
           SystemChrome.setSystemUIOverlayStyle(
             SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark),
           );
-          return MaterialApp(
-            title: 'eatiq',
-            debugShowCheckedModeBanner: false,
-            themeMode: provider.themeMode,
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            locale: provider.locale,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('tr'),
-              Locale('en'),
-              Locale('fr'),
-              Locale('es'),
-              Locale('de'),
-              Locale('ar'),
-              Locale('pt'),
-              Locale('it'),
-              Locale('ru'),
-              Locale('ka'),
-            ],
-            home: const SplashScreen(),
+          return ScreenUtilInit(
+            designSize: const Size(390, 844),
+            minTextAdapt: true,
+            splitScreenMode: true,
+            builder: (context, child) {
+              return MaterialApp(
+                title: 'eatiq',
+                debugShowCheckedModeBanner: false,
+                themeMode: provider.themeMode,
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                locale: provider.locale,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('tr'),
+                  Locale('en'),
+                  Locale('fr'),
+                  Locale('es'),
+                  Locale('de'),
+                  Locale('ar'),
+                  Locale('pt'),
+                  Locale('it'),
+                  Locale('ru'),
+                  Locale('ka'),
+                ],
+                home: const SplashScreen(),
+              );
+            },
           );
         },
       ),

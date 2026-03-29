@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class AppTypography {
+  static TextStyle get displayLarge => TextStyle(fontSize: 32.sp, fontWeight: FontWeight.w800, height: 1.2);
+  static TextStyle get headlineLarge => TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, height: 1.2);
+  static TextStyle get titleLarge => TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800);
+  static TextStyle get titleMedium => TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700);
+  static TextStyle get bodyLarge => TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600);
+  static TextStyle get bodyMedium => TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500);
+  static TextStyle get bodySmall => TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500);
+  static TextStyle get labelSmall => TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600);
+}
 
 class AppColors {
   // Core
@@ -35,7 +47,7 @@ class AppColors {
   static const lightBorder = Color(0xFFE8E6F5);
   static const lightSurface = Color(0xFFEEEDF8);
   static const lightText = Color(0xFF0F0F14);
-  static const lightTextMuted = Color(0xFFAAAAABC);
+  static const lightTextMuted = Color(0xffaaaaabc);
   static const lightTextSecondary = Color(0xFF9999AA);
 
   // Macro card backgrounds light
@@ -87,9 +99,9 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.lime,
           foregroundColor: AppColors.void_,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
         ),
       ),
     );
@@ -129,9 +141,9 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.void_,
           foregroundColor: AppColors.lime,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
         ),
       ),
     );

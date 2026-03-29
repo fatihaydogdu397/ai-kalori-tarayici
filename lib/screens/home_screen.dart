@@ -13,6 +13,7 @@ import 'history_screen.dart';
 import 'manual_entry_screen.dart';
 import 'barcode_scanner_screen.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,22 +49,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result == null || !mounted) return;
 
     final provider = context.read<AppProvider>();
-    await provider.analyzeImage(
-      picked.path,
-      portionGrams: result.grams,
-      cooking: result.cooking,
-    );
+    await provider.analyzeImage(picked.path, portionGrams: result.grams, cooking: result.cooking);
 
     if (!mounted) return;
     if (provider.state == AnalysisState.success && provider.currentAnalysis != null) {
       final retry = await Navigator.push<bool>(
         context,
-        MaterialPageRoute(
-          builder: (_) => ResultScreen(
-            analysis: provider.currentAnalysis!,
-            allowRetry: true,
-          ),
-        ),
+        MaterialPageRoute(builder: (_) => ResultScreen(analysis: provider.currentAnalysis!, allowRetry: true)),
       );
       provider.resetState();
       if (retry == true && mounted) {
@@ -73,10 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (provider.errorMessage == 'limit_reached') {
         _showPaywall();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('${AppLocalizations.of(context).errorGeneric}: ${provider.errorMessage}'),
-          backgroundColor: AppColors.coral,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${AppLocalizations.of(context).errorGeneric}: ${provider.errorMessage}'), backgroundColor: AppColors.coral),
+        );
       }
     }
   }
@@ -421,10 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               width: 100,
               height: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
             ),
           ),
           const SizedBox(height: 24),
@@ -484,11 +472,11 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.only(top: 8, bottom: 4),
           child: Row(
             children: [
-              Text(icon, style: const TextStyle(fontSize: 12)),
-              const SizedBox(width: 5),
+              Text(icon, style: TextStyle(fontSize: 16.sp)),
+              SizedBox(width: 6.w),
               Text(
                 label.toUpperCase(),
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: textMuted, letterSpacing: 0.5),
+                style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w700, color: textMuted, letterSpacing: 1),
               ),
             ],
           ),
@@ -516,7 +504,20 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context, provider, _) {
         final now = DateTime.now();
         final days = [l.monday, l.tuesday, l.wednesday, l.thursday, l.friday, l.saturday, l.sunday];
-        final months = [l.month01, l.month02, l.month03, l.month04, l.month05, l.month06, l.month07, l.month08, l.month09, l.month10, l.month11, l.month12];
+        final months = [
+          l.month01,
+          l.month02,
+          l.month03,
+          l.month04,
+          l.month05,
+          l.month06,
+          l.month07,
+          l.month08,
+          l.month09,
+          l.month10,
+          l.month11,
+          l.month12,
+        ];
         final dateStr = '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
 
         final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
@@ -599,17 +600,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Kalori kartı
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: EdgeInsets.all(14.w),
                       decoration: BoxDecoration(
                         color: cardBg,
-                        borderRadius: BorderRadius.circular(14),
+                        borderRadius: BorderRadius.circular(14.r),
                         border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
                       ),
                       child: Row(
                         children: [
                           SizedBox(
-                            width: 80,
-                            height: 80,
+                            width: 80.w,
+                            height: 80.w,
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
@@ -633,12 +634,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       calories.toStringAsFixed(0),
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: textPrimary, height: 1.1),
+                                      style: AppTypography.titleMedium.copyWith(color: textPrimary, fontWeight: FontWeight.w800),
                                     ),
                                     Text(
                                       'kcal',
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 10, color: textMuted),
+                                      style: AppTypography.labelSmall.copyWith(color: textMuted),
                                     ),
                                   ],
                                 ),
@@ -650,8 +651,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(l.caloriestoday, style: TextStyle(fontSize: 11, color: textMuted)),
-                                const SizedBox(height: 3),
+                                Text(l.caloriestoday, style: AppTypography.bodySmall.copyWith(color: textMuted)),
+                                SizedBox(height: 3.h),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.baseline,
                                   textBaseline: TextBaseline.alphabetic,
@@ -662,19 +663,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                         alignment: Alignment.centerLeft,
                                         child: Text(
                                           calories.toStringAsFixed(0),
-                                          style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.w800,
-                                            color: isDark ? AppColors.lime : AppColors.limeDeep,
-                                            height: 1,
-                                          ),
+                                          style: AppTypography.displayLarge.copyWith(color: isDark ? AppColors.lime : AppColors.limeDeep),
                                         ),
                                       ),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       '/ ${goal.toStringAsFixed(0)}',
-                                      style: TextStyle(fontSize: 11, color: textMuted),
+                                      style: AppTypography.bodySmall.copyWith(color: textMuted),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
@@ -851,8 +847,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 16),
                     ],
 
-                    Text(l.todaysMeals, style: TextStyle(fontSize: 11, color: textMuted)),
-                    const SizedBox(height: 8),
+                    Text(l.todaysMeals, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+                    SizedBox(height: 12.h),
 
                     if (provider.history.isEmpty)
                       Container(
@@ -943,9 +939,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 3),
                     Text(
                       items[i].$2,
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w400,
+                      style: AppTypography.labelSmall.copyWith(
+                        fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
                         color: isCam ? (isDark ? AppColors.darkTextMuted : const Color(0xFFBBBBCC)) : (isActive ? labelActive : iconInactive),
                       ),
                     ),
@@ -971,10 +966,10 @@ class _MacroPill extends StatelessWidget {
     final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 9),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 6.w),
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: valueColor.withOpacity(0.2), width: 1),
         ),
         child: Column(
@@ -983,13 +978,13 @@ class _MacroPill extends StatelessWidget {
               fit: BoxFit.scaleDown,
               child: Text(
                 value,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: valueColor, height: 1.1),
+                style: AppTypography.titleMedium.copyWith(color: valueColor, fontWeight: FontWeight.w800),
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: 4.h),
             Text(
               label,
-              style: TextStyle(fontSize: 10, color: textMuted),
+              style: AppTypography.bodySmall.copyWith(color: textMuted),
               overflow: TextOverflow.ellipsis,
             ),
           ],
@@ -1026,10 +1021,12 @@ class _MealRow extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(8)),
-              child: Center(child: Text(_categoryEmoji(analysis.mealCategory), style: const TextStyle(fontSize: 15))),
+              width: 40.w,
+              height: 40.w,
+              decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(10.r)),
+              child: Center(
+                child: Text(_categoryEmoji(analysis.mealCategory), style: TextStyle(fontSize: 20.sp)),
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -1042,16 +1039,14 @@ class _MealRow extends StatelessWidget {
                         : analysis.summary.isNotEmpty
                         ? analysis.summary
                         : 'Öğün',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textPrimary),
+                    style: AppTypography.bodyLarge.copyWith(color: textPrimary, fontWeight: FontWeight.w700),
                   ),
-                  Text(_timeAgo(analysis.analyzedAt), style: TextStyle(fontSize: 10, color: textMuted)),
+                  SizedBox(height: 2.h),
+                  Text(_timeAgo(analysis.analyzedAt), style: AppTypography.bodySmall.copyWith(color: textMuted)),
                 ],
               ),
             ),
-            Text(
-              analysis.totalCalories.toStringAsFixed(0),
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: calColor),
-            ),
+            Text(analysis.totalCalories.toStringAsFixed(0), style: AppTypography.titleLarge.copyWith(color: calColor)),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: onFavorite,

@@ -355,7 +355,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               Icon(Icons.monitor_weight_rounded, size: 48, color: textMuted.withOpacity(0.5)),
               SizedBox(height: 16.h),
               Text(
-                'Henüz kilo geçmişi yok.\nProfil sekmesindeki düzenleme alanından kilonuzu kaydedin.',
+                '${l.noWeightData}\n${l.noWeightDataHint}',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: textMuted, fontSize: 13.sp),
               ),

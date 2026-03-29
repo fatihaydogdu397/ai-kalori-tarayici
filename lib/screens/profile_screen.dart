@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
 import '../generated/app_localizations.dart';
 import 'settings_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -35,8 +36,8 @@ class ProfileScreen extends StatelessWidget {
                 backgroundColor: bg,
                 surfaceTintColor: Colors.transparent,
                 elevation: 0,
-                toolbarHeight: 56,
-                title: Text(l.profileTitle, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: textPrimary)),
+                toolbarHeight: 56.h,
+                title: Text(l.profileTitle, style: AppTypography.titleLarge.copyWith(color: textPrimary)),
                 actions: [
                   GestureDetector(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
@@ -53,32 +54,31 @@ class ProfileScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                        // 1. Profil — Avatar + isim
                         Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14.r), border: border),
                           child: Row(
                             children: [
                               Container(
-                                width: 52,
-                                height: 52,
+                                width: 52.w,
+                                height: 52.w,
                                 decoration: const BoxDecoration(color: AppColors.violet, shape: BoxShape.circle),
                                 child: Center(
                                   child: Text(
                                     initial,
-                                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.void_),
+                                    style: AppTypography.titleLarge.copyWith(color: AppColors.void_),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 14),
+                              SizedBox(width: 14.w),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textPrimary)),
+                                    Text(name, style: AppTypography.bodyLarge.copyWith(color: textPrimary, fontWeight: FontWeight.w700)),
                                     Text(
                                       '${goal.toStringAsFixed(0)} kcal ${l.calorieGoal.toLowerCase()}',
-                                      style: TextStyle(fontSize: 12, color: textMuted),
+                                      style: AppTypography.bodySmall.copyWith(color: textMuted),
                                     ),
                                   ],
                                 ),
@@ -134,9 +134,9 @@ class ProfileScreen extends StatelessWidget {
                         // 3. Vücut Analizi
                         if (provider.weight > 0)
                           _BodyStatsCard(provider: provider, isDark: isDark, cardBg: cardBg, border: border, textPrimary: textPrimary, textMuted: textMuted),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
 
-                        const SizedBox(height: 100),
+                        SizedBox(height: 100.h),
                       ],
                     ),
                   ),
@@ -573,17 +573,16 @@ class _BodyStatsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Başlık satırı
           Row(
             children: [
-              Text(l.bodyAnalysis, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: textPrimary)),
+              Text(l.bodyAnalysis, style: AppTypography.bodyMedium.copyWith(color: textPrimary, fontWeight: FontWeight.w800)),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: accentMuted, borderRadius: BorderRadius.circular(8)),
-                child: Text(_goalLabel(provider.goal, l), style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: accent)),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                decoration: BoxDecoration(color: accentMuted, borderRadius: BorderRadius.circular(8.r)),
+                child: Text(_goalLabel(provider.goal, l), style: AppTypography.bodySmall.copyWith(color: accent, fontWeight: FontWeight.w700)),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 10.w),
               GestureDetector(
                 onTap: () => _showEditSheet(context, provider, isDark),
                 child: Icon(Icons.edit_rounded, size: 16, color: textMuted),
@@ -594,26 +593,26 @@ class _BodyStatsCard extends StatelessWidget {
 
           // BMI kartı
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             decoration: BoxDecoration(
               color: bmiColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: bmiColor.withOpacity(0.25), width: 1),
             ),
             child: Row(
               children: [
-                Text(_bmiEmoji(bmi), style: const TextStyle(fontSize: 28)),
-                const SizedBox(width: 12),
+                Text(_bmiEmoji(bmi), style: TextStyle(fontSize: 32.sp)),
+                SizedBox(width: 14.w),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       _bmiLabel(bmi, l),
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: bmiColor),
+                      style: AppTypography.bodyLarge.copyWith(color: bmiColor, fontWeight: FontWeight.w800),
                     ),
                     Text(
                       'BMI: ${bmi.toStringAsFixed(1)}',
-                      style: TextStyle(fontSize: 12, color: bmiColor.withOpacity(0.75)),
+                      style: AppTypography.bodySmall.copyWith(color: bmiColor.withOpacity(0.75)),
                     ),
                   ],
                 ),

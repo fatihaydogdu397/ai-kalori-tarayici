@@ -582,4 +582,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get barcodeNotFound => 'Ürün bulunamadı. Manuel giriş deneyin.';
+
+  @override
+  String get noWeightData => 'Henüz kilo geçmişi yok.';
+
+  @override
+  String get noWeightDataHint =>
+      'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
 }

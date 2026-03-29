@@ -1217,6 +1217,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Ürün bulunamadı. Manuel giriş deneyin.'**
   String get barcodeNotFound;
+
+  /// No description provided for @noWeightData.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz kilo geçmişi yok.'**
+  String get noWeightData;
+
+  /// No description provided for @noWeightDataHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.'**
+  String get noWeightDataHint;
 }
 
 class _AppLocalizationsDelegate

@@ -116,6 +116,19 @@
 
 ---
 
+### #11 Uygulama Geneli Responsive Mimari (Text & Layout)
+**OWNER: Gemini**
+**STATUS: ✅ Tamamlandı**
+**Öncelik: 🔴 Yüksek (UI Kararlılığı)**
+**Dosyalar:**
+- `pubspec.yaml` → `flutter_screenutil` veya custom responsive yapı eklenecek
+- `lib/main.dart` → Responsive wrapper (ScreenUtilInit) eklenecek
+- Tüm ekranlar ve `app_theme.dart` → Hardcode `fontSize` ve `EdgeInsets` değerleri orantısal ölçeklendirme (.sp, .h) ile değiştirilecek.
+**Plan:**
+- Fatih'in iPhone 16 Pro Max ve küçük ekranlarda yazı/arayüz parçalarının mükemmel orantıyla büyümesini/küçülmesini sağlamak.
+
+---
+
 ## 📋 İş Bölümü
 
 | # | Görev | Kim | Durum |
@@ -128,8 +141,9 @@
 | 6 | App Store Screenshots + Metadata (TR+EN) | **Gemini** | ⏳ |
 | 7 | Günlük AI Bildirimi | **Claude** | ⏳ |
 | 8 | Android kamera + CAMERA izni (AndroidManifest) | **Gemini** | ⏳ |
-| 9 | Android Widget (home_widget Android tarafı) | **Gemini** | ⏳ |
+| 9 | Android Widget (home_widget Android tarafı) | **Gemini** | ✅ Tamamlandı |
 | 10 | ARB çevirileri — yeni key'ler eklendikçe 10 dile | **Gemini** | 🔄 Sürekli |
+| 11 | Responsive Yazı ve Layout Mimarisi | **Gemini** | ⏳ |
 
 ---
 

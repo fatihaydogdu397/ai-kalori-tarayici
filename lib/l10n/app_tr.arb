@@ -256,5 +256,7 @@
   "barcode": "Barkod",
   "barcodeHint": "Barkodu çerçeve içine hizalayın",
   "barcodeSearching": "Ürün aranıyor...",
-  "barcodeNotFound": "Ürün bulunamadı. Manuel giriş deneyin."
+  "barcodeNotFound": "Ürün bulunamadı. Manuel giriş deneyin.",
+  "noWeightData": "Henüz kilo geçmişi yok.",
+  "noWeightDataHint": "Profil sekmesindeki düzenleme alanından kilonuzu kaydedin."
 }
