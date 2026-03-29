@@ -124,17 +124,25 @@
 | 2 | Analiz Sonucu Düzenleme | **Claude** | ⏳ |
 | 3 | Kilo Takibi | **Claude** | ⏳ |
 | 4 | RevenueCat App Store | **Fatih** | ⏳ |
-| 5 | kUseMockData = false | **Claude** | ⏳ |
-| 6 | App Store Screenshots | **Gemini** | ⏳ |
+| 5 | kUseMockData = false | **Gemini** | ⏳ |
+| 6 | App Store Screenshots + Metadata (TR+EN) | **Gemini** | ⏳ |
 | 7 | Günlük AI Bildirimi | **Claude** | ⏳ |
+| 8 | Android kamera + CAMERA izni (AndroidManifest) | **Gemini** | ⏳ |
+| 9 | Android Widget (home_widget Android tarafı) | **Gemini** | ⏳ |
+| 10 | ARB çevirileri — yeni key'ler eklendikçe 10 dile | **Gemini** | 🔄 Sürekli |
 
 ---
 
 ## 🤝 İş Bölümü Prensibi
 | Claude | Gemini |
 |--------|--------|
-| Flutter/Dart logic | Screenshot & asset üretimi |
-| API entegrasyonları | App Store metadata metni |
-| Grafikler, state management | ARB çevirileri |
-| Bildirim servisi | Android tarafı |
-| Kilo takibi, DB | Icon/asset işleri |
+| Flutter/Dart karmaşık logic | Android native tarafı |
+| API entegrasyonları | AndroidManifest, Android widget |
+| Grafikler + state management | App Store screenshots + metadata |
+| Bildirim servisi (iOS) | ARB çevirileri (10 dil) |
+| Kilo takibi + DB | kUseMockData = false |
+| Analiz düzenleme | Asset / icon işleri |
+
+## 📌 Gemini İçin Kural
+Claude yeni bir özellik ekleyince yeni ARB key'leri `lib/l10n/app_tr.arb`'a yazar.
+Gemini bu key'leri diğer 9 dile (`app_en`, `app_de`, `app_fr`, `app_es`, `app_ar`, `app_pt`, `app_ru`, `app_it`, `app_ka`) çevirir ve commit + push atar.
