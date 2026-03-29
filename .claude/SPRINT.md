@@ -11,78 +11,130 @@
 
 ---
 
-## ✅ Tamamlanan (Sprint 1–4 + L10n + Apple Health)
+## ✅ Tamamlanan (Sprint 1–5)
 - Sprint 1–4: Onboarding, tema, RevenueCat, su, profil, öğün, streak, favoriler, hatırlatıcılar, settings
 - L10n: 10 dil × 187+ key
 - Apple Health: health_service.dart, Settings toggle, HealthKit izinleri
+- Barkod Tarayıcı: mobile_scanner + Open Food Facts API
+- iOS Widget: SwiftUI widget, containerBackground fix
+- Multi-provider AI: GPT-4o primary → Gemini 2.5 Flash → Claude fallback
+- Porsiyon picker: gram slider + pişirme yöntemi → AI prompt'a eklendi
+- flutter_dotenv: .env'den runtime key okuma
 
 ---
 
-## 🚧 Sprint 5 — Aktif
+## 🚧 Sprint 6 — Aktif
 
-### #4 Barkod Tarayıcı
+### #1 Haftalık/Aylık Progress Grafikleri
 **OWNER: Claude**
-**STATUS: 🔄 In Progress**
+**STATUS: ⏳ Bekliyor**
+**Öncelik: 🔴 Yüksek**
 **Dosyalar:**
-- `pubspec.yaml` → mobile_scanner paketi
-- `lib/services/food_api_service.dart` → Open Food Facts API (YENİ)
-- `lib/screens/barcode_scanner_screen.dart` → kamera + tarama UI (YENİ)
-- `lib/screens/home_screen.dart` → scan sheet'e Barkod butonu
-- `lib/l10n/app_*.arb` → barkod key'leri (10 dil)
-- `ios/Runner/Info.plist` → kamera izni zaten var ✓
-
+- `lib/screens/progress_screen.dart` → mevcut günlük → haftalık/aylık ekle
+- `lib/services/database_service.dart` → haftalık/aylık sorgu metodları
+- `pubspec.yaml` → fl_chart paketi
 **Plan:**
-1. `mobile_scanner` paketi ekle
-2. Open Food Facts API servisi yaz
-3. BarcodeScanner ekranı yaz (kamera viewfinder, tarama animasyonu)
-4. Tarama sonucu → FoodAnalysis'e çevir → ResultScreen'e git
-5. Scan sheet'e barkod butonu ekle
-6. ARB key'leri ekle
+- Haftalık: 7 günlük çubuk grafik (kalori, protein, karbonhidrat, yağ)
+- Aylık: 30 günlük trend çizgisi
+- Tab switcher: Günlük / Haftalık / Aylık
 
 ---
 
-### #5 iOS Widget
-**OWNER: Gemini**
-**STATUS: ⏳ Bekliyor (#4 bittikten sonra)**
+### #2 Analiz Sonucu Düzenleme
+**OWNER: Claude**
+**STATUS: ⏳ Bekliyor**
+**Öncelik: 🔴 Yüksek**
 **Dosyalar:**
-- `pubspec.yaml` → home_widget paketi
-- `ios/EatiqWidget/` → Swift Widget Extension (YENİ)
-- `lib/services/widget_service.dart` → veri güncelleme (YENİ)
-- `app_provider.dart` → widget güncelleme çağrıları
-- Xcode: Widget Extension target eklenmesi gerekiyor (manuel)
-
-**Notlar:**
-- iOS 14+ gerekli (Podfile'da zaten 14.0 ✓)
-- App Group: `group.com.ai.eatiq` kullanılacak
-- Widget gösterecekler: bugünkü kalori, su, streak
-- Fatih Xcode'da Widget Extension target eklemeli
+- `lib/screens/result_screen.dart` → gram slider + kalori canlı güncelleme
+- `lib/models/food_analysis.dart` → porsiyon değişince makro hesaplama
+**Plan:**
+- ResultScreen'de her yemek satırında gram düzenlenebilir
+- Gram değişince kalori/protein/karb/yağ orantılı güncellenir
+- "Kaydet" ile DB'ye yazar
 
 ---
 
-## ⏳ Backlog
-- RevenueCat App Store Connect setup
-- `kUseMockData = false` yap (test bittikten sonra)
-- Android barkod izni (CAMERA) AndroidManifest.xml
+### #3 Kilo Takibi
+**OWNER: Claude**
+**STATUS: ⏳ Bekliyor**
+**Öncelik: 🟡 Orta**
+**Dosyalar:**
+- `lib/screens/profile_screen.dart` → kilo giriş butonu
+- `lib/services/database_service.dart` → weight_logs tablosu
+- `lib/screens/progress_screen.dart` → kilo grafik sekmesi
+**Plan:**
+- Günlük kilo girişi (profile veya progress ekranından)
+- Zaman serisi grafik (hedef kilo çizgisi + gerçek kilo)
+- Apple Health'e de yaz
 
 ---
 
-## 📋 Dosya Sahipliği (Conflict önleme)
-| Dosya | Şu an kim kullanıyor |
-|-------|---------------------|
-| `lib/services/food_api_service.dart` | Claude |
-| `lib/screens/barcode_scanner_screen.dart` | Claude |
-| `lib/screens/home_screen.dart` | Claude |
-| `pubspec.yaml` | Claude (barkod bitince serbest) |
-| `ios/EatiqWidget/` | Gemini |
-| `lib/services/widget_service.dart` | Gemini |
+### #4 RevenueCat App Store Connect Kurulum
+**OWNER: Fatih (manuel)**
+**STATUS: ⏳ Bekliyor (App Store hesabı gerekli)**
+**Öncelik: 🟡 Orta**
+**Yapılacaklar:**
+- App Store Connect'te uygulama oluştur
+- In-App Purchase ürünleri tanımla (aylık/yıllık)
+- RevenueCat dashboard'da App Store bağla
+- `RC_IOS_KEY` .env'e ekle
+
+---
+
+### #5 kUseMockData = false
+**OWNER: Claude**
+**STATUS: ⏳ Bekliyor (RevenueCat kurulumu sonrası)**
+**Öncelik: 🟡 Orta**
+**Dosyalar:**
+- `lib/dev/mock_data.dart` → `kUseMockData = false`
+
+---
+
+### #6 App Store Screenshots + Metadata
+**OWNER: Gemini**
+**STATUS: ⏳ Bekliyor (uygulama kararlı olduktan sonra)**
+**Öncelik: 🟡 Orta**
+**Yapılacaklar:**
+- 6.7" ve 5.5" screenshot'lar (iPhone 15 Pro Max + iPhone 8 Plus)
+- App Store açıklaması (TR + EN)
+- Anahtar kelimeler (keywords)
+- Gizlilik politikası URL'i
+
+---
+
+### #7 Günlük AI Beslenme Özeti (Push Notification)
+**OWNER: Claude**
+**STATUS: ⏳ Bekliyor**
+**Öncelik: 🟢 Düşük**
+**Dosyalar:**
+- `lib/services/notification_service.dart` → akşam scheduled notification
+- `lib/services/ai_service.dart` → günlük özet prompt
+**Plan:**
+- Her akşam 20:00 sabit bildirim: "Bugün X kcal aldın, Y kcal kaldı"
+- Haftalık özet (Pazar): AI ile trend analizi
+- Kullanıcı saati settings'ten değiştirebilir
+
+---
+
+## 📋 İş Bölümü
+
+| # | Görev | Kim | Durum |
+|---|-------|-----|-------|
+| 1 | Haftalık/Aylık Grafikler | **Claude** | ⏳ |
+| 2 | Analiz Sonucu Düzenleme | **Claude** | ⏳ |
+| 3 | Kilo Takibi | **Claude** | ⏳ |
+| 4 | RevenueCat App Store | **Fatih** | ⏳ |
+| 5 | kUseMockData = false | **Claude** | ⏳ |
+| 6 | App Store Screenshots | **Gemini** | ⏳ |
+| 7 | Günlük AI Bildirimi | **Claude** | ⏳ |
 
 ---
 
 ## 🤝 İş Bölümü Prensibi
 | Claude | Gemini |
 |--------|--------|
-| Kompleks Flutter/Dart logic | Swift/native kod |
-| API entegrasyonları | Android tarafı |
-| State management (Provider) | ARB çevirileri |
-| Servis mimarisi | Icon/asset işleri |
-| iOS HealthKit, Scanner | iOS Widget Swift kodu |
+| Flutter/Dart logic | Screenshot & asset üretimi |
+| API entegrasyonları | App Store metadata metni |
+| Grafikler, state management | ARB çevirileri |
+| Bildirim servisi | Android tarafı |
+| Kilo takibi, DB | Icon/asset işleri |
