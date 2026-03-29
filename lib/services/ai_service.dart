@@ -33,8 +33,8 @@ MUTLAKA aşağıdaki JSON formatında yanıt ver (başka hiçbir metin ekleme):
 {
   "foods": [
     {
-      "name": "Food Name in English",
-      "name_tr": "Yemeğin Türkçe Adı",
+      "name": "Grilled Chicken",
+      "name_tr": "Izgara Tavuk",
       "portion": 150,
       "portion_unit": "g",
       "nutrients": {
@@ -61,8 +61,12 @@ MUTLAKA aşağıdaki JSON formatında yanıt ver (başka hiçbir metin ekleme):
   "advice": "Beslenme önerisi Türkçe (2-3 cümle)"
 }
 
-health_score değerleri: "Mükemmel", "İyi", "Orta", "Dikkatli"
-Eğer yemek göremiyorsan calories: 0 yaz ve summary'de açıkla.
+KURALLAR:
+- name: İngilizce, kısa yemek adı — max 3 kelime (örn: "Grilled Chicken", "Caesar Salad", "Chocolate Cake")
+- name_tr: Türkçe, kısa yemek adı — max 3 kelime (örn: "Izgara Tavuk", "Sezar Salata", "Çikolatalı Kek"). İçerik açıklaması YAZMA.
+- Tabakta birden fazla yemek varsa her birini ayrı "foods" öğesi olarak yaz
+- health_score değerleri: "Mükemmel", "İyi", "Orta", "Dikkatli"
+- Eğer yemek göremiyorsan calories: 0 yaz ve summary'de açıkla.
 ''';
   }
 
