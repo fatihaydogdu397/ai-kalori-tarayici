@@ -62,8 +62,8 @@ MUTLAKA aşağıdaki JSON formatında yanıt ver (başka hiçbir metin ekleme):
 }
 
 KURALLAR:
-- name: İngilizce, kısa yemek adı — max 3 kelime (örn: "Grilled Chicken", "Caesar Salad", "Chocolate Cake")
-- name_tr: Türkçe, kısa yemek adı — max 3 kelime (örn: "Izgara Tavuk", "Sezar Salata", "Çikolatalı Kek"). İçerik açıklaması YAZMA.
+- name: İngilizce, açıklayıcı yemek adı — max 7-8 kelime (örn: "Grilled Chicken with Rice and Vegetables", "Caesar Salad with Croutons")
+- name_tr: Türkçe, açıklayıcı yemek adı — max 7-8 kelime (örn: "Pirinç Pilav ile Izgara Tavuk", "Krutonlu Sezar Salatası"). Cümle yapısında YAZMA, isim gibi yaz.
 - Tabakta birden fazla yemek varsa her birini ayrı "foods" öğesi olarak yaz
 - health_score değerleri: "Mükemmel", "İyi", "Orta", "Dikkatli"
 - Eğer yemek göremiyorsan calories: 0 yaz ve summary'de açıkla.
