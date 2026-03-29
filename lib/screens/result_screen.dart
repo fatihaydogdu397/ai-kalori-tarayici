@@ -1,15 +1,57 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/food_analysis.dart';
 import '../theme/app_theme.dart';
 import '../generated/app_localizations.dart';
+import '../services/app_provider.dart';
 import 'manual_entry_screen.dart';
 
-class ResultScreen extends StatelessWidget {
+class ResultScreen extends StatefulWidget {
   final FoodAnalysis analysis;
   final bool allowRetry;
 
   const ResultScreen({super.key, required this.analysis, this.allowRetry = false});
+
+  @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+  late FoodAnalysis _currentAnalysis;
+  late double _originalPortion;
+  late double _currentPortion;
+  bool _portionChanged = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentAnalysis = widget.analysis;
+    if (_currentAnalysis.foods.isNotEmpty) {
+      _originalPortion = _currentAnalysis.foods.first.portion;
+      if (_originalPortion <= 0) _originalPortion = 100;
+    } else {
+      _originalPortion = 100;
+    }
+    _currentPortion = _originalPortion;
+  }
+
+  void _onPortionChanged(double newPortion) {
+    setState(() {
+      _currentPortion = newPortion;
+      _portionChanged = true;
+      final scale = _currentPortion / _originalPortion;
+      _currentAnalysis = widget.analysis.copyWithScaled(scale);
+    });
+  }
+
+  Future<void> _saveChanges() async {
+    if (_portionChanged) {
+      // Sadece porsiyon değiştiğinde DB ve Provider update edilsin
+      await context.read<AppProvider>().saveManualEntry(_currentAnalysis);
+    }
+    if (mounted) Navigator.pop(context, false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +68,8 @@ class ResultScreen extends StatelessWidget {
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
     final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
 
-    final food = analysis.foods.isNotEmpty ? analysis.foods.first : null;
-    final total = analysis.totalNutrients;
+    final food = _currentAnalysis.foods.isNotEmpty ? _currentAnalysis.foods.first : null;
+    final total = _currentAnalysis.totalNutrients;
 
     final tagConfigs = [
       (AppColors.lime, isDark ? const Color(0xFF1A2010) : const Color(0xFFEEF5E0), isDark ? const Color(0xFF3A5A20) : const Color(0xFFAACE60)),
@@ -59,7 +101,7 @@ class ResultScreen extends StatelessWidget {
                       final updated = await Navigator.push<bool>(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ManualEntryScreen(existing: analysis),
+                          builder: (_) => ManualEntryScreen(existing: _currentAnalysis),
                         ),
                       );
                       if (updated == true && context.mounted) {
@@ -98,7 +140,7 @@ class ResultScreen extends StatelessWidget {
                     Stack(
                       children: [
                         Hero(
-                          tag: 'food_image_${analysis.id}',
+                          tag: 'food_image_${_currentAnalysis.id}',
                           child: Container(
                             width: double.infinity,
                             height: 160,
@@ -107,8 +149,8 @@ class ResultScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                             clipBehavior: Clip.hardEdge,
-                            child: File(analysis.imagePath).existsSync()
-                                ? Image.file(File(analysis.imagePath), fit: BoxFit.cover)
+                            child: File(_currentAnalysis.imagePath).existsSync()
+                                ? Image.file(File(_currentAnalysis.imagePath), fit: BoxFit.cover)
                                 : Center(child: Icon(Icons.restaurant_rounded, size: 48, color: textMuted)),
                           ),
                         ),
@@ -139,13 +181,13 @@ class ResultScreen extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      food?.nameTr ?? analysis.summary,
+                                      food?.nameTr ?? _currentAnalysis.summary,
                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textPrimary),
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
-                                      '1 porsiyon · ~${food?.portion.toStringAsFixed(0) ?? "—"}${food?.portionUnit ?? "g"}',
-                                      style: TextStyle(fontSize: 11, color: textMuted),
+                                      '~${_currentPortion.toStringAsFixed(0)}${food?.portionUnit ?? "g"}',
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMuted),
                                     ),
                                   ],
                                 ),
@@ -170,15 +212,43 @@ class ResultScreen extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 12),
+                          // PORTION SLIDER
+                          if (food != null) ...[
+                            Row(
+                              children: [
+                                Text('${_currentPortion.toStringAsFixed(0)}${food.portionUnit}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: btnBg)),
+                                Expanded(
+                                  child: SliderTheme(
+                                    data: SliderTheme.of(context).copyWith(
+                                      trackHeight: 4,
+                                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                                      overlayShape: SliderComponentShape.noOverlay,
+                                      activeTrackColor: btnBg,
+                                      inactiveTrackColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                                      thumbColor: btnBg,
+                                    ),
+                                    child: Slider(
+                                      value: _currentPortion,
+                                      min: 10,
+                                      max: _originalPortion > 500 ? _originalPortion * 2 : 1000,
+                                      divisions: 100,
+                                      onChanged: _onPortionChanged,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           Divider(color: divider, height: 1),
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              _MacroCell(value: '${total.protein.toStringAsFixed(0)}g', label: 'protein', color: isDark ? AppColors.violet : AppColors.violetDark),
+                              _MacroCell(value: '${total.protein.toStringAsFixed(0)}g', label: l.protein, color: isDark ? AppColors.violet : AppColors.violetDark),
                               VerticalDivider(color: divider, width: 1),
-                              _MacroCell(value: '${total.carbs.toStringAsFixed(0)}g', label: 'karbonhidrat', color: isDark ? AppColors.amber : AppColors.amberDark),
+                              _MacroCell(value: '${total.carbs.toStringAsFixed(0)}g', label: l.carbs, color: isDark ? AppColors.amber : AppColors.amberDark),
                               VerticalDivider(color: divider, width: 1),
-                              _MacroCell(value: '${total.fat.toStringAsFixed(0)}g', label: 'yağ', color: isDark ? AppColors.coral : AppColors.coralDark),
+                              _MacroCell(value: '${total.fat.toStringAsFixed(0)}g', label: l.fat, color: isDark ? AppColors.coral : AppColors.coralDark),
                             ],
                           ),
                         ],
@@ -219,11 +289,11 @@ class ResultScreen extends StatelessWidget {
                     ],
 
                     // Advice
-                    if (analysis.advice.isNotEmpty)
+                    if (_currentAnalysis.advice.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
-                        child: Text(analysis.advice, style: TextStyle(fontSize: 12, color: textMuted, height: 1.5)),
+                        child: Text(_currentAnalysis.advice, style: TextStyle(fontSize: 12, color: textMuted, height: 1.5)),
                       ),
 
                     const SizedBox(height: 24),
@@ -241,7 +311,7 @@ class ResultScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: _saveChanges,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: btnBg,
                         foregroundColor: btnText,
@@ -249,10 +319,10 @@ class ResultScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                       ),
-                      child: Text(l.addedToLog, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
+                      child: Text(_portionChanged ? l.save : l.addedToLog, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
                     ),
                   ),
-                  if (allowRetry) ...[
+                  if (widget.allowRetry) ...[
                     const SizedBox(height: 8),
                     SizedBox(
                       width: double.infinity,

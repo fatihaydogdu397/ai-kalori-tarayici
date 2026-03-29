@@ -79,6 +79,25 @@ class FoodItem {
     required this.tags,
   });
 
+  FoodItem copyWithScaled(double scale) {
+    return FoodItem(
+      name: name,
+      nameTr: nameTr,
+      portion: portion * scale,
+      portionUnit: portionUnit,
+      nutrients: NutrientInfo(
+        calories: nutrients.calories * scale,
+        protein: nutrients.protein * scale,
+        carbs: nutrients.carbs * scale,
+        fat: nutrients.fat * scale,
+        fiber: nutrients.fiber * scale,
+        sugar: nutrients.sugar * scale,
+      ),
+      healthScore: healthScore,
+      tags: tags,
+    );
+  }
+
   factory FoodItem.fromMap(Map<String, dynamic> map) {
     return FoodItem(
       name: map['name'] ?? '',
@@ -116,12 +135,29 @@ class FoodAnalysis {
     this.isFavorite = false,
   }) : mealCategory = mealCategory ?? MealCategoryX.fromTime(analyzedAt);
 
-  FoodAnalysis copyWith({bool? isFavorite}) => FoodAnalysis(
-    id: id, imagePath: imagePath, foods: foods,
-    totalNutrients: totalNutrients, summary: summary, advice: advice,
+  FoodAnalysis copyWith({bool? isFavorite, List<FoodItem>? foods, NutrientInfo? totalNutrients}) => FoodAnalysis(
+    id: id, imagePath: imagePath, foods: foods ?? this.foods,
+    totalNutrients: totalNutrients ?? this.totalNutrients, summary: summary, advice: advice,
     analyzedAt: analyzedAt, mealCategory: mealCategory,
     isFavorite: isFavorite ?? this.isFavorite,
   );
+
+  FoodAnalysis copyWithScaled(double scaleFactor) {
+    if (scaleFactor == 1.0) return this;
+    final scaledFoods = foods.map((f) => f.copyWithScaled(scaleFactor)).toList();
+    final scaledNutrients = NutrientInfo(
+      calories: totalNutrients.calories * scaleFactor,
+      protein: totalNutrients.protein * scaleFactor,
+      carbs: totalNutrients.carbs * scaleFactor,
+      fat: totalNutrients.fat * scaleFactor,
+      fiber: totalNutrients.fiber * scaleFactor,
+      sugar: totalNutrients.sugar * scaleFactor,
+    );
+    return copyWith(
+      foods: scaledFoods,
+      totalNutrients: scaledNutrients,
+    );
+  }
 
   double get totalCalories => totalNutrients.calories;
 
