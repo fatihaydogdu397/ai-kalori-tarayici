@@ -340,7 +340,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   child: Text(
                     l.save,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
                     ),
@@ -452,7 +452,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Text(
                   l.goProBtn,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w800,
                   ),
@@ -662,7 +662,6 @@ class _LangPicker extends StatelessWidget {
                                 lang.$1.toUpperCase(),
                                 style: TextStyle(
                                   fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
                                   color: textMuted,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -882,11 +881,24 @@ class _BodyStatsCard extends StatelessWidget {
                       children: [
                         Text(
                           l.streakDays(provider.streak),
-                          style: AppTypography.bodyLarge.copyWith(color: isDark ? AppColors.amber : AppColors.amberDark, fontWeight: FontWeight.w800),
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: isDark
+                                ? AppColors.amber
+                                : AppColors.amberDark,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                         Text(
-                          provider.streak == 7 ? l.streakMilestone7 : provider.streak == 30 ? l.streakMilestone30 : l.streakMotivation,
-                          style: AppTypography.bodySmall.copyWith(color: (isDark ? AppColors.amber : AppColors.amberDark).withOpacity(0.8)),
+                          provider.streak == 7
+                              ? l.streakMilestone7
+                              : provider.streak == 30
+                              ? l.streakMilestone30
+                              : l.streakMotivation,
+                          style: AppTypography.bodySmall.copyWith(
+                            color:
+                                (isDark ? AppColors.amber : AppColors.amberDark)
+                                    .withOpacity(0.8),
+                          ),
                         ),
                       ],
                     ),
@@ -1037,6 +1049,9 @@ void _showEditSheet(BuildContext context, AppProvider provider, bool isDark) {
   int age = provider.age > 0 ? provider.age : 25;
   String gender = provider.gender.isNotEmpty ? provider.gender : 'male';
   String goal = provider.goal.isNotEmpty ? provider.goal : 'maintain';
+  String activityLevel = provider.activityLevel.isNotEmpty
+      ? provider.activityLevel
+      : 'active';
 
   final accent = isDark ? AppColors.lime : AppColors.void_;
   final accentFg = isDark ? AppColors.void_ : AppColors.lime;
@@ -1083,7 +1098,15 @@ void _showEditSheet(BuildContext context, AppProvider provider, bool isDark) {
         } else {
           bmr = 10 * weight + 6.25 * height - 5 * age - 161;
         }
-        final tdee = bmr * 1.375;
+        double multiplier = 1.55;
+        if (activityLevel == 'sedentary')
+          multiplier = 1.2;
+        else if (activityLevel == 'light')
+          multiplier = 1.375;
+        else if (activityLevel == 'very_active')
+          multiplier = 1.725;
+
+        final tdee = bmr * multiplier;
         double targetKcal = tdee;
         if (goal == 'lose') targetKcal -= 400;
         if (goal == 'gain') targetKcal += 300;
@@ -1275,6 +1298,62 @@ void _showEditSheet(BuildContext context, AppProvider provider, bool isDark) {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+
+                // Aktivite
+                Text(
+                  l.activityLevel,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w700,
+                    color: textMuted,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _ToggleChip(
+                        label: '🛋️ ${l.activitySedentary}',
+                        selected: activityLevel == 'sedentary',
+                        accent: accent,
+                        textPrimary: textPrimary,
+                        textMuted: textMuted,
+                        onTap: () =>
+                            setState(() => activityLevel = 'sedentary'),
+                      ),
+                      const SizedBox(width: 8),
+                      _ToggleChip(
+                        label: '🚶 ${l.activityLight}',
+                        selected: activityLevel == 'light',
+                        accent: accent,
+                        textPrimary: textPrimary,
+                        textMuted: textMuted,
+                        onTap: () => setState(() => activityLevel = 'light'),
+                      ),
+                      const SizedBox(width: 8),
+                      _ToggleChip(
+                        label: '🏃 ${l.activityActive}',
+                        selected: activityLevel == 'active',
+                        accent: accent,
+                        textPrimary: textPrimary,
+                        textMuted: textMuted,
+                        onTap: () => setState(() => activityLevel = 'active'),
+                      ),
+                      const SizedBox(width: 8),
+                      _ToggleChip(
+                        label: '🏋️ ${l.activityVery}',
+                        selected: activityLevel == 'very_active',
+                        accent: accent,
+                        textPrimary: textPrimary,
+                        textMuted: textMuted,
+                        onTap: () =>
+                            setState(() => activityLevel = 'very_active'),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 // Hesaplanan değerler
@@ -1318,6 +1397,7 @@ void _showEditSheet(BuildContext context, AppProvider provider, bool isDark) {
                         weight: weight,
                         gender: gender,
                         goal: goal,
+                        activityLevel: activityLevel,
                       );
                       if (ctx.mounted) Navigator.pop(ctx);
                     },
@@ -1331,7 +1411,7 @@ void _showEditSheet(BuildContext context, AppProvider provider, bool isDark) {
                     ),
                     child: Text(
                       l.save,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w800,
                       ),
