@@ -558,20 +558,55 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const Spacer(),
                   if (provider.streak > 0)
-                    Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                      decoration: BoxDecoration(color: AppColors.amber.withOpacity(isDark ? 0.2 : 0.15), borderRadius: BorderRadius.circular(20)),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('🔥', style: TextStyle(fontSize: 13)),
-                          const SizedBox(width: 3),
-                          Text(
-                            '${provider.streak}',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: isDark ? AppColors.amber : AppColors.amberDark),
+                    GestureDetector(
+                      onTap: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Text('🔥', style: TextStyle(fontSize: 18)),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        l.streakDays(provider.streak),
+                                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.void_),
+                                      ),
+                                      Text(
+                                        provider.streak == 7 ? l.streakMilestone7 : provider.streak == 30 ? l.streakMilestone30 : l.streakMotivation,
+                                        style: TextStyle(fontSize: 12.sp, color: AppColors.void_.withOpacity(0.8)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: AppColors.lime,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                            duration: const Duration(seconds: 3),
                           ),
-                        ],
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                        decoration: BoxDecoration(color: AppColors.amber.withOpacity(isDark ? 0.2 : 0.15), borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text('🔥', style: TextStyle(fontSize: 13)),
+                            const SizedBox(width: 3),
+                            Text(
+                              '${provider.streak}',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: isDark ? AppColors.amber : AppColors.amberDark),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   GestureDetector(

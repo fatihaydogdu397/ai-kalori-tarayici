@@ -863,6 +863,40 @@ class _BodyStatsCard extends StatelessWidget {
           ),
           const SizedBox(height: 14),
 
+          // Streak Card
+          if (provider.streak > 0) ...[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              decoration: BoxDecoration(
+                color: AppColors.amber.withOpacity(isDark ? 0.1 : 0.05),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: AppColors.amber.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Text('🔥', style: TextStyle(fontSize: 32)),
+                  SizedBox(width: 14.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.streakDays(provider.streak),
+                          style: AppTypography.bodyLarge.copyWith(color: isDark ? AppColors.amber : AppColors.amberDark, fontWeight: FontWeight.w800),
+                        ),
+                        Text(
+                          provider.streak == 7 ? l.streakMilestone7 : provider.streak == 30 ? l.streakMilestone30 : l.streakMotivation,
+                          style: AppTypography.bodySmall.copyWith(color: (isDark ? AppColors.amber : AppColors.amberDark).withOpacity(0.8)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
           // BMI kartı
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),

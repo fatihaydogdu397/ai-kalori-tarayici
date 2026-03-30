@@ -258,5 +258,16 @@
   "barcodeSearching": "პროდუქტი ეძებება...",
   "barcodeNotFound": "პროდუქტი ვერ მოიძებნა. სცადეთ ხელით შეყვანა.",
   "backToHome": "კარგი, მთავარ გვერდზე დაბრუნება",
-  "mealAutoSaved": "კვება ავტომატურად შეინახა."
+  "mealAutoSaved": "კვება ავტომატურად შეინახა.",
+  "streakDays": "{count} დღე მიჯრით",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "შეიყვანეთ ყოველდღე!",
+  "streakMilestone7": "1 კვირა მიჯრით! ყოჩაღ. 🎉",
+  "streakMilestone30": "1 თვე მიჯრით! საოცარია! 🏆"
 }

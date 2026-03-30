@@ -258,5 +258,16 @@
   "barcodeSearching": "Produkt wird gesucht...",
   "barcodeNotFound": "Produkt nicht gefunden. Manuelle Eingabe versuchen.",
   "backToHome": "OK, Zurück zur Startseite",
-  "mealAutoSaved": "Mahlzeit automatisch gespeichert."
+  "mealAutoSaved": "Mahlzeit automatisch gespeichert.",
+  "streakDays": "{count} Tage in Folge",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "Täglich loggen, um den Streak zu halten!",
+  "streakMilestone7": "1 Woche am Stück! Weiter so. 🎉",
+  "streakMilestone30": "1 Monat! Unglaublich! 🏆"
 }

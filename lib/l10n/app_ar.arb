@@ -258,5 +258,16 @@
   "barcodeSearching": "جارٍ البحث عن المنتج...",
   "barcodeNotFound": "المنتج غير موجود. جرّب الإدخال اليدوي.",
   "backToHome": "حسنا، العودة للرئيسية",
-  "mealAutoSaved": "تم حفظ الوجبة تلقائيا."
+  "mealAutoSaved": "تم حفظ الوجبة تلقائيا.",
+  "streakDays": "{count} أيام متتالية",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "سجل كل يوم للحفاظ على سلسلتك!",
+  "streakMilestone7": "أسبوع متواصل! استمر. 🎉",
+  "streakMilestone30": "شهر متواصل! مذهل. 🏆"
 }

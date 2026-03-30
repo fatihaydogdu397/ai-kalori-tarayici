@@ -1241,6 +1241,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.'**
   String get noWeightDataHint;
+
+  /// No description provided for @streakDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} Günlük Seri'**
+  String streakDays(int count);
+
+  /// No description provided for @streakMotivation.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her gün kayıt yaparak serisini koru!'**
+  String get streakMotivation;
+
+  /// No description provided for @streakMilestone7.
+  ///
+  /// In tr, this message translates to:
+  /// **'1 haftalık seri! Harika gidiyorsun. 🎉'**
+  String get streakMilestone7;
+
+  /// No description provided for @streakMilestone30.
+  ///
+  /// In tr, this message translates to:
+  /// **'1 aylık seri! İnanılmaz bir başarı. 🏆'**
+  String get streakMilestone30;
 }
 
 class _AppLocalizationsDelegate

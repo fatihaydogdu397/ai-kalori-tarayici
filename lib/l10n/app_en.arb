@@ -258,5 +258,16 @@
   "barcodeSearching": "Looking up product...",
   "barcodeNotFound": "Product not found. Try manual entry.",
   "backToHome": "OK, Back to Home",
-  "mealAutoSaved": "Meal saved automatically."
+  "mealAutoSaved": "Meal saved automatically.",
+  "streakDays": "{count} Day Streak",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "Log every day to keep your streak!",
+  "streakMilestone7": "1 week streak! Keep it up. 🎉",
+  "streakMilestone30": "1 month streak! Incredible! 🏆"
 }

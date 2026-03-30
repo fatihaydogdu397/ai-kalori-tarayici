@@ -595,4 +595,18 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get noWeightDataHint =>
       'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
+
+  @override
+  String streakDays(int count) {
+    return '$count დღე მიჯრით';
+  }
+
+  @override
+  String get streakMotivation => 'შეიყვანეთ ყოველდღე!';
+
+  @override
+  String get streakMilestone7 => '1 კვირა მიჯრით! ყოჩაღ. 🎉';
+
+  @override
+  String get streakMilestone30 => '1 თვე მიჯრით! საოცარია! 🏆';
 }

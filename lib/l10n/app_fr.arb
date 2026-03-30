@@ -258,5 +258,16 @@
   "barcodeSearching": "Recherche du produit...",
   "barcodeNotFound": "Produit introuvable. Essayez la saisie manuelle.",
   "backToHome": "OK, Retour à l'accueil",
-  "mealAutoSaved": "Repas enregistré automatiquement."
+  "mealAutoSaved": "Repas enregistré automatiquement.",
+  "streakDays": "{count} Jours de série",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "Enregistrez chaque jour !",
+  "streakMilestone7": "1 semaine de série ! Super. 🎉",
+  "streakMilestone30": "1 mois de série ! Incroyable. 🏆"
 }

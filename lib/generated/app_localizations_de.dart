@@ -599,4 +599,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get noWeightDataHint =>
       'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
+
+  @override
+  String streakDays(int count) {
+    return '$count Tage in Folge';
+  }
+
+  @override
+  String get streakMotivation => 'Täglich loggen, um den Streak zu halten!';
+
+  @override
+  String get streakMilestone7 => '1 Woche am Stück! Weiter so. 🎉';
+
+  @override
+  String get streakMilestone30 => '1 Monat! Unglaublich! 🏆';
 }

@@ -258,5 +258,16 @@
   "barcodeSearching": "Ricerca prodotto...",
   "barcodeNotFound": "Prodotto non trovato. Prova inserimento manuale.",
   "backToHome": "OK, Torna alla Home",
-  "mealAutoSaved": "Pasto salvato automaticamente."
+  "mealAutoSaved": "Pasto salvato automaticamente.",
+  "streakDays": "{count} Giorni consecutivi",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "Registra ogni giorno!",
+  "streakMilestone7": "1 settimana di fila! Continua così. 🎉",
+  "streakMilestone30": "1 mese di fila! Incredibile! 🏆"
 }

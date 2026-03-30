@@ -260,5 +260,16 @@
   "barcodeSearching": "Ürün aranıyor...",
   "barcodeNotFound": "Ürün bulunamadı. Manuel giriş deneyin.",
   "noWeightData": "Henüz kilo geçmişi yok.",
-  "noWeightDataHint": "Profil sekmesindeki düzenleme alanından kilonuzu kaydedin."
+  "noWeightDataHint": "Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.",
+  "streakDays": "{count} Günlük Seri",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "Her gün kayıt yaparak serisini koru!",
+  "streakMilestone7": "1 haftalık seri! Harika gidiyorsun. 🎉",
+  "streakMilestone30": "1 aylık seri! İnanılmaz bir başarı. 🏆"
 }

@@ -258,5 +258,16 @@
   "barcodeSearching": "Поиск продукта...",
   "barcodeNotFound": "Продукт не найден. Попробуйте ручной ввод.",
   "backToHome": "ОК, На главную",
-  "mealAutoSaved": "Прием пищи сохранен автоматически."
+  "mealAutoSaved": "Прием пищи сохранен автоматически.",
+  "streakDays": "{count} Дней подряд",
+  "@streakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "streakMotivation": "Добавляйте каждый день!",
+  "streakMilestone7": "1 неделя подряд! Так держать. 🎉",
+  "streakMilestone30": "1 месяц подряд! Потрясающе! 🏆"
 }
