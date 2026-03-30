@@ -274,31 +274,79 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
               ),
               SizedBox(height: 14.h),
-              _MacroBar(
-                label: l.protein,
-                value: pro,
-                color: AppColors.violet,
-                textPrimary: textPrimary,
-                textMuted: textMuted,
-                isDark: isDark,
-              ),
-              SizedBox(height: 10.h),
-              _MacroBar(
-                label: l.carbs,
-                value: car,
-                color: AppColors.amber,
-                textPrimary: textPrimary,
-                textMuted: textMuted,
-                isDark: isDark,
-              ),
-              SizedBox(height: 10.h),
-              _MacroBar(
-                label: l.fat,
-                value: fat,
-                color: AppColors.coral,
-                textPrimary: textPrimary,
-                textMuted: textMuted,
-                isDark: isDark,
+              Builder(
+                builder: (context) {
+                  final total = pro + car + fat;
+                  return Row(
+                    children: [
+                      SizedBox(
+                        width: 100.w,
+                        height: 100.w,
+                        child: total > 0
+                            ? PieChart(
+                                PieChartData(
+                                  sectionsSpace: 2,
+                                  centerSpaceRadius: 30.w,
+                                  sections: [
+                                    PieChartSectionData(
+                                      color: AppColors.violet,
+                                      value: pro,
+                                      title: '',
+                                      radius: 12.w,
+                                    ),
+                                    PieChartSectionData(
+                                      color: AppColors.amber,
+                                      value: car,
+                                      title: '',
+                                      radius: 12.w,
+                                    ),
+                                    PieChartSectionData(
+                                      color: AppColors.coral,
+                                      value: fat,
+                                      title: '',
+                                      radius: 12.w,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : const SizedBox(),
+                      ),
+                      SizedBox(width: 20.w),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            _MacroBar(
+                              label: l.protein,
+                              value: pro,
+                              color: AppColors.violet,
+                              textPrimary: textPrimary,
+                              textMuted: textMuted,
+                              isDark: isDark,
+                            ),
+                            SizedBox(height: 10.h),
+                            _MacroBar(
+                              label: l.carbs,
+                              value: car,
+                              color: AppColors.amber,
+                              textPrimary: textPrimary,
+                              textMuted: textMuted,
+                              isDark: isDark,
+                            ),
+                            SizedBox(height: 10.h),
+                            _MacroBar(
+                              label: l.fat,
+                              value: fat,
+                              color: AppColors.coral,
+                              textPrimary: textPrimary,
+                              textMuted: textMuted,
+                              isDark: isDark,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
           ),
@@ -410,7 +458,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                         dayName,
                                         style: TextStyle(
                                           fontSize: 12.sp,
-                                          fontWeight: FontWeight.w400,
                                           color: textMuted,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -497,43 +544,94 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     style: TextStyle(color: textMuted, fontSize: 12.sp),
                   ),
                 )
-              else ...[
-                _MacroBar(
-                  label: l.protein,
-                  value: weekly.fold<double>(
-                    0,
-                    (s, d) => s + (d['protein'] as num).toDouble(),
-                  ),
-                  color: AppColors.violet,
-                  textPrimary: textPrimary,
-                  textMuted: textMuted,
-                  isDark: isDark,
+              else
+                Builder(
+                  builder: (context) {
+                    final pro = weekly.fold<double>(
+                      0,
+                      (s, d) => s + (d['protein'] as num).toDouble(),
+                    );
+                    final car = weekly.fold<double>(
+                      0,
+                      (s, d) => s + (d['carbs'] as num).toDouble(),
+                    );
+                    final fat = weekly.fold<double>(
+                      0,
+                      (s, d) => s + (d['fat'] as num).toDouble(),
+                    );
+                    final total = pro + car + fat;
+
+                    return Row(
+                      children: [
+                        SizedBox(
+                          width: 100.w,
+                          height: 100.w,
+                          child: total > 0
+                              ? PieChart(
+                                  PieChartData(
+                                    sectionsSpace: 2,
+                                    centerSpaceRadius: 30.w,
+                                    sections: [
+                                      PieChartSectionData(
+                                        color: AppColors.violet,
+                                        value: pro,
+                                        title: '',
+                                        radius: 12.w,
+                                      ),
+                                      PieChartSectionData(
+                                        color: AppColors.amber,
+                                        value: car,
+                                        title: '',
+                                        radius: 12.w,
+                                      ),
+                                      PieChartSectionData(
+                                        color: AppColors.coral,
+                                        value: fat,
+                                        title: '',
+                                        radius: 12.w,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : const SizedBox(),
+                        ),
+                        SizedBox(width: 20.w),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _MacroBar(
+                                label: l.protein,
+                                value: pro,
+                                color: AppColors.violet,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                isDark: isDark,
+                              ),
+                              SizedBox(height: 10.h),
+                              _MacroBar(
+                                label: l.carbs,
+                                value: car,
+                                color: AppColors.amber,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                isDark: isDark,
+                              ),
+                              SizedBox(height: 10.h),
+                              _MacroBar(
+                                label: l.fat,
+                                value: fat,
+                                color: AppColors.coral,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                isDark: isDark,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                SizedBox(height: 10.h),
-                _MacroBar(
-                  label: l.carbs,
-                  value: weekly.fold<double>(
-                    0,
-                    (s, d) => s + (d['carbs'] as num).toDouble(),
-                  ),
-                  color: AppColors.amber,
-                  textPrimary: textPrimary,
-                  textMuted: textMuted,
-                  isDark: isDark,
-                ),
-                SizedBox(height: 10.h),
-                _MacroBar(
-                  label: l.fat,
-                  value: weekly.fold<double>(
-                    0,
-                    (s, d) => s + (d['fat'] as num).toDouble(),
-                  ),
-                  color: AppColors.coral,
-                  textPrimary: textPrimary,
-                  textMuted: textMuted,
-                  isDark: isDark,
-                ),
-              ],
             ],
           ),
         ),
@@ -713,43 +811,94 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     style: TextStyle(color: textMuted, fontSize: 12.sp),
                   ),
                 )
-              else ...[
-                _MacroBar(
-                  label: l.protein,
-                  value: monthly.fold<double>(
-                    0,
-                    (s, d) => s + (d['protein'] as num).toDouble(),
-                  ),
-                  color: AppColors.violet,
-                  textPrimary: textPrimary,
-                  textMuted: textMuted,
-                  isDark: isDark,
+              else
+                Builder(
+                  builder: (context) {
+                    final pro = monthly.fold<double>(
+                      0,
+                      (s, d) => s + (d['protein'] as num).toDouble(),
+                    );
+                    final car = monthly.fold<double>(
+                      0,
+                      (s, d) => s + (d['carbs'] as num).toDouble(),
+                    );
+                    final fat = monthly.fold<double>(
+                      0,
+                      (s, d) => s + (d['fat'] as num).toDouble(),
+                    );
+                    final total = pro + car + fat;
+
+                    return Row(
+                      children: [
+                        SizedBox(
+                          width: 100.w,
+                          height: 100.w,
+                          child: total > 0
+                              ? PieChart(
+                                  PieChartData(
+                                    sectionsSpace: 2,
+                                    centerSpaceRadius: 30.w,
+                                    sections: [
+                                      PieChartSectionData(
+                                        color: AppColors.violet,
+                                        value: pro,
+                                        title: '',
+                                        radius: 12.w,
+                                      ),
+                                      PieChartSectionData(
+                                        color: AppColors.amber,
+                                        value: car,
+                                        title: '',
+                                        radius: 12.w,
+                                      ),
+                                      PieChartSectionData(
+                                        color: AppColors.coral,
+                                        value: fat,
+                                        title: '',
+                                        radius: 12.w,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : const SizedBox(),
+                        ),
+                        SizedBox(width: 20.w),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _MacroBar(
+                                label: l.protein,
+                                value: pro,
+                                color: AppColors.violet,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                isDark: isDark,
+                              ),
+                              SizedBox(height: 10.h),
+                              _MacroBar(
+                                label: l.carbs,
+                                value: car,
+                                color: AppColors.amber,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                isDark: isDark,
+                              ),
+                              SizedBox(height: 10.h),
+                              _MacroBar(
+                                label: l.fat,
+                                value: fat,
+                                color: AppColors.coral,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                isDark: isDark,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                SizedBox(height: 10.h),
-                _MacroBar(
-                  label: l.carbs,
-                  value: monthly.fold<double>(
-                    0,
-                    (s, d) => s + (d['carbs'] as num).toDouble(),
-                  ),
-                  color: AppColors.amber,
-                  textPrimary: textPrimary,
-                  textMuted: textMuted,
-                  isDark: isDark,
-                ),
-                SizedBox(height: 10.h),
-                _MacroBar(
-                  label: l.fat,
-                  value: monthly.fold<double>(
-                    0,
-                    (s, d) => s + (d['fat'] as num).toDouble(),
-                  ),
-                  color: AppColors.coral,
-                  textPrimary: textPrimary,
-                  textMuted: textMuted,
-                  isDark: isDark,
-                ),
-              ],
             ],
           ),
         ),
