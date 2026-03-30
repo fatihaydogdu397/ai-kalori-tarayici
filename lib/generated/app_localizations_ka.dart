@@ -609,4 +609,64 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '1 თვე მიჯრით! საოცარია! 🏆';
+
+  @override
+  String get activityLevel => 'რამდენად აქტიური ხართ?';
+
+  @override
+  String get activityLevelSub => 'აირჩიეთ ყოველდღიური აქტივობის დონე';
+
+  @override
+  String get activitySedentary => 'მჯდომარე';
+
+  @override
+  String get activitySedentarySub => 'მცირე ან ვარჯიშის გარეშე';
+
+  @override
+  String get activityLight => 'მსუბუქი აქტიური';
+
+  @override
+  String get activityLightSub => 'მსუბუქი ვარჯიში 1-3 დღე/კვირა';
+
+  @override
+  String get activityActive => 'აქტიური';
+
+  @override
+  String get activityActiveSub => 'საშუალო ვარჯიში 3-5 დღე/კვირა';
+
+  @override
+  String get activityVery => 'ძალიან აქტიური';
+
+  @override
+  String get activityVerySub => 'მძიმე ვარჯიში 6-7 დღე/კვირა';
+
+  @override
+  String get onboardingSummaryTitle => 'თქვენ მზად ხართ! 🎉';
+
+  @override
+  String get onboardingSummarySub =>
+      'აქ არის თქვენი პერსონალური ყოველდღიური მიზანი.';
+
+  @override
+  String get onboardingRecommend => 'რეკომენდებული ყოველდღიური კალორიები';
+
+  @override
+  String get onboardingGender => 'რა სქესის ხართ?';
+
+  @override
+  String get onboardingGenderSub =>
+      'გამოიყენება მეტაბოლიზმის სიჩქარის გამოსათვლელად.';
+
+  @override
+  String get onboardingAge => 'რამდენი წლის ხართ?';
+
+  @override
+  String get onboardingAgeSub =>
+      'გამოიყენება მეტაბოლიზმის სიჩქარის გამოსათვლელად.';
+
+  @override
+  String get onboardingHeightWeight => 'სიმაღლე და წონა';
+
+  @override
+  String get onboardingHeightWeightSub => 'საჭიროა BMI და კალორიებისთვის.';
 }

@@ -616,4 +616,62 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '1 mois de série ! Incroyable. 🏆';
+
+  @override
+  String get activityLevel => 'Quel est ton niveau d\'activité ?';
+
+  @override
+  String get activityLevelSub => 'Choisis ton niveau d\'activité quotidien';
+
+  @override
+  String get activitySedentary => 'Sédentaire';
+
+  @override
+  String get activitySedentarySub => 'Peu ou pas d\'exercice';
+
+  @override
+  String get activityLight => 'Légèrement actif';
+
+  @override
+  String get activityLightSub => 'Exercice léger 1-3 jours/semaine';
+
+  @override
+  String get activityActive => 'Actif';
+
+  @override
+  String get activityActiveSub => 'Exercice modéré 3-5 jours/semaine';
+
+  @override
+  String get activityVery => 'Très actif';
+
+  @override
+  String get activityVerySub => 'Exercice intense 6-7 jours/semaine';
+
+  @override
+  String get onboardingSummaryTitle => 'C\'est parti ! 🎉';
+
+  @override
+  String get onboardingSummarySub =>
+      'Voici ton objectif quotidien personnalisé.';
+
+  @override
+  String get onboardingRecommend => 'Calories quotidiennes recommandées';
+
+  @override
+  String get onboardingGender => 'Quel est ton sexe ?';
+
+  @override
+  String get onboardingGenderSub => 'Utilisé pour calculer ton métabolisme.';
+
+  @override
+  String get onboardingAge => 'Quel âge as-tu ?';
+
+  @override
+  String get onboardingAgeSub => 'Utilisé pour calculer ton métabolisme.';
+
+  @override
+  String get onboardingHeightWeight => 'Taille et Poids';
+
+  @override
+  String get onboardingHeightWeightSub => 'Requis pour l\'IMC et les calories.';
 }

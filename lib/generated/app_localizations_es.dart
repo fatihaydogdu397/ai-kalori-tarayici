@@ -611,4 +611,62 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '¡1 mes de racha! ¡Increíble! 🏆';
+
+  @override
+  String get activityLevel => '¿Qué tan activo eres?';
+
+  @override
+  String get activityLevelSub => 'Selecciona tu nivel de actividad diaria';
+
+  @override
+  String get activitySedentary => 'Sedentario';
+
+  @override
+  String get activitySedentarySub => 'Poco o ningún ejercicio';
+
+  @override
+  String get activityLight => 'Ligeramente activo';
+
+  @override
+  String get activityLightSub => 'Ejercicio ligero 1-3 días/semana';
+
+  @override
+  String get activityActive => 'Activo';
+
+  @override
+  String get activityActiveSub => 'Ejercicio moderado 3-5 días/semana';
+
+  @override
+  String get activityVery => 'Muy activo';
+
+  @override
+  String get activityVerySub => 'Ejercicio intenso 6-7 días/semana';
+
+  @override
+  String get onboardingSummaryTitle => '¡Listo! 🎉';
+
+  @override
+  String get onboardingSummarySub =>
+      'Aquí está tu objetivo diario personalizado.';
+
+  @override
+  String get onboardingRecommend => 'Calorías diarias recomendadas';
+
+  @override
+  String get onboardingGender => '¿Cuál es tu género?';
+
+  @override
+  String get onboardingGenderSub => 'Usado para calcular tu metabolismo.';
+
+  @override
+  String get onboardingAge => '¿Cuántos años tienes?';
+
+  @override
+  String get onboardingAgeSub => 'Usado para calcular tu metabolismo.';
+
+  @override
+  String get onboardingHeightWeight => 'Altura y Peso';
+
+  @override
+  String get onboardingHeightWeightSub => 'Necesario para el IMC y calorías.';
 }

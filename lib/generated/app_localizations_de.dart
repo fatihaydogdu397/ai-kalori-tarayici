@@ -613,4 +613,64 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '1 Monat! Unglaublich! 🏆';
+
+  @override
+  String get activityLevel => 'Wie aktiv bist du?';
+
+  @override
+  String get activityLevelSub => 'Wähle dein tägliches Aktivitätslevel';
+
+  @override
+  String get activitySedentary => 'Sitzend';
+
+  @override
+  String get activitySedentarySub => 'Kaum oder keine Bewegung';
+
+  @override
+  String get activityLight => 'Leicht aktiv';
+
+  @override
+  String get activityLightSub => '1-3 Tage/Woche leichtes Training';
+
+  @override
+  String get activityActive => 'Aktiv';
+
+  @override
+  String get activityActiveSub => '3-5 Tage/Woche moderates Training';
+
+  @override
+  String get activityVery => 'Sehr aktiv';
+
+  @override
+  String get activityVerySub => '6-7 Tage/Woche hartes Training';
+
+  @override
+  String get onboardingSummaryTitle => 'Fertig! 🎉';
+
+  @override
+  String get onboardingSummarySub => 'Hier ist dein tägliches Ziel.';
+
+  @override
+  String get onboardingRecommend => 'Empfohlene tägliche Kalorien';
+
+  @override
+  String get onboardingGender => 'Was ist dein Geschlecht?';
+
+  @override
+  String get onboardingGenderSub =>
+      'Wird zur Berechnung der Stoffwechselrate benötigt.';
+
+  @override
+  String get onboardingAge => 'Wie alt bist du?';
+
+  @override
+  String get onboardingAgeSub =>
+      'Wird zur Berechnung der Stoffwechselrate benötigt.';
+
+  @override
+  String get onboardingHeightWeight => 'Größe & Gewicht';
+
+  @override
+  String get onboardingHeightWeightSub =>
+      'Erforderlich für den BMI und tägliche Kalorien.';
 }

@@ -608,4 +608,62 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get streakMilestone30 => 'شهر متواصل! مذهل. 🏆';
+
+  @override
+  String get activityLevel => 'ما مدى نشاطك؟';
+
+  @override
+  String get activityLevelSub => 'حدد مستوى نشاطك اليومي';
+
+  @override
+  String get activitySedentary => 'خامل';
+
+  @override
+  String get activitySedentarySub => 'تمرين قليل أو معدوم';
+
+  @override
+  String get activityLight => 'نشط قليلاً';
+
+  @override
+  String get activityLightSub => 'تمرين خفيف 1-3 أيام/أسبوع';
+
+  @override
+  String get activityActive => 'نشط';
+
+  @override
+  String get activityActiveSub => 'تمرين معتدل 3-5 أيام/أسبوع';
+
+  @override
+  String get activityVery => 'نشيط جدا';
+
+  @override
+  String get activityVerySub => 'تمرين شاق 6-7 أيام/أسبوع';
+
+  @override
+  String get onboardingSummaryTitle => 'أنت مستعد! 🎉';
+
+  @override
+  String get onboardingSummarySub => 'إليك هدفك اليومي المخصص.';
+
+  @override
+  String get onboardingRecommend => 'السعرات الحرارية اليومية الموصى بها';
+
+  @override
+  String get onboardingGender => 'ما هو جنسك؟';
+
+  @override
+  String get onboardingGenderSub => 'يستخدم لحساب معدل الأيض الخاص بك.';
+
+  @override
+  String get onboardingAge => 'كم عمرك؟';
+
+  @override
+  String get onboardingAgeSub => 'يستخدم لحساب معدل الأيض الخاص بك.';
+
+  @override
+  String get onboardingHeightWeight => 'الطول والوزن';
+
+  @override
+  String get onboardingHeightWeightSub =>
+      'مطلوب لتحديد مؤشر كتلة الجسم والسعرات.';
 }

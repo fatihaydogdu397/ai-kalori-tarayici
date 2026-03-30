@@ -1265,6 +1265,120 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'1 aylık seri! İnanılmaz bir başarı. 🏆'**
   String get streakMilestone30;
+
+  /// No description provided for @activityLevel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ne kadar hareketlisin?'**
+  String get activityLevel;
+
+  /// No description provided for @activityLevelSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük aktivite seviyeni seç'**
+  String get activityLevelSub;
+
+  /// No description provided for @activitySedentary.
+  ///
+  /// In tr, this message translates to:
+  /// **'Masa Başı'**
+  String get activitySedentary;
+
+  /// No description provided for @activitySedentarySub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok az egzersiz veya ofis işi'**
+  String get activitySedentarySub;
+
+  /// No description provided for @activityLight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hafif Hareketli'**
+  String get activityLight;
+
+  /// No description provided for @activityLightSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftada 1-3 gün hafif egzersiz'**
+  String get activityLightSub;
+
+  /// No description provided for @activityActive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif'**
+  String get activityActive;
+
+  /// No description provided for @activityActiveSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftada 3-5 gün orta egzersiz'**
+  String get activityActiveSub;
+
+  /// No description provided for @activityVery.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok Aktif'**
+  String get activityVery;
+
+  /// No description provided for @activityVerySub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftada 6-7 gün ağır egzersiz'**
+  String get activityVerySub;
+
+  /// No description provided for @onboardingSummaryTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hazırsın! 🎉'**
+  String get onboardingSummaryTitle;
+
+  /// No description provided for @onboardingSummarySub.
+  ///
+  /// In tr, this message translates to:
+  /// **'İşte sana özel günlük hedefin.'**
+  String get onboardingSummarySub;
+
+  /// No description provided for @onboardingRecommend.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önerilen Günlük Kalori'**
+  String get onboardingRecommend;
+
+  /// No description provided for @onboardingGender.
+  ///
+  /// In tr, this message translates to:
+  /// **'Cinsiyetin nedir?'**
+  String get onboardingGender;
+
+  /// No description provided for @onboardingGenderSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Metabolizma hızını hesaplamak için gerekli.'**
+  String get onboardingGenderSub;
+
+  /// No description provided for @onboardingAge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaç yaşındasın?'**
+  String get onboardingAge;
+
+  /// No description provided for @onboardingAgeSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Metabolizma hızını hesaplamak için gerekli.'**
+  String get onboardingAgeSub;
+
+  /// No description provided for @onboardingHeightWeight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Boy ve Kilo'**
+  String get onboardingHeightWeight;
+
+  /// No description provided for @onboardingHeightWeightSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'VKI ve günlük kalori ihtiyacın için gerekli.'**
+  String get onboardingHeightWeightSub;
 }
 
 class _AppLocalizationsDelegate

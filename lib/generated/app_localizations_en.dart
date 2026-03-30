@@ -609,4 +609,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '1 month streak! Incredible! 🏆';
+
+  @override
+  String get activityLevel => 'How active are you?';
+
+  @override
+  String get activityLevelSub => 'Select your daily activity level';
+
+  @override
+  String get activitySedentary => 'Sedentary';
+
+  @override
+  String get activitySedentarySub => 'Little or no exercise';
+
+  @override
+  String get activityLight => 'Lightly Active';
+
+  @override
+  String get activityLightSub => 'Light exercise 1-3 days/week';
+
+  @override
+  String get activityActive => 'Active';
+
+  @override
+  String get activityActiveSub => 'Moderate exercise 3-5 days/week';
+
+  @override
+  String get activityVery => 'Very Active';
+
+  @override
+  String get activityVerySub => 'Heavy exercise 6-7 days/week';
+
+  @override
+  String get onboardingSummaryTitle => 'You\'re set! 🎉';
+
+  @override
+  String get onboardingSummarySub => 'Here is your daily personalized goal.';
+
+  @override
+  String get onboardingRecommend => 'Recommended Daily Calories';
+
+  @override
+  String get onboardingGender => 'What is your gender?';
+
+  @override
+  String get onboardingGenderSub => 'Used to calculate your metabolic rate.';
+
+  @override
+  String get onboardingAge => 'How old are you?';
+
+  @override
+  String get onboardingAgeSub => 'Used to calculate your metabolic rate.';
+
+  @override
+  String get onboardingHeightWeight => 'Height & Weight';
+
+  @override
+  String get onboardingHeightWeightSub =>
+      'Required for BMI and daily calories.';
 }

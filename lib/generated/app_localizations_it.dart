@@ -611,4 +611,63 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '1 mese di fila! Incredibile! 🏆';
+
+  @override
+  String get activityLevel => 'Quanto sei attivo?';
+
+  @override
+  String get activityLevelSub =>
+      'Seleziona il tuo livello di attività quotidiana';
+
+  @override
+  String get activitySedentary => 'Sedentario';
+
+  @override
+  String get activitySedentarySub => 'Poco o nessun esercizio';
+
+  @override
+  String get activityLight => 'Leggermente attivo';
+
+  @override
+  String get activityLightSub => 'Esercizio leggero 1-3 giorni/settimana';
+
+  @override
+  String get activityActive => 'Attivo';
+
+  @override
+  String get activityActiveSub => 'Esercizio moderato 3-5 giorni/settimana';
+
+  @override
+  String get activityVery => 'Molto attivo';
+
+  @override
+  String get activityVerySub => 'Esercizio intenso 6-7 giorni/settimana';
+
+  @override
+  String get onboardingSummaryTitle => 'Ci sei quasi! 🎉';
+
+  @override
+  String get onboardingSummarySub =>
+      'Ecco il tuo obiettivo giornaliero personalizzato.';
+
+  @override
+  String get onboardingRecommend => 'Calorie giornaliere raccomandate';
+
+  @override
+  String get onboardingGender => 'Qual è il tuo sesso?';
+
+  @override
+  String get onboardingGenderSub => 'Usato per calcolare il tuo metabolismo.';
+
+  @override
+  String get onboardingAge => 'Quanti anni hai?';
+
+  @override
+  String get onboardingAgeSub => 'Usato per calcolare il tuo metabolismo.';
+
+  @override
+  String get onboardingHeightWeight => 'Altezza e Peso';
+
+  @override
+  String get onboardingHeightWeightSub => 'Necessario per BMI e calorie.';
 }

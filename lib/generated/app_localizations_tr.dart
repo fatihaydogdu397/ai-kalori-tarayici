@@ -609,4 +609,63 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '1 aylık seri! İnanılmaz bir başarı. 🏆';
+
+  @override
+  String get activityLevel => 'Ne kadar hareketlisin?';
+
+  @override
+  String get activityLevelSub => 'Günlük aktivite seviyeni seç';
+
+  @override
+  String get activitySedentary => 'Masa Başı';
+
+  @override
+  String get activitySedentarySub => 'Çok az egzersiz veya ofis işi';
+
+  @override
+  String get activityLight => 'Hafif Hareketli';
+
+  @override
+  String get activityLightSub => 'Haftada 1-3 gün hafif egzersiz';
+
+  @override
+  String get activityActive => 'Aktif';
+
+  @override
+  String get activityActiveSub => 'Haftada 3-5 gün orta egzersiz';
+
+  @override
+  String get activityVery => 'Çok Aktif';
+
+  @override
+  String get activityVerySub => 'Haftada 6-7 gün ağır egzersiz';
+
+  @override
+  String get onboardingSummaryTitle => 'Hazırsın! 🎉';
+
+  @override
+  String get onboardingSummarySub => 'İşte sana özel günlük hedefin.';
+
+  @override
+  String get onboardingRecommend => 'Önerilen Günlük Kalori';
+
+  @override
+  String get onboardingGender => 'Cinsiyetin nedir?';
+
+  @override
+  String get onboardingGenderSub =>
+      'Metabolizma hızını hesaplamak için gerekli.';
+
+  @override
+  String get onboardingAge => 'Kaç yaşındasın?';
+
+  @override
+  String get onboardingAgeSub => 'Metabolizma hızını hesaplamak için gerekli.';
+
+  @override
+  String get onboardingHeightWeight => 'Boy ve Kilo';
+
+  @override
+  String get onboardingHeightWeightSub =>
+      'VKI ve günlük kalori ihtiyacın için gerekli.';
 }

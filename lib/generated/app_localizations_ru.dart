@@ -610,4 +610,61 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get streakMilestone30 => '1 месяц подряд! Потрясающе! 🏆';
+
+  @override
+  String get activityLevel => 'Насколько вы активны?';
+
+  @override
+  String get activityLevelSub => 'Выберите ваш ежедневный уровень активности';
+
+  @override
+  String get activitySedentary => 'Скромный';
+
+  @override
+  String get activitySedentarySub => 'Мало или совсем без упражнений';
+
+  @override
+  String get activityLight => 'Слегка активный';
+
+  @override
+  String get activityLightSub => 'Легкие упражнения 1-3 дня/нед';
+
+  @override
+  String get activityActive => 'Активный';
+
+  @override
+  String get activityActiveSub => 'Умеренные упражнения 3-5 дней/нед';
+
+  @override
+  String get activityVery => 'Очень активный';
+
+  @override
+  String get activityVerySub => 'Тяжелые упражнения 6-7 дней/нед';
+
+  @override
+  String get onboardingSummaryTitle => 'Вы готовы! 🎉';
+
+  @override
+  String get onboardingSummarySub => 'Вот ваша персональная ежедневная цель.';
+
+  @override
+  String get onboardingRecommend => 'Рекомендуемые ежедневные калории';
+
+  @override
+  String get onboardingGender => 'Каков ваш пол?';
+
+  @override
+  String get onboardingGenderSub => 'Используется для расчета обмена веществ.';
+
+  @override
+  String get onboardingAge => 'Сколько вам лет?';
+
+  @override
+  String get onboardingAgeSub => 'Используется для расчета обмена веществ.';
+
+  @override
+  String get onboardingHeightWeight => 'Рост и Вес';
+
+  @override
+  String get onboardingHeightWeightSub => 'Необходимо для ИМТ и калорий.';
 }

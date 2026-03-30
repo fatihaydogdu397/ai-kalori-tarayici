@@ -200,6 +200,7 @@ class AppProvider extends ChangeNotifier {
   double _weight = 0;
   String _gender = '';
   String _goal = '';
+  String _activityLevel = 'active';
   
   // Weight tracking history
   List<Map<String, dynamic>> _weightLogs = [];
@@ -211,6 +212,7 @@ class AppProvider extends ChangeNotifier {
   double get weight => _weight;
   String get gender => _gender;
   String get goal => _goal;
+  String get activityLevel => _activityLevel;
 
   double get bmi => (_height > 0 && _weight > 0) ? _weight / ((_height / 100) * (_height / 100)) : 0;
 
@@ -220,7 +222,14 @@ class AppProvider extends ChangeNotifier {
     return 10 * _weight + 6.25 * _height - 5 * _age - 161;
   }
 
-  double get tdee => bmr > 0 ? bmr * 1.375 : 0;
+  double get tdee {
+    if (bmr <= 0) return 0;
+    double multiplier = 1.55; // active
+    if (_activityLevel == 'sedentary') multiplier = 1.2;
+    else if (_activityLevel == 'light') multiplier = 1.375;
+    else if (_activityLevel == 'very_active') multiplier = 1.725;
+    return bmr * multiplier;
+  }
 
   Future<void> loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
@@ -234,6 +243,7 @@ class AppProvider extends ChangeNotifier {
     _weight = prefs.getDouble('weight') ?? 0;
     _gender = prefs.getString('gender') ?? '';
     _goal = prefs.getString('goal') ?? '';
+    _activityLevel = prefs.getString('activityLevel') ?? 'active';
     _healthEnabled = await _healthService.isEnabled();
     await loadWeightLogs();
     notifyListeners();
@@ -267,7 +277,9 @@ class AppProvider extends ChangeNotifier {
     required double weight,
     required String gender,
     required String goal,
+    String? activityLevel,
   }) async {
+    final actLevel = activityLevel ?? _activityLevel;
     // Mifflin-St Jeor BMR
     double bmr;
     if (gender == 'male') {
@@ -275,7 +287,13 @@ class AppProvider extends ChangeNotifier {
     } else {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
-    double tdee = bmr * 1.375;
+    
+    double multiplier = 1.55; // active
+    if (actLevel == 'sedentary') multiplier = 1.2;
+    else if (actLevel == 'light') multiplier = 1.375;
+    else if (actLevel == 'very_active') multiplier = 1.725;
+
+    double tdee = bmr * multiplier;
     if (goal == 'lose') tdee -= 400;
     if (goal == 'gain') tdee += 300;
 
@@ -288,6 +306,7 @@ class AppProvider extends ChangeNotifier {
     await prefs.setDouble('weight', weight);
     await prefs.setString('gender', gender);
     await prefs.setString('goal', goal);
+    await prefs.setString('activityLevel', actLevel);
 
     _userName = name;
     _dailyCalorieGoal = tdee;
@@ -296,6 +315,7 @@ class AppProvider extends ChangeNotifier {
     _weight = weight;
     _gender = gender;
     _goal = goal;
+    _activityLevel = actLevel;
     
     // Ayrıca bu değişikliği (veya mevcut kiloyu) DB'de Kilo Logu olarak sakla
     await logWeight(weight, DateTime.now());

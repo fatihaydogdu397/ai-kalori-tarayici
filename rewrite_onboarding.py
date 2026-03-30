@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import os
+
+CODE = """import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
@@ -36,10 +38,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
     setState(() => _nameError = false);
     if (_page < _totalPages - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
       _finish();
     }
@@ -48,9 +47,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _finish() {
     final provider = context.read<AppProvider>();
     provider.saveProfile(
-      name: _name.trim().isEmpty
-          ? AppLocalizations.of(context).userFallback
-          : _name.trim(),
+      name: _name.trim().isEmpty ? AppLocalizations.of(context).userFallback : _name.trim(),
       age: _age.round(),
       height: _height,
       weight: _weight,
@@ -60,10 +57,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
     provider.loadHistory();
     provider.loadTodayStats();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
   }
 
   @override
@@ -71,9 +65,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark
-        ? AppColors.darkTextSecondary
-        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
 
     return Scaffold(
       backgroundColor: bg,
@@ -88,15 +80,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   return Expanded(
                     child: Container(
                       height: 3,
-                      margin: EdgeInsets.only(
-                        right: i < _totalPages - 1 ? 6 : 0,
-                      ),
+                      margin: EdgeInsets.only(right: i < _totalPages - 1 ? 6 : 0),
                       decoration: BoxDecoration(
                         color: i <= _page
                             ? (isDark ? AppColors.lime : AppColors.void_)
-                            : (isDark
-                                  ? AppColors.darkCard
-                                  : AppColors.lightBorder),
+                            : (isDark ? AppColors.darkCard : AppColors.lightBorder),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -116,24 +104,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                       ),
-                      child: Icon(
-                        Icons.arrow_back_ios_rounded,
-                        size: 18,
-                        color: textMuted,
-                      ),
+                      child: Icon(Icons.arrow_back_ios_rounded, size: 18, color: textMuted),
                     )
                   else
                     const SizedBox(width: 18),
-                  Text(
-                    '${_page + 1} / $_totalPages',
-                    style: TextStyle(fontSize: 12.sp, color: textMuted),
-                  ),
+                  Text('${_page + 1} / $_totalPages', style: TextStyle(fontSize: 12.sp, color: textMuted)),
                   GestureDetector(
                     onTap: _finish,
-                    child: Text(
-                      AppLocalizations.of(context).skip,
-                      style: TextStyle(fontSize: 12.sp, color: textMuted),
-                    ),
+                    child: Text(AppLocalizations.of(context).skip, style: TextStyle(fontSize: 12.sp, color: textMuted)),
                   ),
                 ],
               ),
@@ -150,10 +128,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     textMuted: textMuted,
                     value: _name,
                     hasError: _nameError,
-                    onChanged: (v) => setState(() {
-                      _name = v;
-                      _nameError = false;
-                    }),
+                    onChanged: (v) => setState(() { _name = v; _nameError = false; }),
                   ),
                   _PageGender(
                     isDark: isDark,
@@ -220,19 +195,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isDark ? AppColors.lime : AppColors.void_,
                     foregroundColor: isDark ? AppColors.void_ : AppColors.lime,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
-                    _page < _totalPages - 1
-                        ? AppLocalizations.of(context).continueBtn
-                        : AppLocalizations.of(context).letsGo,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w800,
-                    ),
+                    _page < _totalPages - 1 ? AppLocalizations.of(context).continueBtn : AppLocalizations.of(context).letsGo,
+                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
                   ),
                 ),
               ),
@@ -269,15 +237,9 @@ class _PageName extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.onboardingHello,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.onboardingHello, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.onboardingNameSub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.onboardingNameSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 40),
           TextField(
             autofocus: true,
@@ -287,22 +249,8 @@ class _PageName extends StatelessWidget {
               hintText: l.onboardingNameHint,
               hintStyle: AppTypography.titleLarge.copyWith(color: textMuted),
               border: InputBorder.none,
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: hasError
-                      ? AppColors.coral
-                      : (isDark ? AppColors.darkCard : AppColors.lightBorder),
-                  width: 2,
-                ),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: hasError
-                      ? AppColors.coral
-                      : (isDark ? AppColors.lime : AppColors.void_),
-                  width: 2,
-                ),
-              ),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: hasError ? AppColors.coral : (isDark ? AppColors.darkCard : AppColors.lightBorder), width: 2)),
+              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: hasError ? AppColors.coral : (isDark ? AppColors.lime : AppColors.void_), width: 2)),
               errorText: hasError ? l.onboardingNameRequired : null,
             ),
             cursorColor: isDark ? AppColors.lime : AppColors.void_,
@@ -336,33 +284,15 @@ class _PageGender extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.onboardingGender,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.onboardingGender, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.onboardingGenderSub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.onboardingGenderSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 40),
           Row(
             children: [
-              _GenderBtn(
-                label: l.male,
-                icon: '♂',
-                selected: gender == 'male',
-                isDark: isDark,
-                onTap: () => onGender('male'),
-              ),
+              _GenderBtn(label: l.male, icon: '♂', selected: gender == 'male', isDark: isDark, onTap: () => onGender('male')),
               const SizedBox(width: 12),
-              _GenderBtn(
-                label: l.female,
-                icon: '♀',
-                selected: gender == 'female',
-                isDark: isDark,
-                onTap: () => onGender('female'),
-              ),
+              _GenderBtn(label: l.female, icon: '♀', selected: gender == 'female', isDark: isDark, onTap: () => onGender('female')),
             ],
           ),
         ],
@@ -397,15 +327,9 @@ class _PageAge extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.onboardingAge,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.onboardingAge, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.onboardingAgeSub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.onboardingAgeSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 40),
           _SliderRow(
             label: l.age,
@@ -455,15 +379,9 @@ class _PageHeightWeight extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.onboardingHeightWeight,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.onboardingHeightWeight, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.onboardingHeightWeightSub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.onboardingHeightWeightSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 40),
           _SliderRow(
             label: l.height,
@@ -526,51 +444,17 @@ class _PageActivity extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.activityLevel,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.activityLevel, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.activityLevelSub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.activityLevelSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 32),
-          _GoalCard(
-            emoji: '🛋️',
-            title: l.activitySedentary,
-            subtitle: l.activitySedentarySub,
-            selected: activity == 'sedentary',
-            isDark: isDark,
-            onTap: () => onActivity('sedentary'),
-          ),
+          _GoalCard(emoji: '🛋️', title: l.activitySedentary, subtitle: l.activitySedentarySub, selected: activity == 'sedentary', isDark: isDark, onTap: () => onActivity('sedentary')),
           const SizedBox(height: 12),
-          _GoalCard(
-            emoji: '🚶',
-            title: l.activityLight,
-            subtitle: l.activityLightSub,
-            selected: activity == 'light',
-            isDark: isDark,
-            onTap: () => onActivity('light'),
-          ),
+          _GoalCard(emoji: '🚶', title: l.activityLight, subtitle: l.activityLightSub, selected: activity == 'light', isDark: isDark, onTap: () => onActivity('light')),
           const SizedBox(height: 12),
-          _GoalCard(
-            emoji: '🏃',
-            title: l.activityActive,
-            subtitle: l.activityActiveSub,
-            selected: activity == 'active',
-            isDark: isDark,
-            onTap: () => onActivity('active'),
-          ),
+          _GoalCard(emoji: '🏃', title: l.activityActive, subtitle: l.activityActiveSub, selected: activity == 'active', isDark: isDark, onTap: () => onActivity('active')),
           const SizedBox(height: 12),
-          _GoalCard(
-            emoji: '🏋️',
-            title: l.activityVery,
-            subtitle: l.activityVerySub,
-            selected: activity == 'very_active',
-            isDark: isDark,
-            onTap: () => onActivity('very_active'),
-          ),
+          _GoalCard(emoji: '🏋️', title: l.activityVery, subtitle: l.activityVerySub, selected: activity == 'very_active', isDark: isDark, onTap: () => onActivity('very_active')),
         ],
       ),
     );
@@ -600,42 +484,15 @@ class _PageGoal extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.onboardingGoal,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.onboardingGoal, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.onboardingGoalSub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.onboardingGoalSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 32),
-          _GoalCard(
-            emoji: '📉',
-            title: l.goalLose,
-            subtitle: l.goalLoseSub,
-            selected: goal == 'lose',
-            isDark: isDark,
-            onTap: () => onGoal('lose'),
-          ),
+          _GoalCard(emoji: '📉', title: l.goalLose, subtitle: l.goalLoseSub, selected: goal == 'lose', isDark: isDark, onTap: () => onGoal('lose')),
           const SizedBox(height: 12),
-          _GoalCard(
-            emoji: '⚖️',
-            title: l.goalMaintain,
-            subtitle: l.goalMaintainSub,
-            selected: goal == 'maintain',
-            isDark: isDark,
-            onTap: () => onGoal('maintain'),
-          ),
+          _GoalCard(emoji: '⚖️', title: l.goalMaintain, subtitle: l.goalMaintainSub, selected: goal == 'maintain', isDark: isDark, onTap: () => onGoal('maintain')),
           const SizedBox(height: 12),
-          _GoalCard(
-            emoji: '💪',
-            title: l.goalGain,
-            subtitle: l.goalGainSub,
-            selected: goal == 'gain',
-            isDark: isDark,
-            onTap: () => onGoal('gain'),
-          ),
+          _GoalCard(emoji: '💪', title: l.goalGain, subtitle: l.goalGainSub, selected: goal == 'gain', isDark: isDark, onTap: () => onGoal('gain')),
         ],
       ),
     );
@@ -674,12 +531,9 @@ class _PageSummary extends StatelessWidget {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
     double multiplier = 1.55;
-    if (activity == 'sedentary')
-      multiplier = 1.2;
-    else if (activity == 'light')
-      multiplier = 1.375;
-    else if (activity == 'very_active')
-      multiplier = 1.725;
+    if (activity == 'sedentary') multiplier = 1.2;
+    else if (activity == 'light') multiplier = 1.375;
+    else if (activity == 'very_active') multiplier = 1.725;
 
     double tdee = bmr * multiplier;
     if (goal == 'lose') tdee -= 400;
@@ -690,49 +544,26 @@ class _PageSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.onboardingSummaryTitle,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.onboardingSummaryTitle, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.onboardingSummarySub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.onboardingSummarySub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 40),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(20.r),
-            ),
+            decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(20.r)),
             child: Column(
               children: [
-                Text(
-                  l.onboardingRecommend,
-                  style: AppTypography.titleMedium.copyWith(color: textMuted),
-                ),
+                Text(l.onboardingRecommend, style: AppTypography.titleMedium.copyWith(color: textMuted)),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Text(
-                      tdee.toStringAsFixed(0),
-                      style: AppTypography.displayLarge.copyWith(
-                        color: isDark ? AppColors.lime : AppColors.limeDeep,
-                        fontSize: 48.sp,
-                      ),
-                    ),
+                    Text(tdee.toStringAsFixed(0), style: AppTypography.displayLarge.copyWith(color: isDark ? AppColors.lime : AppColors.limeDeep, fontSize: 48.sp)),
                     const SizedBox(width: 8),
-                    Text(
-                      'kcal',
-                      style: AppTypography.titleMedium.copyWith(
-                        color: textMuted,
-                      ),
-                    ),
+                    Text('kcal', style: AppTypography.titleMedium.copyWith(color: textMuted)),
                   ],
                 ),
               ],
@@ -749,11 +580,7 @@ class _PageTheme extends StatelessWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
 
-  const _PageTheme({
-    required this.isDark,
-    required this.textPrimary,
-    required this.textMuted,
-  });
+  const _PageTheme({required this.isDark, required this.textPrimary, required this.textMuted});
 
   @override
   Widget build(BuildContext context) {
@@ -763,15 +590,9 @@ class _PageTheme extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.onboardingTheme,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-          ),
+          Text(l.onboardingTheme, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
           const SizedBox(height: 8),
-          Text(
-            l.onboardingThemeSub,
-            style: AppTypography.titleMedium.copyWith(color: textMuted),
-          ),
+          Text(l.onboardingThemeSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
           const SizedBox(height: 32),
           Row(
             children: [
@@ -809,22 +630,12 @@ class _ThemeCard extends StatelessWidget {
   final IconData icon;
   final bool selected, isDark;
   final VoidCallback onTap;
-  const _ThemeCard({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.isDark,
-    required this.onTap,
-  });
+  const _ThemeCard({required this.label, required this.icon, required this.selected, required this.isDark, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected
-        ? (isDark ? AppColors.lime : AppColors.void_)
-        : (isDark ? AppColors.darkCard : AppColors.lightCard);
-    final fgColor = selected
-        ? (isDark ? AppColors.void_ : AppColors.lime)
-        : (isDark ? AppColors.darkText : AppColors.lightText);
+    final bg = selected ? (isDark ? AppColors.lime : AppColors.void_) : (isDark ? AppColors.darkCard : AppColors.lightCard);
+    final fgColor = selected ? (isDark ? AppColors.void_ : AppColors.lime) : (isDark ? AppColors.darkText : AppColors.lightText);
     final borderColor = isDark ? null : AppColors.lightBorder;
 
     return Expanded(
@@ -835,21 +646,13 @@ class _ThemeCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(14.r),
-            border: selected
-                ? null
-                : Border.all(
-                    color: borderColor ?? Colors.transparent,
-                    width: 0.5,
-                  ),
+            border: selected ? null : Border.all(color: borderColor ?? Colors.transparent, width: 0.5),
           ),
           child: Column(
             children: [
               Icon(icon, color: fgColor, size: 32.sp),
               const SizedBox(height: 10),
-              Text(
-                label,
-                style: AppTypography.titleMedium.copyWith(color: fgColor),
-              ),
+              Text(label, style: AppTypography.titleMedium.copyWith(color: fgColor)),
             ],
           ),
         ),
@@ -862,28 +665,15 @@ class _GoalCard extends StatelessWidget {
   final String emoji, title, subtitle;
   final bool selected, isDark;
   final VoidCallback onTap;
-  const _GoalCard({
-    required this.emoji,
-    required this.title,
-    required this.subtitle,
-    required this.selected,
-    required this.isDark,
-    required this.onTap,
-  });
+  const _GoalCard({required this.emoji, required this.title, required this.subtitle, required this.selected, required this.isDark, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final bg = selected
         ? (isDark ? AppColors.lime : AppColors.void_)
         : (isDark ? AppColors.darkCard : AppColors.lightCard);
-    final titleColor = selected
-        ? (isDark ? AppColors.void_ : AppColors.lime)
-        : (isDark ? AppColors.darkText : AppColors.lightText);
-    final subColor = selected
-        ? (isDark
-              ? AppColors.void_.withOpacity(0.6)
-              : AppColors.lime.withOpacity(0.7))
-        : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary);
+    final titleColor = selected ? (isDark ? AppColors.void_ : AppColors.lime) : (isDark ? AppColors.darkText : AppColors.lightText);
+    final subColor = selected ? (isDark ? AppColors.void_.withOpacity(0.6) : AppColors.lime.withOpacity(0.7)) : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary);
     final borderColor = isDark ? AppColors.darkSurface : AppColors.lightBorder;
 
     return GestureDetector(
@@ -903,25 +693,12 @@ class _GoalCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: AppTypography.titleMedium.copyWith(
-                      color: titleColor,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: AppTypography.bodySmall.copyWith(color: subColor),
-                  ),
+                  Text(title, style: AppTypography.titleMedium.copyWith(color: titleColor)),
+                  Text(subtitle, style: AppTypography.bodySmall.copyWith(color: subColor)),
                 ],
               ),
             ),
-            if (selected)
-              Icon(
-                Icons.check_circle_rounded,
-                color: isDark ? AppColors.void_ : AppColors.lime,
-                size: 20.sp,
-              ),
+            if (selected) Icon(Icons.check_circle_rounded, color: isDark ? AppColors.void_ : AppColors.lime, size: 20.sp),
           ],
         ),
       ),
@@ -955,32 +732,18 @@ class _SliderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(12.r),
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(12.r)),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                label,
-                style: AppTypography.bodyMedium.copyWith(color: textMuted),
-              ),
+              Text(label, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
               RichText(
                 text: TextSpan(
                   children: [
-                    TextSpan(
-                      text: value,
-                      style: AppTypography.titleLarge.copyWith(
-                        color: textPrimary,
-                      ),
-                    ),
-                    TextSpan(
-                      text: ' $unit',
-                      style: AppTypography.bodySmall.copyWith(color: textMuted),
-                    ),
+                    TextSpan(text: value, style: AppTypography.titleLarge.copyWith(color: textPrimary)),
+                    TextSpan(text: ' $unit', style: AppTypography.bodySmall.copyWith(color: textMuted)),
                   ],
                 ),
               ),
@@ -992,17 +755,10 @@ class _SliderRow extends StatelessWidget {
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
               overlayShape: SliderComponentShape.noOverlay,
               activeTrackColor: accent,
-              inactiveTrackColor: isDark
-                  ? AppColors.darkSurface
-                  : AppColors.lightBorder,
+              inactiveTrackColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
               thumbColor: accent,
             ),
-            child: Slider(
-              value: sliderValue,
-              min: min,
-              max: max,
-              onChanged: onChanged,
-            ),
+            child: Slider(value: sliderValue, min: min, max: max, onChanged: onChanged),
           ),
         ],
       ),
@@ -1014,13 +770,7 @@ class _GenderBtn extends StatelessWidget {
   final String label, icon;
   final bool selected, isDark;
   final VoidCallback onTap;
-  const _GenderBtn({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.isDark,
-    required this.onTap,
-  });
+  const _GenderBtn({required this.label, required this.icon, required this.selected, required this.isDark, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -1034,35 +784,13 @@ class _GenderBtn extends StatelessWidget {
                 ? (isDark ? AppColors.lime : AppColors.void_)
                 : (isDark ? AppColors.darkCard : AppColors.lightCard),
             borderRadius: BorderRadius.circular(12.r),
-            border: selected
-                ? null
-                : Border.all(
-                    color: isDark
-                        ? AppColors.darkSurface
-                        : AppColors.lightBorder,
-                    width: 0.5,
-                  ),
+            border: selected ? null : Border.all(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, width: 0.5),
           ),
           child: Column(
             children: [
-              Text(
-                icon,
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  color: selected
-                      ? (isDark ? AppColors.void_ : AppColors.lime)
-                      : (isDark ? AppColors.darkText : AppColors.lightText),
-                ),
-              ),
+              Text(icon, style: TextStyle(fontSize: 20.sp, color: selected ? (isDark ? AppColors.void_ : AppColors.lime) : (isDark ? AppColors.darkText : AppColors.lightText))),
               const SizedBox(height: 4),
-              Text(
-                label,
-                style: AppTypography.bodyMedium.copyWith(
-                  color: selected
-                      ? (isDark ? AppColors.void_ : AppColors.lime)
-                      : (isDark ? AppColors.darkText : AppColors.lightText),
-                ),
-              ),
+              Text(label, style: AppTypography.bodyMedium.copyWith(color: selected ? (isDark ? AppColors.void_ : AppColors.lime) : (isDark ? AppColors.darkText : AppColors.lightText))),
             ],
           ),
         ),
@@ -1074,11 +802,7 @@ class _GenderBtn extends StatelessWidget {
 class _BmiBadge extends StatelessWidget {
   final double height, weight;
   final bool isDark;
-  const _BmiBadge({
-    required this.height,
-    required this.weight,
-    required this.isDark,
-  });
+  const _BmiBadge({required this.height, required this.weight, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -1122,29 +846,23 @@ class _BmiBadge extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '${l.bmiLabel} ${bmi.toStringAsFixed(1)}',
-                style: AppTypography.labelSmall.copyWith(color: color),
-              ),
+              Text('${l.bmiLabel} ${bmi.toStringAsFixed(1)}', style: AppTypography.labelSmall.copyWith(color: color)),
               const SizedBox(height: 2),
-              Text(
-                label,
-                style: AppTypography.titleMedium.copyWith(color: color),
-              ),
+              Text(label, style: AppTypography.titleMedium.copyWith(color: color)),
             ],
           ),
           const Spacer(),
           Flexible(
-            child: Text(
-              desc,
-              style: AppTypography.bodySmall.copyWith(
-                color: color.withOpacity(0.8),
-              ),
-              textAlign: TextAlign.right,
-            ),
+            child: Text(desc, style: AppTypography.bodySmall.copyWith(color: color.withOpacity(0.8)), textAlign: TextAlign.right),
           ),
         ],
       ),
     );
   }
 }
+"""
+
+with open('lib/screens/onboarding_screen.dart', 'w', encoding='utf-8') as f:
+    f.write(CODE)
+
+print("onboarding_screen.dart has been updated successfully via Python!")
