@@ -337,6 +337,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addedToLog => 'Añadido al registro ✓';
 
   @override
+  String get backToHome => 'OK, Volver al inicio';
+
+  @override
+  String get mealAutoSaved => 'Comida guardada automáticamente.';
+
+  @override
   String get historyTitle => 'Historial';
 
   @override

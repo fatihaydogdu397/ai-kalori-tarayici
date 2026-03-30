@@ -308,6 +308,12 @@ class _ResultScreenState extends State<ResultScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Text(
+                    l.mealAutoSaved,
+                    style: TextStyle(fontSize: 11, color: textMuted),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -319,7 +325,14 @@ class _ResultScreenState extends State<ResultScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                       ),
-                      child: Text(_portionChanged ? l.save : l.addedToLog, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(_portionChanged ? Icons.save_rounded : Icons.check_circle_outline_rounded, size: 20),
+                          const SizedBox(width: 8),
+                          Text(_portionChanged ? l.save : l.backToHome, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
+                        ],
+                      ),
                     ),
                   ),
                   if (widget.allowRetry) ...[

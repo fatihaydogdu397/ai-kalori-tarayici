@@ -336,6 +336,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addedToLog => 'Günlüğe Eklendi ✓';
 
   @override
+  String get backToHome => 'Tamam, Ana Sayfaya Dön';
+
+  @override
+  String get mealAutoSaved => 'Öğün otomatik olarak kaydedildi.';
+
+  @override
   String get historyTitle => 'Geçmiş';
 
   @override

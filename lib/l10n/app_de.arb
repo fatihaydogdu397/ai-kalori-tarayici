@@ -256,5 +256,7 @@
   "barcode": "Barcode",
   "barcodeHint": "Barcode im Rahmen ausrichten",
   "barcodeSearching": "Produkt wird gesucht...",
-  "barcodeNotFound": "Produkt nicht gefunden. Manuelle Eingabe versuchen."
+  "barcodeNotFound": "Produkt nicht gefunden. Manuelle Eingabe versuchen.",
+  "backToHome": "OK, Zurück zur Startseite",
+  "mealAutoSaved": "Mahlzeit automatisch gespeichert."
 }

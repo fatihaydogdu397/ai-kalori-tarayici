@@ -338,6 +338,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addedToLog => 'Ajouté au journal ✓';
 
   @override
+  String get backToHome => 'OK, Retour à l\'accueil';
+
+  @override
+  String get mealAutoSaved => 'Repas enregistré automatiquement.';
+
+  @override
   String get historyTitle => 'Historique';
 
   @override

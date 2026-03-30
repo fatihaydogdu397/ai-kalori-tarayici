@@ -336,6 +336,12 @@ class AppLocalizationsKa extends AppLocalizations {
   String get addedToLog => 'დღიურში დაემატა ✓';
 
   @override
+  String get backToHome => 'კარგი, მთავარ გვერდზე დაბრუნება';
+
+  @override
+  String get mealAutoSaved => 'კვება ავტომატურად შეინახა.';
+
+  @override
   String get historyTitle => 'ისტორია';
 
   @override

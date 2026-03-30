@@ -744,6 +744,18 @@ abstract class AppLocalizations {
   /// **'Günlüğe Eklendi ✓'**
   String get addedToLog;
 
+  /// No description provided for @backToHome.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamam, Ana Sayfaya Dön'**
+  String get backToHome;
+
+  /// No description provided for @mealAutoSaved.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğün otomatik olarak kaydedildi.'**
+  String get mealAutoSaved;
+
   /// No description provided for @historyTitle.
   ///
   /// In tr, this message translates to:

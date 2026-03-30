@@ -256,5 +256,7 @@
   "barcode": "Code-barres",
   "barcodeHint": "Alignez le code-barres dans le cadre",
   "barcodeSearching": "Recherche du produit...",
-  "barcodeNotFound": "Produit introuvable. Essayez la saisie manuelle."
+  "barcodeNotFound": "Produit introuvable. Essayez la saisie manuelle.",
+  "backToHome": "OK, Retour à l'accueil",
+  "mealAutoSaved": "Repas enregistré automatiquement."
 }

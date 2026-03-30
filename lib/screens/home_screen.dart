@@ -1046,7 +1046,27 @@ class _MealRow extends StatelessWidget {
                 ],
               ),
             ),
-            Text(analysis.totalCalories.toStringAsFixed(0), style: AppTypography.titleLarge.copyWith(color: calColor)),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: isDark ? AppColors.darkBg : AppColors.lightSurface,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    analysis.totalCalories.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w800,
+                      color: calColor,
+                    ),
+                  ),
+                  Text('kcal', style: TextStyle(fontSize: 10.sp, color: textMuted)),
+                ],
+              ),
+            ),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: onFavorite,

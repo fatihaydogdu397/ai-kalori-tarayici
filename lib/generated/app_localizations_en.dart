@@ -336,6 +336,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addedToLog => 'Added to Log ✓';
 
   @override
+  String get backToHome => 'OK, Back to Home';
+
+  @override
+  String get mealAutoSaved => 'Meal saved automatically.';
+
+  @override
   String get historyTitle => 'History';
 
   @override

@@ -256,5 +256,7 @@
   "barcode": "Barcode",
   "barcodeHint": "Align the barcode within the frame",
   "barcodeSearching": "Looking up product...",
-  "barcodeNotFound": "Product not found. Try manual entry."
+  "barcodeNotFound": "Product not found. Try manual entry.",
+  "backToHome": "OK, Back to Home",
+  "mealAutoSaved": "Meal saved automatically."
 }

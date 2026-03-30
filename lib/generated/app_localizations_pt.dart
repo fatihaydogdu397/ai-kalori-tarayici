@@ -337,6 +337,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addedToLog => 'Adicionado ao diário ✓';
 
   @override
+  String get backToHome => 'OK, Voltar ao Início';
+
+  @override
+  String get mealAutoSaved => 'Refeição salva automaticamente.';
+
+  @override
   String get historyTitle => 'Histórico';
 
   @override

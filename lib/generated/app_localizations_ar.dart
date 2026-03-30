@@ -335,6 +335,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addedToLog => 'تمت الإضافة إلى السجل ✓';
 
   @override
+  String get backToHome => 'حسنا، العودة للرئيسية';
+
+  @override
+  String get mealAutoSaved => 'تم حفظ الوجبة تلقائيا.';
+
+  @override
   String get historyTitle => 'السجل';
 
   @override

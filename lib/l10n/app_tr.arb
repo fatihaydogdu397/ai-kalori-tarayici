@@ -140,6 +140,8 @@
   "analysisResult": "Analiz Sonucu",
   "detectedIngredients": "Tespit edilen malzemeler",
   "addedToLog": "Günlüğe Eklendi ✓",
+  "backToHome": "Tamam, Ana Sayfaya Dön",
+  "mealAutoSaved": "Öğün otomatik olarak kaydedildi.",
   "historyTitle": "Geçmiş",
   "noScansYet": "Henüz tarama yok",
   "scanFirstMeal": "İlk yemeğini tara!",

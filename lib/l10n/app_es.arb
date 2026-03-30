@@ -256,5 +256,7 @@
   "barcode": "Código de barras",
   "barcodeHint": "Alinea el código de barras en el marco",
   "barcodeSearching": "Buscando producto...",
-  "barcodeNotFound": "Producto no encontrado. Prueba la entrada manual."
+  "barcodeNotFound": "Producto no encontrado. Prueba la entrada manual.",
+  "backToHome": "OK, Volver al inicio",
+  "mealAutoSaved": "Comida guardada automáticamente."
 }

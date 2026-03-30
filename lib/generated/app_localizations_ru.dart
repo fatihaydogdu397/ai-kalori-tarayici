@@ -337,6 +337,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addedToLog => 'Добавлено в дневник ✓';
 
   @override
+  String get backToHome => 'ОК, На главную';
+
+  @override
+  String get mealAutoSaved => 'Прием пищи сохранен автоматически.';
+
+  @override
   String get historyTitle => 'История';
 
   @override
