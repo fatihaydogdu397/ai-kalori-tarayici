@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_analysis.dart';
 import '../widgets/portion_picker_sheet.dart';
@@ -14,8 +17,11 @@ enum UnitSystem { metric, imperial }
 
 extension UnitSystemX on UnitSystem {
   bool get isMetric => this == UnitSystem.metric;
-  String weightUnit(double kg) => isMetric ? '${kg.toStringAsFixed(1)} kg' : '${(kg * 2.20462).toStringAsFixed(1)} lb';
-  String heightUnit(double cm) => isMetric ? '${cm.toStringAsFixed(0)} cm' : _cmToFtIn(cm);
+  String weightUnit(double kg) => isMetric
+      ? '${kg.toStringAsFixed(1)} kg'
+      : '${(kg * 2.20462).toStringAsFixed(1)} lb';
+  String heightUnit(double cm) =>
+      isMetric ? '${cm.toStringAsFixed(0)} cm' : _cmToFtIn(cm);
   static String _cmToFtIn(double cm) {
     final totalIn = cm / 2.54;
     final ft = totalIn ~/ 12;
@@ -40,7 +46,9 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> toggleTheme() async {
-    _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    _themeMode = _themeMode == ThemeMode.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDark', _themeMode == ThemeMode.dark);
     notifyListeners();
@@ -56,7 +64,8 @@ class AppProvider extends ChangeNotifier {
   AnalysisState get state => _state;
   FoodAnalysis? get currentAnalysis => _currentAnalysis;
   List<FoodAnalysis> get history => _history;
-  List<FoodAnalysis> get favorites => _history.where((a) => a.isFavorite).toList();
+  List<FoodAnalysis> get favorites =>
+      _history.where((a) => a.isFavorite).toList();
   Map<String, double> get todayStats => _todayStats;
   String get errorMessage => _errorMessage;
   double get dailyCalorieGoal => _dailyCalorieGoal;
@@ -89,8 +98,23 @@ class AppProvider extends ChangeNotifier {
         'height': _height,
         'goal': _goal,
       };
+
+      // Resim kaydetme işlemi (Kalıcı olarak uygulamanın belgeler dizinine kopyalama)
+      String localPath = imagePath;
+      try {
+        if (File(imagePath).existsSync()) {
+          final ext = p.extension(imagePath);
+          final uniqueName = '${DateTime.now().millisecondsSinceEpoch}$ext';
+          final appDir = await getApplicationDocumentsDirectory();
+          localPath = p.join(appDir.path, uniqueName);
+          await File(imagePath).copy(localPath);
+        }
+      } catch (e) {
+        debugPrint('Resim kopyalanırken hata: $e');
+      }
+
       final analysis = await _claudeService.analyzeFood(
-        imagePath,
+        localPath,
         portionGrams: portionGrams,
         cooking: cooking,
         userProfile: profile,
@@ -101,13 +125,15 @@ class AppProvider extends ChangeNotifier {
       await _updateStreak();
       await loadHistory();
       await loadTodayStats();
-      unawaited(_healthService.logMeal(
-        calories: analysis.totalNutrients.calories,
-        protein: analysis.totalNutrients.protein,
-        carbs: analysis.totalNutrients.carbs,
-        fat: analysis.totalNutrients.fat,
-        time: analysis.analyzedAt,
-      ));
+      unawaited(
+        _healthService.logMeal(
+          calories: analysis.totalNutrients.calories,
+          protein: analysis.totalNutrients.protein,
+          carbs: analysis.totalNutrients.carbs,
+          fat: analysis.totalNutrients.fat,
+          time: analysis.analyzedAt,
+        ),
+      );
       _state = AnalysisState.success;
     } catch (e) {
       _errorMessage = e.toString();
@@ -133,13 +159,15 @@ class AppProvider extends ChangeNotifier {
     await _dbService.saveAnalysis(analysis);
     await loadHistory();
     await loadTodayStats();
-    unawaited(_healthService.logMeal(
-      calories: analysis.totalNutrients.calories,
-      protein: analysis.totalNutrients.protein,
-      carbs: analysis.totalNutrients.carbs,
-      fat: analysis.totalNutrients.fat,
-      time: analysis.analyzedAt,
-    ));
+    unawaited(
+      _healthService.logMeal(
+        calories: analysis.totalNutrients.calories,
+        protein: analysis.totalNutrients.protein,
+        carbs: analysis.totalNutrients.carbs,
+        fat: analysis.totalNutrients.fat,
+        time: analysis.analyzedAt,
+      ),
+    );
   }
 
   Future<void> updateAnalysis(FoodAnalysis analysis) async {
@@ -201,20 +229,22 @@ class AppProvider extends ChangeNotifier {
   String _gender = '';
   String _goal = '';
   String _activityLevel = 'active';
-  
+
   // Weight tracking history
   List<Map<String, dynamic>> _weightLogs = [];
   List<Map<String, dynamic>> get weightLogs => _weightLogs;
 
   String get userName => _userName;
   int get age => _age;
-  double get height => _height; 
+  double get height => _height;
   double get weight => _weight;
   String get gender => _gender;
   String get goal => _goal;
   String get activityLevel => _activityLevel;
 
-  double get bmi => (_height > 0 && _weight > 0) ? _weight / ((_height / 100) * (_height / 100)) : 0;
+  double get bmi => (_height > 0 && _weight > 0)
+      ? _weight / ((_height / 100) * (_height / 100))
+      : 0;
 
   double get bmr {
     if (_weight <= 0 || _height <= 0 || _age <= 0) return 0;
@@ -225,9 +255,12 @@ class AppProvider extends ChangeNotifier {
   double get tdee {
     if (bmr <= 0) return 0;
     double multiplier = 1.55; // active
-    if (_activityLevel == 'sedentary') multiplier = 1.2;
-    else if (_activityLevel == 'light') multiplier = 1.375;
-    else if (_activityLevel == 'very_active') multiplier = 1.725;
+    if (_activityLevel == 'sedentary')
+      multiplier = 1.2;
+    else if (_activityLevel == 'light')
+      multiplier = 1.375;
+    else if (_activityLevel == 'very_active')
+      multiplier = 1.725;
     return bmr * multiplier;
   }
 
@@ -237,7 +270,9 @@ class AppProvider extends ChangeNotifier {
     _dailyCalorieGoal = prefs.getDouble('calorieGoal') ?? 2000;
     _waterGoal = prefs.getDouble('waterGoal') ?? 2.0;
     _streak = prefs.getInt('streak') ?? 0;
-    _unitSystem = (prefs.getString('unitSystem') == 'imperial') ? UnitSystem.imperial : UnitSystem.metric;
+    _unitSystem = (prefs.getString('unitSystem') == 'imperial')
+        ? UnitSystem.imperial
+        : UnitSystem.metric;
     _age = prefs.getInt('age') ?? 0;
     _height = prefs.getDouble('height') ?? 0;
     _weight = prefs.getDouble('weight') ?? 0;
@@ -259,13 +294,13 @@ class AppProvider extends ChangeNotifier {
     _weight = newWeight;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('weight', newWeight);
-    
+
     // DB'ye logla
     await _dbService.saveWeight(newWeight, date);
-    
+
     // Geçmişi RAM'de tazele
     await loadWeightLogs();
-    
+
     // TODO: Apple Health / Google Fit aktarımı yapılabilir
     notifyListeners();
   }
@@ -287,11 +322,14 @@ class AppProvider extends ChangeNotifier {
     } else {
       bmr = 10 * weight + 6.25 * height - 5 * age - 161;
     }
-    
+
     double multiplier = 1.55; // active
-    if (actLevel == 'sedentary') multiplier = 1.2;
-    else if (actLevel == 'light') multiplier = 1.375;
-    else if (actLevel == 'very_active') multiplier = 1.725;
+    if (actLevel == 'sedentary')
+      multiplier = 1.2;
+    else if (actLevel == 'light')
+      multiplier = 1.375;
+    else if (actLevel == 'very_active')
+      multiplier = 1.725;
 
     double tdee = bmr * multiplier;
     if (goal == 'lose') tdee -= 400;
@@ -316,10 +354,10 @@ class AppProvider extends ChangeNotifier {
     _gender = gender;
     _goal = goal;
     _activityLevel = actLevel;
-    
+
     // Ayrıca bu değişikliği (veya mevcut kiloyu) DB'de Kilo Logu olarak sakla
     await logWeight(weight, DateTime.now());
-    
+
     notifyListeners();
   }
 
@@ -424,7 +462,10 @@ class AppProvider extends ChangeNotifier {
       return;
     }
 
-    final yesterday = DateTime.now().subtract(const Duration(days: 1)).toIso8601String().substring(0, 10);
+    final yesterday = DateTime.now()
+        .subtract(const Duration(days: 1))
+        .toIso8601String()
+        .substring(0, 10);
     if (lastScan == yesterday) {
       _streak = (_streak) + 1;
     } else {
