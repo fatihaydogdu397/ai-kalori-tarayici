@@ -33,9 +33,16 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isDark, AppLocalizations l, AppProvider provider) {
+  Widget _buildHeader(
+    BuildContext context,
+    bool isDark,
+    AppLocalizations l,
+    AppProvider provider,
+  ) {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final textMuted = isDark
+        ? AppColors.darkTextMuted
+        : const Color(0xFFAAAAAA);
     final totalScans = provider.history.length;
 
     return SliverToBoxAdapter(
@@ -51,28 +58,55 @@ class HistoryScreen extends StatelessWidget {
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      width: 36, height: 36,
+                      width: 36,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                        color: isDark
+                            ? AppColors.darkCard
+                            : AppColors.lightCard,
                         borderRadius: BorderRadius.circular(10),
-                        border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+                        border: isDark
+                            ? null
+                            : Border.all(
+                                color: AppColors.lightBorder,
+                                width: 0.5,
+                              ),
                       ),
-                      child: Icon(Icons.chevron_left_rounded, color: textMuted, size: 22),
+                      child: Icon(
+                        Icons.chevron_left_rounded,
+                        color: textMuted,
+                        size: 22,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(l.historyTitle, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: textPrimary)),
+                  Text(
+                    l.historyTitle,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: textPrimary,
+                    ),
+                  ),
                   const Spacer(),
                   if (totalScans > 0)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
-                        color: (isDark ? AppColors.lime : AppColors.void_).withOpacity(0.15),
+                        color: (isDark ? AppColors.lime : AppColors.void_)
+                            .withOpacity(0.15),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         l.scanCount(totalScans),
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: isDark ? AppColors.lime : AppColors.void_),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? AppColors.lime : AppColors.void_,
+                        ),
                       ),
                     ),
                 ],
@@ -87,7 +121,9 @@ class HistoryScreen extends StatelessWidget {
 
   Widget _buildEmpty(bool isDark, AppLocalizations l) {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final textMuted = isDark
+        ? AppColors.darkTextMuted
+        : const Color(0xFFAAAAAA);
     final iconBg = isDark ? AppColors.darkCard : AppColors.lightCard;
 
     return Center(
@@ -95,27 +131,48 @@ class HistoryScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80, height: 80,
+            width: 80,
+            height: 80,
             decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
-            child: Center(child: Text('🍽️', style: const TextStyle(fontSize: 36))),
+            child: Center(
+              child: Text('🍽️', style: const TextStyle(fontSize: 36)),
+            ),
           ),
           const SizedBox(height: 16),
-          Text(l.noScansYet, style: TextStyle(color: textPrimary, fontSize: 17, fontWeight: FontWeight.w700)),
+          Text(
+            l.noScansYet,
+            style: TextStyle(
+              color: textPrimary,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 6),
-          Text(l.scanFirstMeal, style: TextStyle(color: textMuted, fontSize: 13)),
+          Text(
+            l.scanFirstMeal,
+            style: TextStyle(color: textMuted, fontSize: 13.sp),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildList(BuildContext context, bool isDark, AppLocalizations l, AppProvider provider) {
-    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+  Widget _buildList(
+    BuildContext context,
+    bool isDark,
+    AppLocalizations l,
+    AppProvider provider,
+  ) {
+    final textMuted = isDark
+        ? AppColors.darkTextMuted
+        : const Color(0xFFAAAAAA);
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
 
     // Group by date (yyyy-MM-dd)
     final grouped = <String, List<FoodAnalysis>>{};
     for (final a in provider.history) {
-      final key = '${a.analyzedAt.year}-${a.analyzedAt.month.toString().padLeft(2, '0')}-${a.analyzedAt.day.toString().padLeft(2, '0')}';
+      final key =
+          '${a.analyzedAt.year}-${a.analyzedAt.month.toString().padLeft(2, '0')}-${a.analyzedAt.day.toString().padLeft(2, '0')}';
       grouped.putIfAbsent(key, () => []).add(a);
     }
 
@@ -124,64 +181,127 @@ class HistoryScreen extends StatelessWidget {
     return SliverPadding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final dateKey = dates[index];
-            final items = grouped[dateKey]!;
-            final totalCal = items.fold<double>(0, (s, a) => s + a.totalCalories);
-            final totalProt = items.fold<double>(0, (s, a) => s + a.totalNutrients.protein);
-            final totalCarbs = items.fold<double>(0, (s, a) => s + a.totalNutrients.carbs);
-            final totalFat = items.fold<double>(0, (s, a) => s + a.totalNutrients.fat);
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final dateKey = dates[index];
+          final items = grouped[dateKey]!;
+          final totalCal = items.fold<double>(0, (s, a) => s + a.totalCalories);
+          final totalProt = items.fold<double>(
+            0,
+            (s, a) => s + a.totalNutrients.protein,
+          );
+          final totalCarbs = items.fold<double>(
+            0,
+            (s, a) => s + a.totalNutrients.carbs,
+          );
+          final totalFat = items.fold<double>(
+            0,
+            (s, a) => s + a.totalNutrients.fat,
+          );
 
-            final parts = dateKey.split('-');
-            final dt = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
-            final now = DateTime.now();
-            final diff = DateTime(now.year, now.month, now.day).difference(DateTime(dt.year, dt.month, dt.day)).inDays;
-            final dateLabel = diff == 0 ? l.today : diff == 1 ? l.yesterday : l.daysAgo(diff);
+          final parts = dateKey.split('-');
+          final dt = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+          final now = DateTime.now();
+          final diff = DateTime(
+            now.year,
+            now.month,
+            now.day,
+          ).difference(DateTime(dt.year, dt.month, dt.day)).inDays;
+          final dateLabel = diff == 0
+              ? l.today
+              : diff == 1
+              ? l.yesterday
+              : l.daysAgo(diff);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Date header
-                Padding(
-                  padding: const EdgeInsets.only(top: 4, bottom: 10),
-                  child: Row(
-                    children: [
-                      Text(dateLabel, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkText : AppColors.lightText)),
-                      const SizedBox(width: 6),
-                      Text('${dt.day}/${dt.month}', style: TextStyle(fontSize: 11, color: textMuted)),
-                      const Spacer(),
-                      Flexible(
-                        child: Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
-                          alignment: WrapAlignment.end,
-                          children: [
-                            _MacroChip(label: '${totalCal.toStringAsFixed(0)}kcal', color: calColor, isDark: isDark),
-                            _MacroChip(label: 'P${totalProt.toStringAsFixed(0)}', color: isDark ? AppColors.violet : AppColors.violetDark, isDark: isDark),
-                            _MacroChip(label: 'K${totalCarbs.toStringAsFixed(0)}', color: isDark ? AppColors.amber : AppColors.amberDark, isDark: isDark),
-                            _MacroChip(label: 'Y${totalFat.toStringAsFixed(0)}', color: isDark ? AppColors.coral : AppColors.coralDark, isDark: isDark),
-                          ],
-                        ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Date header
+              Padding(
+                padding: const EdgeInsets.only(top: 4, bottom: 10),
+                child: Row(
+                  children: [
+                    Text(
+                      dateLabel,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: isDark
+                            ? AppColors.darkText
+                            : AppColors.lightText,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${dt.day}/${dt.month}',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: textMuted,
+                      ),
+                    ),
+                    const Spacer(),
+                    Flexible(
+                      child: Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        alignment: WrapAlignment.end,
+                        children: [
+                          _MacroChip(
+                            label: '${totalCal.toStringAsFixed(0)}kcal',
+                            color: calColor,
+                            isDark: isDark,
+                          ),
+                          _MacroChip(
+                            label: 'P${totalProt.toStringAsFixed(0)}',
+                            color: isDark
+                                ? AppColors.violet
+                                : AppColors.violetDark,
+                            isDark: isDark,
+                          ),
+                          _MacroChip(
+                            label: 'K${totalCarbs.toStringAsFixed(0)}',
+                            color: isDark
+                                ? AppColors.amber
+                                : AppColors.amberDark,
+                            isDark: isDark,
+                          ),
+                          _MacroChip(
+                            label: 'Y${totalFat.toStringAsFixed(0)}',
+                            color: isDark
+                                ? AppColors.coral
+                                : AppColors.coralDark,
+                            isDark: isDark,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                // Meal cards
-                ...items.map((a) => _HistoryCard(
+              ),
+              // Meal cards
+              ...items.map(
+                (a) => _HistoryCard(
                   key: Key(a.id),
                   analysis: a,
                   isDark: isDark,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(analysis: a))),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ResultScreen(analysis: a),
+                    ),
+                  ),
                   onDelete: () => provider.deleteAnalysis(a.id),
                   onFavorite: () => provider.toggleFavorite(a),
-                )),
-                const SizedBox(height: 8),
-              ],
-            );
-          },
-          childCount: dates.length,
-        ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          );
+        }, childCount: dates.length),
       ),
     );
   }
@@ -195,7 +315,11 @@ class _MacroChip extends StatelessWidget {
   final String label;
   final Color color;
   final bool isDark;
-  const _MacroChip({required this.label, required this.color, required this.isDark});
+  const _MacroChip({
+    required this.label,
+    required this.color,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +329,14 @@ class _MacroChip extends StatelessWidget {
         color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
+      ),
     );
   }
 }
@@ -228,10 +359,14 @@ class _HistoryCard extends StatelessWidget {
 
   String _categoryEmoji(MealCategory cat) {
     switch (cat) {
-      case MealCategory.breakfast: return '🌅';
-      case MealCategory.lunch:     return '☀️';
-      case MealCategory.dinner:    return '🌙';
-      case MealCategory.snack:     return '🍎';
+      case MealCategory.breakfast:
+        return '🌅';
+      case MealCategory.lunch:
+        return '☀️';
+      case MealCategory.dinner:
+        return '🌙';
+      case MealCategory.snack:
+        return '🍎';
     }
   }
 
@@ -239,10 +374,13 @@ class _HistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final textMuted = isDark
+        ? AppColors.darkTextMuted
+        : const Color(0xFFAAAAAA);
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
     final iconBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final time = '${analysis.analyzedAt.hour.toString().padLeft(2, '0')}:${analysis.analyzedAt.minute.toString().padLeft(2, '0')}';
+    final time =
+        '${analysis.analyzedAt.hour.toString().padLeft(2, '0')}:${analysis.analyzedAt.minute.toString().padLeft(2, '0')}';
 
     return Dismissible(
       key: Key(analysis.id),
@@ -255,7 +393,11 @@ class _HistoryCard extends StatelessWidget {
           color: AppColors.coral.withOpacity(0.15),
           borderRadius: BorderRadius.circular(14),
         ),
-        child: const Icon(Icons.delete_rounded, color: AppColors.coral, size: 22),
+        child: const Icon(
+          Icons.delete_rounded,
+          color: AppColors.coral,
+          size: 22,
+        ),
       ),
       onDismissed: (_) => onDelete(),
       child: GestureDetector(
@@ -266,7 +408,9 @@ class _HistoryCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(14),
-            border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+            border: isDark
+                ? null
+                : Border.all(color: AppColors.lightBorder, width: 0.5),
           ),
           child: Row(
             children: [
@@ -277,15 +421,26 @@ class _HistoryCard extends StatelessWidget {
                     tag: 'food_image_${analysis.id}',
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: _Thumb(path: analysis.imagePath, bg: iconBg, iconColor: textMuted),
+                      child: _Thumb(
+                        path: analysis.imagePath,
+                        bg: iconBg,
+                        iconColor: textMuted,
+                      ),
                     ),
                   ),
                   Positioned(
-                    bottom: 3, right: 3,
+                    bottom: 3,
+                    right: 3,
                     child: Container(
                       padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(6)),
-                      child: Text(_categoryEmoji(analysis.mealCategory), style: const TextStyle(fontSize: 11)),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        _categoryEmoji(analysis.mealCategory),
+                        style: const TextStyle(fontSize: 11),
+                      ),
                     ),
                   ),
                 ],
@@ -297,21 +452,53 @@ class _HistoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      analysis.foods.isNotEmpty ? analysis.foods.first.nameTr : analysis.summary,
+                      analysis.foods.isNotEmpty
+                          ? analysis.foods.first.nameTr
+                          : analysis.summary,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textPrimary),
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w500,
+                        color: textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 4),
-                    Row(children: [
-                      Text(time, style: TextStyle(fontSize: 11, color: textMuted)),
-                      const SizedBox(width: 8),
-                      _MiniMacro(value: '${analysis.totalNutrients.protein.toStringAsFixed(0)}g', label: 'P', color: isDark ? AppColors.violet : AppColors.violetDark),
-                      const SizedBox(width: 4),
-                      _MiniMacro(value: '${analysis.totalNutrients.carbs.toStringAsFixed(0)}g', label: 'K', color: isDark ? AppColors.amber : AppColors.amberDark),
-                      const SizedBox(width: 4),
-                      _MiniMacro(value: '${analysis.totalNutrients.fat.toStringAsFixed(0)}g', label: 'Y', color: isDark ? AppColors.coral : AppColors.coralDark),
-                    ]),
+                    Row(
+                      children: [
+                        Text(
+                          time,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w400,
+                            color: textMuted,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _MiniMacro(
+                          value:
+                              '${analysis.totalNutrients.protein.toStringAsFixed(0)}g',
+                          label: 'P',
+                          color: isDark
+                              ? AppColors.violet
+                              : AppColors.violetDark,
+                        ),
+                        const SizedBox(width: 4),
+                        _MiniMacro(
+                          value:
+                              '${analysis.totalNutrients.carbs.toStringAsFixed(0)}g',
+                          label: 'K',
+                          color: isDark ? AppColors.amber : AppColors.amberDark,
+                        ),
+                        const SizedBox(width: 4),
+                        _MiniMacro(
+                          value:
+                              '${analysis.totalNutrients.fat.toStringAsFixed(0)}g',
+                          label: 'Y',
+                          color: isDark ? AppColors.coral : AppColors.coralDark,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -325,14 +512,33 @@ class _HistoryCard extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Icon(
-                        analysis.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        analysis.isFavorite
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
                         size: 16,
-                        color: analysis.isFavorite ? AppColors.coral : textMuted,
+                        color: analysis.isFavorite
+                            ? AppColors.coral
+                            : textMuted,
                       ),
                     ),
                   ),
-                  Text(analysis.totalCalories.toStringAsFixed(0), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: calColor, height: 1)),
-                  Text('kcal', style: TextStyle(fontSize: 10, color: textMuted)),
+                  Text(
+                    analysis.totalCalories.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: calColor,
+                      height: 1,
+                    ),
+                  ),
+                  Text(
+                    'kcal',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w400,
+                      color: textMuted,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -346,15 +552,32 @@ class _HistoryCard extends StatelessWidget {
 class _MiniMacro extends StatelessWidget {
   final String value, label;
   final Color color;
-  const _MiniMacro({required this.value, required this.label, required this.color});
+  const _MiniMacro({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(mainAxisSize: MainAxisSize.min, children: [
-      Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: color)),
-      const SizedBox(width: 1),
-      Text(value, style: TextStyle(fontSize: 10, color: color.withOpacity(0.8))),
-    ]);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 1),
+        Text(
+          value,
+          style: TextStyle(fontSize: 10, color: color.withOpacity(0.8)),
+        ),
+      ],
+    );
   }
 }
 
@@ -370,7 +593,8 @@ class _Thumb extends StatelessWidget {
       return Image.file(file, width: 52, height: 52, fit: BoxFit.cover);
     }
     return Container(
-      width: 52, height: 52,
+      width: 52,
+      height: 52,
       color: bg,
       child: Icon(Icons.restaurant_rounded, color: iconColor, size: 22),
     );

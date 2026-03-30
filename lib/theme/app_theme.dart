@@ -6,10 +6,10 @@ class AppTypography {
   static TextStyle get displayLarge => TextStyle(fontSize: 32.sp, fontWeight: FontWeight.w800, height: 1.2);
   static TextStyle get headlineLarge => TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, height: 1.2);
   static TextStyle get titleLarge => TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800);
-  static TextStyle get titleMedium => TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700);
-  static TextStyle get bodyLarge => TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600);
-  static TextStyle get bodyMedium => TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500);
-  static TextStyle get bodySmall => TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500);
+  static TextStyle get titleMedium => TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700);
+  static TextStyle get bodyLarge => TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700);
+  static TextStyle get bodyMedium => TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w500);
+  static TextStyle get bodySmall => TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w400);
   static TextStyle get labelSmall => TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600);
 }
 
