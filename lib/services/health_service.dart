@@ -4,7 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class HealthService {
   static const _prefKey = 'healthEnabled';
 
-  static final _types = [
+  // Write types
+  static final _writeTypes = [
     HealthDataType.DIETARY_ENERGY_CONSUMED,
     HealthDataType.DIETARY_PROTEIN_CONSUMED,
     HealthDataType.DIETARY_CARBS_CONSUMED,
@@ -12,9 +13,18 @@ class HealthService {
     HealthDataType.WATER,
   ];
 
-  static final _permissions = _types
-      .map((_) => HealthDataAccess.WRITE)
-      .toList();
+  // Read types
+  static final _readTypes = [
+    HealthDataType.ACTIVE_ENERGY_BURNED,
+    HealthDataType.STEPS,
+    HealthDataType.BODY_MASS,
+  ];
+
+  static final _writePermissions =
+      _writeTypes.map((_) => HealthDataAccess.WRITE).toList();
+
+  static final _readPermissions =
+      _readTypes.map((_) => HealthDataAccess.READ).toList();
 
   // -------------------------------------------------------------------------
   // Persistence
@@ -34,14 +44,77 @@ class HealthService {
   // Permissions
   // -------------------------------------------------------------------------
 
-  /// Requests HealthKit write permissions. Returns true if granted.
   Future<bool> requestPermissions() async {
     try {
       final health = Health();
       await health.configure();
-      return await health.requestAuthorization(_types, permissions: _permissions);
+      final allTypes = [..._writeTypes, ..._readTypes];
+      final allPerms = [..._writePermissions, ..._readPermissions];
+      return await health.requestAuthorization(allTypes, permissions: allPerms);
     } catch (_) {
       return false;
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Read helpers
+  // -------------------------------------------------------------------------
+
+  /// Bugünkü aktif kalori (kcal) — Apple Watch / Fitness ring
+  Future<double> getTodayActiveCalories() async {
+    if (!await isEnabled()) return 0;
+    try {
+      final health = Health();
+      await health.configure();
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final data = await health.getHealthDataFromTypes(
+        startTime: start,
+        endTime: now,
+        types: [HealthDataType.ACTIVE_ENERGY_BURNED],
+      );
+      return data.fold<double>(
+        0,
+        (sum, p) => sum + (p.value as NumericHealthValue).numericValue.toDouble(),
+      );
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Bugünkü adım sayısı
+  Future<int> getTodaySteps() async {
+    if (!await isEnabled()) return 0;
+    try {
+      final health = Health();
+      await health.configure();
+      final now = DateTime.now();
+      final start = DateTime(now.year, now.month, now.day);
+      final steps = await health.getTotalStepsInInterval(start, now);
+      return steps ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// En son kaydedilen vücut ağırlığı (kg) — Apple Watch / Withings tartı
+  Future<double?> getLatestBodyWeight() async {
+    if (!await isEnabled()) return null;
+    try {
+      final health = Health();
+      await health.configure();
+      final now = DateTime.now();
+      final start = now.subtract(const Duration(days: 30));
+      final data = await health.getHealthDataFromTypes(
+        startTime: start,
+        endTime: now,
+        types: [HealthDataType.BODY_MASS],
+      );
+      if (data.isEmpty) return null;
+      data.sort((a, b) => b.dateFrom.compareTo(a.dateFrom));
+      return (data.first.value as NumericHealthValue).numericValue.toDouble();
+    } catch (_) {
+      return null;
     }
   }
 
@@ -49,8 +122,6 @@ class HealthService {
   // Write helpers
   // -------------------------------------------------------------------------
 
-  /// Logs a meal's nutrition data to Apple Health.
-  /// Silently swallows errors — Health sync is best-effort.
   Future<void> logMeal({
     required double calories,
     required double protein,
@@ -97,12 +168,9 @@ class HealthService {
             unit: HealthDataUnit.GRAM,
           ),
       ]);
-    } catch (_) {
-      // Best-effort — don't block the user
-    }
+    } catch (_) {}
   }
 
-  /// Logs today's cumulative water intake to Apple Health.
   Future<void> logWater({
     required double liters,
     required DateTime time,
@@ -119,8 +187,6 @@ class HealthService {
         endTime: time.add(const Duration(seconds: 1)),
         unit: HealthDataUnit.LITER,
       );
-    } catch (_) {
-      // Best-effort
-    }
+    } catch (_) {}
   }
 }

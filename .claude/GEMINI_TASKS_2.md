@@ -367,3 +367,79 @@ Butonlar eşit genişlikte, hafif rounded, accent rengi (cyan/mavi).
 - `app_provider.dart`'a yeni state eklerken mevcut yapıyı bozma
 - Yeni ARB key'leri önce `app_tr.arb`'a ekle, sonra diğer 9 dile çevir
 - Bitince Claude'a rapor ver, özellikle `app_provider.dart` değişikliklerini detaylı anlat
+
+---
+
+## Görev I — Apple Health Okuma Entegrasyonu
+**Öncelik: 🟡 ÖNEMLİ**
+**Dosyalar:** `lib/services/app_provider.dart`, `lib/screens/home_screen.dart`, `lib/screens/progress_screen.dart`
+
+### Arka Plan:
+`health_service.dart`'a 3 yeni READ metodu eklendi (Claude tarafından):
+- `getTodayActiveCalories()` → bugün yakılan aktif kalori (kcal)
+- `getTodaySteps()` → bugün atılan adım sayısı
+- `getLatestBodyWeight()` → en son kaydedilen vücut ağırlığı (kg)
+
+### Ne Yapılacak:
+
+**1. app_provider.dart'a state ekle:**
+```dart
+double _activeCalories = 0;
+int _todaySteps = 0;
+
+double get activeCalories => _activeCalories;
+int get todaySteps => _todaySteps;
+double get netCalories => todayCalories - _activeCalories; // yenilen - yakılan
+```
+
+**2. loadTodayStats() içine health okuma ekle:**
+```dart
+Future<void> loadTodayStats() async {
+  _todayStats = await _dbService.getTodayStats();
+  // Health verilerini arka planda yükle
+  if (_healthEnabled) {
+    _activeCalories = await _healthService.getTodayActiveCalories();
+    _todaySteps = await _healthService.getTodaySteps();
+    // Eğer Health'ten kilo geldiyse ve kullanıcı bugün kilo girmemişse güncelle
+    final latestWeight = await _healthService.getLatestBodyWeight();
+    if (latestWeight != null && latestWeight > 0) {
+      // Sadece son 24 saatte kilo log yoksa güncelle
+      final logs = await _dbService.getWeightLogs();
+      final today = DateTime.now();
+      final todayStr = '${today.year}-${today.month.toString().padLeft(2,'0')}-${today.day.toString().padLeft(2,'0')}';
+      final hasTodayLog = logs.any((l) => l['date'] == todayStr);
+      if (!hasTodayLog) {
+        await _dbService.saveWeight(latestWeight, today);
+      }
+    }
+  }
+  notifyListeners();
+  unawaited(_syncWidget());
+}
+```
+
+**3. Home screen'de göster:**
+Health aktifse ve `activeCalories > 0` ise ana sayfada kalori ring'inin altına küçük bir satır ekle:
+```
+🔥 Bugün 320 kcal yaktın  · 👟 4.250 adım
+```
+Stil: küçük, muted renk, kalori ring'inin hemen altında.
+
+**4. Progress screen'de net kalori göster:**
+Günlük tab'da kalori kartının yanına:
+```
+Net: [yenilen - yakılan] kcal
+```
+Yeşil = pozitif (hedef altında), kırmızı = negatif (hedef üstü).
+
+**ARB key'leri ekle (app_tr.arb + 9 dil):**
+```json
+"activeCalories": "Bugün {cal} kcal yaktın",
+"todaySteps": "{steps} adım",
+"netCalories": "Net: {net} kcal"
+```
+
+### Dikkat:
+- Health devre dışıysa (`_healthEnabled == false`) bu alanlar görünmez
+- Tüm Health çağrıları try/catch ile sarılı, hata fırlatmaz
+- `health_service.dart`'a dokunma, sadece mevcut metodları çağır
