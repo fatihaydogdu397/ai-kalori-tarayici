@@ -79,13 +79,14 @@
 
 ### #4 RevenueCat App Store Connect Kurulum
 **OWNER: Fatih (manuel)**
-**STATUS: ⏳ Bekliyor (App Store hesabı gerekli)**
-**Öncelik: 🟡 Orta**
+**STATUS: 🔄 Aktif — App Store hesabı alındı (2 Nisan 2026)**
+**Öncelik: 🔴 Kritik**
 **Yapılacaklar:**
-- App Store Connect'te uygulama oluştur
-- In-App Purchase ürünleri tanımla (aylık/yıllık)
-- RevenueCat dashboard'da App Store bağla
-- `RC_IOS_KEY` .env'e ekle
+- [ ] App Store Connect'te uygulama oluştur (Bundle ID: `com.ai.eatiq`)
+- [ ] In-App Purchase ürünleri tanımla (aylık/yıllık)
+- [ ] RevenueCat dashboard'da App Store bağla → API key al
+- [ ] `RC_IOS_KEY` .env'e ekle → Claude'a haber ver
+- Kılavuz: `.claude/APPSTORE_SETUP.md`
 
 ---
 
@@ -144,7 +145,7 @@
 | 1 | Haftalık/Aylık Grafikler | **Claude** | ✅ Tamamlandı |
 | 2 | Analiz Sonucu Düzenleme | **Gemini** | ✅ Tamamlandı |
 | 3 | Kilo Takibi | **Gemini** | ✅ Tamamlandı |
-| 4 | RevenueCat App Store | **Fatih** | ⏳ App Store hesabı bekleniyor |
+| 4 | RevenueCat App Store | **Fatih** | 🔄 Aktif — hesap alındı |
 | 5 | kUseMockData = false | — | ❌ İptal — canlıya almadan önce |
 | 6 | App Store Screenshots + Metadata (TR+EN) | **Gemini** | ⏳ |
 | 7 | Günlük AI Bildirimi (dinamik) | **Claude** | ⏳ |
