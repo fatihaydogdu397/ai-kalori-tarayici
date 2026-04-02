@@ -82,7 +82,7 @@
 **STATUS: 🔄 Aktif — App Store hesabı alındı (2 Nisan 2026)**
 **Öncelik: 🔴 Kritik**
 **Yapılacaklar:**
-- [ ] App Store Connect'te uygulama oluştur (Bundle ID: `com.ai.eatiq`)
+- [ ] App Store Connect'te uygulama oluştur (Bundle ID: `com.fatihaydogdu.eatiq`)
 - [ ] In-App Purchase ürünleri tanımla (aylık/yıllık)
 - [ ] RevenueCat dashboard'da App Store bağla → API key al
 - [ ] `RC_IOS_KEY` .env'e ekle → Claude'a haber ver

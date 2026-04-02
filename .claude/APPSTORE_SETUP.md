@@ -1,6 +1,6 @@
 # App Store Connect + RevenueCat Kurulum Kılavuzu
 > Fatih için adım adım rehber. Sırayla yap.
-> Bundle ID: `com.ai.eatiq` | Version: `1.0` | Build: `1`
+> Bundle ID: `com.fatihaydogdu.eatiq` | Version: `1.0` | Build: `1`
 
 ---
 
@@ -13,7 +13,7 @@
    - **Platform:** iOS
    - **Name:** eatiq - AI Kalori Tarayıcı
    - **Primary Language:** Turkish
-   - **Bundle ID:** `com.ai.eatiq` (dropdown'dan seç — Xcode'dan zaten tanımlı gelir)
+   - **Bundle ID:** `com.fatihaydogdu.eatiq` (dropdown'dan seç — Xcode'dan zaten tanımlı gelir)
    - **SKU:** `eatiq001` (herhangi bir unique string)
 4. **Create** tıkla
 
@@ -30,7 +30,7 @@
 1. **+** (Add Subscription) tıkla
 2. Doldur:
    - **Reference Name:** eatiq Premium Monthly
-   - **Product ID:** `com.ai.eatiq.premium.monthly`
+   - **Product ID:** `com.fatihaydogdu.eatiq.premium.monthly`
 3. **Create** → Sonraki sayfada:
    - **Subscription Duration:** 1 Month
    - **Price:** Schedule → seç (örn. 79,99 TRY / $2,99 USD Tier 3)
@@ -46,7 +46,7 @@
 1. Aynı subscription group'a `+` tıkla
 2. Doldur:
    - **Reference Name:** eatiq Premium Yearly
-   - **Product ID:** `com.ai.eatiq.premium.yearly`
+   - **Product ID:** `com.fatihaydogdu.eatiq.premium.yearly`
 3. **Create** → Sonraki sayfada:
    - **Subscription Duration:** 1 Year
    - **Price:** ~4-5x aylık fiyat (örn. 599,99 TRY / $19,99 USD Tier 18)
@@ -69,7 +69,7 @@
 1. Project içinde **+ Add App** → **App Store**
 2. Doldur:
    - **App Name:** eatiq
-   - **Bundle ID:** `com.ai.eatiq`
+   - **Bundle ID:** `com.fatihaydogdu.eatiq`
 3. **Save** → RevenueCat sana **iOS API Key** verecek (Public Key, `appl_...` ile başlar)
 4. Bu key'i kopyala → `.env` dosyasına `RC_IOS_KEY=appl_...` olarak ekle
 
@@ -88,18 +88,18 @@ RevenueCat'in server-side doğrulama yapabilmesi için App Store Connect API key
 
 ### 3.6 Products (Ürünler)
 1. RevenueCat → **Products** → `+`
-   - Product ID: `com.ai.eatiq.premium.monthly` → App Store'da tanımladığın ile aynı
+   - Product ID: `com.fatihaydogdu.eatiq.premium.monthly` → App Store'da tanımladığın ile aynı
    - Kaydet
 2. Tekrar `+`:
-   - Product ID: `com.ai.eatiq.premium.yearly`
+   - Product ID: `com.fatihaydogdu.eatiq.premium.yearly`
    - Kaydet
 
 ### 3.7 Offerings (Teklifler)
 1. RevenueCat → **Offerings** → `+`
 2. **Identifier:** `default`
 3. **Add Package** × 2:
-   - Package 1: Identifier `$monthly`, Product: `com.ai.eatiq.premium.monthly`
-   - Package 2: Identifier `$annual`, Product: `com.ai.eatiq.premium.yearly`
+   - Package 1: Identifier `$monthly`, Product: `com.fatihaydogdu.eatiq.premium.monthly`
+   - Package 2: Identifier `$annual`, Product: `com.fatihaydogdu.eatiq.premium.yearly`
 4. **Save**
 
 ---
