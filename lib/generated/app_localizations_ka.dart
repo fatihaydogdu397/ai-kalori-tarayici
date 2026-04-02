@@ -669,4 +669,42 @@ class AppLocalizationsKa extends AppLocalizations {
 
   @override
   String get onboardingHeightWeightSub => 'საჭიროა BMI და კალორიებისთვის.';
+
+  @override
+  String get waterToday => 'დღევანდელი წყალი';
+
+  @override
+  String get reset => 'გასუფთავება';
+
+  @override
+  String get confirmDelete => 'ყველა მონაცემი წაიშლება. დარწმუნებული ხართ?';
+
+  @override
+  String get dailySummaryTitle => 'Günün Özeti 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+  }
+
+  @override
+  String get goalAchievement => 'Hedef Başarımı';
+
+  @override
+  String get consistency => 'İstikrar';
+
+  @override
+  String get topDay => 'Zirve Gün';
+
+  @override
+  String get avgWater => 'Ort. Su';
+
+  @override
+  String get weeklyInsight => 'Haftalık Analiz';
+
+  @override
+  String get monthlyInsight => 'Aylık Analiz';
+
+  @override
+  String get mostConsumedMeal => 'En Yoğun Öğün';
 }

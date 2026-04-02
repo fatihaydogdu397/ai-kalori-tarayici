@@ -670,4 +670,43 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get onboardingHeightWeightSub =>
       'Necessário para cálculos de IMC e calorias.';
+
+  @override
+  String get waterToday => 'Água hoje';
+
+  @override
+  String get reset => 'Redefinir';
+
+  @override
+  String get confirmDelete =>
+      'Todos os dados serão redefinidos. Você tem certeza?';
+
+  @override
+  String get dailySummaryTitle => 'Günün Özeti 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+  }
+
+  @override
+  String get goalAchievement => 'Hedef Başarımı';
+
+  @override
+  String get consistency => 'İstikrar';
+
+  @override
+  String get topDay => 'Zirve Gün';
+
+  @override
+  String get avgWater => 'Ort. Su';
+
+  @override
+  String get weeklyInsight => 'Haftalık Analiz';
+
+  @override
+  String get monthlyInsight => 'Aylık Analiz';
+
+  @override
+  String get mostConsumedMeal => 'En Yoğun Öğün';
 }

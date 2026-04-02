@@ -670,8 +670,48 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onboardingAgeSub => 'Utilisé pour calculer ton métabolisme.';
 
   @override
-  String get onboardingHeightWeight => 'Taille et Poids';
+  String get onboardingHeightWeight => 'Taille et poids';
 
   @override
-  String get onboardingHeightWeightSub => 'Requis pour l\'IMC et les calories.';
+  String get onboardingHeightWeightSub =>
+      'Requis pour l\'IMC et les calories quotidiennes.';
+
+  @override
+  String get waterToday => 'Eau aujourd\'hui';
+
+  @override
+  String get reset => 'Réinitialiser';
+
+  @override
+  String get confirmDelete =>
+      'Toutes les données seront réinitialisées. Êtes-vous sûr ?';
+
+  @override
+  String get dailySummaryTitle => 'Günün Özeti 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+  }
+
+  @override
+  String get goalAchievement => 'Hedef Başarımı';
+
+  @override
+  String get consistency => 'İstikrar';
+
+  @override
+  String get topDay => 'Zirve Gün';
+
+  @override
+  String get avgWater => 'Ort. Su';
+
+  @override
+  String get weeklyInsight => 'Haftalık Analiz';
+
+  @override
+  String get monthlyInsight => 'Aylık Analiz';
+
+  @override
+  String get mostConsumedMeal => 'En Yoğun Öğün';
 }

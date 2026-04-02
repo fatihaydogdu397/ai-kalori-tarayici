@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.ai.eatiq</string>
+		<string>group.com.fatihaydogdu.eatiq</string>
 	</array>
 </dict>
 </plist>

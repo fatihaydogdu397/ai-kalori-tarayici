@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
@@ -27,7 +28,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) setState(() => _notifSettings = s);
   }
 
-  Future<void> _saveAndApply(NotificationSettings s) async {
+  Future<void> _saveAndApply(NotificationSettings s, AppProvider provider) async {
     setState(() => _notifSettings = s);
     await s.save();
     if (s.enabled) {
@@ -35,6 +36,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!granted) return;
     }
     await s.apply();
+    if (s.enabled && s.summaryEnabled && mounted) {
+      await provider.syncNotification(AppLocalizations.of(context));
+    }
   }
 
   Future<void> _pickTime(
@@ -87,11 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 title: Text(
                   l.settings,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: textPrimary,
-                  ),
+                  style: AppTypography.titleLarge.copyWith(color: textPrimary),
                 ),
               ),
               SliverToBoxAdapter(
@@ -270,6 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 value: _notifSettings.enabled,
                                 onChanged: (v) => _saveAndApply(
                                   _notifSettings.copyWith(enabled: v),
+                                  provider,
                                 ),
                                 activeColor: AppColors.lime,
                                 activeTrackColor: AppColors.lime.withOpacity(
@@ -294,11 +295,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 accent: accent,
                                 onToggle: (v) => _saveAndApply(
                                   _notifSettings.copyWith(breakfastEnabled: v),
+                                  provider,
                                 ),
                                 onTimeTap: () => _pickTime(
                                   _notifSettings.breakfastTime,
                                   (t) => _saveAndApply(
                                     _notifSettings.copyWith(breakfastTime: t),
+                                    provider,
                                   ),
                                 ),
                                 showDivider: true,
@@ -315,11 +318,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 accent: accent,
                                 onToggle: (v) => _saveAndApply(
                                   _notifSettings.copyWith(lunchEnabled: v),
+                                  provider,
                                 ),
                                 onTimeTap: () => _pickTime(
                                   _notifSettings.lunchTime,
                                   (t) => _saveAndApply(
                                     _notifSettings.copyWith(lunchTime: t),
+                                    provider,
                                   ),
                                 ),
                                 showDivider: true,
@@ -336,13 +341,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 accent: accent,
                                 onToggle: (v) => _saveAndApply(
                                   _notifSettings.copyWith(dinnerEnabled: v),
+                                  provider,
                                 ),
                                 onTimeTap: () => _pickTime(
                                   _notifSettings.dinnerTime,
                                   (t) => _saveAndApply(
                                     _notifSettings.copyWith(dinnerTime: t),
+                                    provider,
                                   ),
                                 ),
+                                showDivider: true,
+                              ),
+                              _ReminderRow(
+                                emoji: '📊',
+                                label: l.dailySummaryTitle,
+                                enabled: _notifSettings.summaryEnabled,
+                                time: const TimeOfDay(hour: 20, minute: 0),
+                                isDark: isDark,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                divColor: divColor,
+                                accent: accent,
+                                onToggle: (v) => _saveAndApply(
+                                  _notifSettings.copyWith(summaryEnabled: v),
+                                  provider,
+                                ),
+                                onTimeTap: () {}, // Sabit saat
                                 showDivider: false,
                               ),
                             ],
@@ -531,7 +555,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   child: Text(
                     l.save,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
                     ),
@@ -558,9 +582,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     label.toUpperCase(),
-    style: TextStyle(
-      fontSize: 10,
-      fontWeight: FontWeight.w700,
+    style: AppTypography.labelSmall.copyWith(
       color: textMuted,
       letterSpacing: 0.8,
     ),
@@ -596,7 +618,7 @@ class _SettingRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: TextStyle(fontSize: 14.sp, color: textPrimary),
+                style: AppTypography.bodyLarge.copyWith(color: textPrimary),
               ),
             ),
             trailing,
@@ -646,7 +668,7 @@ class _ReminderRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 14.sp, color: textPrimary),
+                  style: AppTypography.bodyLarge.copyWith(color: textPrimary),
                 ),
               ),
               if (enabled)
@@ -810,7 +832,6 @@ class _LangTile extends StatelessWidget {
                                 lang.$1.toUpperCase(),
                                 style: TextStyle(
                                   fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
                                   color: textMuted,
                                   fontWeight: FontWeight.w600,
                                 ),

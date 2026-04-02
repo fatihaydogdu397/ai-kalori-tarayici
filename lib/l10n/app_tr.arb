@@ -290,5 +290,24 @@
   "onboardingAge": "Kaç yaşındasın?",
   "onboardingAgeSub": "Metabolizma hızını hesaplamak için gerekli.",
   "onboardingHeightWeight": "Boy ve Kilo",
-  "onboardingHeightWeightSub": "VKI ve günlük kalori ihtiyacın için gerekli."
+  "onboardingHeightWeightSub": "VKI ve günlük kalori ihtiyacın için gerekli.",
+  "waterToday": "Bugünkü Su",
+  "reset": "Sıfırla",
+  "confirmDelete": "Tüm veriler sıfırlanacak. Emin misiniz?",
+  "dailySummaryTitle": "Günün Özeti 📊",
+  "dailySummaryBody": "Bugün {cal}/{goal} kcal ve {water}L su tükettin. Harika gidiyorsun!",
+  "@dailySummaryBody": {
+    "placeholders": {
+      "cal": { "type": "String" },
+      "goal": { "type": "String" },
+      "water": { "type": "String" }
+    }
+  },
+  "goalAchievement": "Hedef Başarımı",
+  "consistency": "İstikrar",
+  "topDay": "Zirve Gün",
+  "avgWater": "Ort. Su",
+  "weeklyInsight": "Haftalık Analiz",
+  "monthlyInsight": "Aylık Analiz",
+  "mostConsumedMeal": "En Yoğun Öğün"
 }

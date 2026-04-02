@@ -10,6 +10,8 @@ import 'ai_service.dart';
 import 'database_service.dart';
 import 'health_service.dart';
 import 'widget_service.dart';
+import 'notification_service.dart';
+import '../generated/app_localizations.dart';
 
 enum AnalysisState { idle, loading, success, error }
 
@@ -168,6 +170,15 @@ class AppProvider extends ChangeNotifier {
         time: analysis.analyzedAt,
       ),
     );
+  }
+
+  Future<void> duplicateAnalysisToToday(FoodAnalysis analysis) async {
+    final newAnalysis = analysis.copyWith(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      analyzedAt: DateTime.now(),
+      mealCategory: MealCategoryX.fromTime(DateTime.now()),
+    );
+    await saveManualEntry(newAnalysis);
   }
 
   Future<void> updateAnalysis(FoodAnalysis analysis) async {
@@ -392,6 +403,15 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> syncNotification(AppLocalizations l) async {
+    await NotificationService.updateDailySummary(
+      l,
+      calories: _todayStats['calories'] ?? 0,
+      goal: _dailyCalorieGoal,
+      water: _waterToday,
+    );
+  }
+
   Future<void> setLocale(Locale locale) async {
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
@@ -525,25 +545,82 @@ class AppProvider extends ChangeNotifier {
     unawaited(_syncWidget());
   }
 
+  /// Resets today's water to zero.
+  Future<void> resetWater() async {
+    _waterToday = 0.0;
+    await _dbService.saveWater(0.0, DateTime.now());
+    notifyListeners();
+    unawaited(_syncWidget());
+  }
+
   // ---------------------------------------------------------------------------
   // Weekly stats
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // Weekly & Monthly Stats
   // ---------------------------------------------------------------------------
 
   List<Map<String, dynamic>> _weeklyStats = [];
   List<Map<String, dynamic>> get weeklyStats => _weeklyStats;
 
-  /// Loads the last 7 days of aggregated nutrition data from the database.
-  Future<void> loadWeeklyStats() async {
-    _weeklyStats = await _dbService.getWeeklyStats();
-    notifyListeners();
-  }
-
   List<Map<String, dynamic>> _monthlyStats = [];
   List<Map<String, dynamic>> get monthlyStats => _monthlyStats;
 
-  /// Loads the last 30 days of aggregated nutrition data from the database.
+  Map<String, dynamic> _weeklyInsights = {};
+  Map<String, dynamic> get weeklyInsights => _weeklyInsights;
+
+  Map<String, dynamic> _monthlyInsights = {};
+  Map<String, dynamic> get monthlyInsights => _monthlyInsights;
+
+  /// Loads the last 7 days of aggregated nutrition data and calculates insights.
+  Future<void> loadWeeklyStats() async {
+    _weeklyStats = await _dbService.getWeeklyStats();
+    final topMeal = await _dbService.getTopMealCategory(7);
+    _weeklyInsights = _calculateInsights(_weeklyStats, 7, topMeal);
+    notifyListeners();
+  }
+
+  /// Loads the last 30 days of aggregated nutrition data and calculates insights.
   Future<void> loadMonthlyStats() async {
     _monthlyStats = await _dbService.getMonthlyStats();
+    final topMeal = await _dbService.getTopMealCategory(30);
+    _monthlyInsights = _calculateInsights(_monthlyStats, 30, topMeal);
     notifyListeners();
+  }
+
+  Map<String, dynamic> _calculateInsights(List<Map<String, dynamic>> stats, int days, String? topMeal) {
+    if (stats.isEmpty) return {};
+
+    double totalCal = 0;
+    double totalWater = 0;
+    int goalMetDays = 0;
+    double maxCal = 0;
+    String topDay = '';
+
+    for (final day in stats) {
+      final cal = day['calories'] as double;
+      final water = day['water'] as double;
+      totalCal += cal;
+      totalWater += water;
+
+      if (cal > 0 && cal <= _dailyCalorieGoal * 1.1 && cal >= _dailyCalorieGoal * 0.9) {
+        goalMetDays++;
+      }
+
+      if (cal > maxCal) {
+        maxCal = cal;
+        topDay = day['date'];
+      }
+    }
+
+    return {
+      'avgCal': totalCal / days,
+      'avgWater': totalWater / days,
+      'goalAchievement': (totalCal / (days * _dailyCalorieGoal)) * 100,
+      'consistencyScore': (goalMetDays / days) * 100,
+      'topDay': topDay,
+      'topMeal': topMeal,
+    };
   }
 }

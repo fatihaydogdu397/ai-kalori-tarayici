@@ -288,5 +288,24 @@
   "onboardingAge": "How old are you?",
   "onboardingAgeSub": "Used to calculate your metabolic rate.",
   "onboardingHeightWeight": "Height & Weight",
-  "onboardingHeightWeightSub": "Required for BMI and daily calories."
+  "onboardingHeightWeightSub": "Required for BMI and daily calories.",
+  "waterToday": "Today's Water",
+  "reset": "Reset",
+  "confirmDelete": "All data will be reset. Are you sure?",
+  "dailySummaryTitle": "Daily Summary 📊",
+  "dailySummaryBody": "Today you've consumed {cal}/{goal} kcal and {water}L water. Great job!",
+  "@dailySummaryBody": {
+    "placeholders": {
+      "cal": { "type": "String" },
+      "goal": { "type": "String" },
+      "water": { "type": "String" }
+    }
+  },
+  "goalAchievement": "Goal Achievement",
+  "consistency": "Consistency",
+  "topDay": "Top Day",
+  "avgWater": "Avg Water",
+  "weeklyInsight": "Weekly Analysis",
+  "monthlyInsight": "Monthly Analysis",
+  "mostConsumedMeal": "Top Meal"
 }

@@ -667,4 +667,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingHeightWeightSub =>
       'Required for BMI and daily calories.';
+
+  @override
+  String get waterToday => 'Today\'s Water';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get confirmDelete => 'All data will be reset. Are you sure?';
+
+  @override
+  String get dailySummaryTitle => 'Daily Summary 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Today you\'ve consumed $cal/$goal kcal and ${water}L water. Great job!';
+  }
+
+  @override
+  String get goalAchievement => 'Goal Achievement';
+
+  @override
+  String get consistency => 'Consistency';
+
+  @override
+  String get topDay => 'Top Day';
+
+  @override
+  String get avgWater => 'Avg Water';
+
+  @override
+  String get weeklyInsight => 'Weekly Analysis';
+
+  @override
+  String get monthlyInsight => 'Monthly Analysis';
+
+  @override
+  String get mostConsumedMeal => 'Top Meal';
 }

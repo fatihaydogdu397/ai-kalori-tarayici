@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
+import '../generated/app_localizations.dart';
 
 class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
@@ -44,6 +45,21 @@ class NotificationService {
     );
   }
 
+  static Future<void> updateDailySummary(AppLocalizations l, {required double calories, required double goal, required double water}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final isEnabled = prefs.getBool(kPrefNotifSummaryEnabled) ?? true;
+    if (!isEnabled) return;
+
+    final title = l.dailySummaryTitle;
+    final body = l.dailySummaryBody(
+      calories.toStringAsFixed(0),
+      goal.toStringAsFixed(0),
+      (water / 1000).toStringAsFixed(1),
+    );
+
+    await scheduleDaily(kNotifSummary, const TimeOfDay(hour: 20, minute: 0), title, body);
+  }
+
   static Future<void> cancel(int id) => _plugin.cancel(id);
 
   static Future<void> cancelAll() => _plugin.cancelAll();
@@ -60,6 +76,7 @@ class NotificationService {
 const kNotifBreakfast = 1;
 const kNotifLunch = 2;
 const kNotifDinner = 3;
+const kNotifSummary = 4;
 
 // SharedPrefs keys
 const kPrefNotifEnabled = 'notif_enabled';
@@ -70,6 +87,7 @@ const kPrefNotifBreakfastHour = 'notif_breakfast_hour';
 const kPrefNotifBreakfastMin = 'notif_breakfast_min';
 const kPrefNotifLunchHour = 'notif_lunch_hour';
 const kPrefNotifLunchMin = 'notif_lunch_min';
+const kPrefNotifSummaryEnabled = 'notif_summary_enabled';
 const kPrefNotifDinnerHour = 'notif_dinner_hour';
 const kPrefNotifDinnerMin = 'notif_dinner_min';
 
@@ -82,11 +100,14 @@ class NotificationSettings {
   final TimeOfDay lunchTime;
   final TimeOfDay dinnerTime;
 
+  final bool summaryEnabled;
+
   const NotificationSettings({
     this.enabled = true,
     this.breakfastEnabled = true,
     this.lunchEnabled = true,
     this.dinnerEnabled = true,
+    this.summaryEnabled = true,
     this.breakfastTime = const TimeOfDay(hour: 8, minute: 0),
     this.lunchTime = const TimeOfDay(hour: 12, minute: 30),
     this.dinnerTime = const TimeOfDay(hour: 19, minute: 0),
@@ -99,6 +120,7 @@ class NotificationSettings {
       breakfastEnabled: prefs.getBool(kPrefNotifBreakfastEnabled) ?? true,
       lunchEnabled: prefs.getBool(kPrefNotifLunchEnabled) ?? true,
       dinnerEnabled: prefs.getBool(kPrefNotifDinnerEnabled) ?? true,
+      summaryEnabled: prefs.getBool(kPrefNotifSummaryEnabled) ?? true,
       breakfastTime: TimeOfDay(hour: prefs.getInt(kPrefNotifBreakfastHour) ?? 8, minute: prefs.getInt(kPrefNotifBreakfastMin) ?? 0),
       lunchTime: TimeOfDay(hour: prefs.getInt(kPrefNotifLunchHour) ?? 12, minute: prefs.getInt(kPrefNotifLunchMin) ?? 30),
       dinnerTime: TimeOfDay(hour: prefs.getInt(kPrefNotifDinnerHour) ?? 19, minute: prefs.getInt(kPrefNotifDinnerMin) ?? 0),
@@ -111,6 +133,7 @@ class NotificationSettings {
     await prefs.setBool(kPrefNotifBreakfastEnabled, breakfastEnabled);
     await prefs.setBool(kPrefNotifLunchEnabled, lunchEnabled);
     await prefs.setBool(kPrefNotifDinnerEnabled, dinnerEnabled);
+    await prefs.setBool(kPrefNotifSummaryEnabled, summaryEnabled);
     await prefs.setInt(kPrefNotifBreakfastHour, breakfastTime.hour);
     await prefs.setInt(kPrefNotifBreakfastMin, breakfastTime.minute);
     await prefs.setInt(kPrefNotifLunchHour, lunchTime.hour);
@@ -139,16 +162,20 @@ class NotificationSettings {
     } else {
       await NotificationService.cancel(kNotifDinner);
     }
+    if (!summaryEnabled) {
+      await NotificationService.cancel(kNotifSummary);
+    }
   }
 
   NotificationSettings copyWith({
-    bool? enabled, bool? breakfastEnabled, bool? lunchEnabled, bool? dinnerEnabled,
+    bool? enabled, bool? breakfastEnabled, bool? lunchEnabled, bool? dinnerEnabled, bool? summaryEnabled,
     TimeOfDay? breakfastTime, TimeOfDay? lunchTime, TimeOfDay? dinnerTime,
   }) => NotificationSettings(
     enabled: enabled ?? this.enabled,
     breakfastEnabled: breakfastEnabled ?? this.breakfastEnabled,
     lunchEnabled: lunchEnabled ?? this.lunchEnabled,
     dinnerEnabled: dinnerEnabled ?? this.dinnerEnabled,
+    summaryEnabled: summaryEnabled ?? this.summaryEnabled,
     breakfastTime: breakfastTime ?? this.breakfastTime,
     lunchTime: lunchTime ?? this.lunchTime,
     dinnerTime: dinnerTime ?? this.dinnerTime,

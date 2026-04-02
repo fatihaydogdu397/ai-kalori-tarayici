@@ -287,6 +287,9 @@
   "onboardingGenderSub": "Используется для расчета обмена веществ.",
   "onboardingAge": "Сколько вам лет?",
   "onboardingAgeSub": "Используется для расчета обмена веществ.",
-  "onboardingHeightWeight": "Рост и Вес",
-  "onboardingHeightWeightSub": "Необходимо для ИМТ и калорий."
+  "onboardingHeightWeight": "Рост и вес",
+  "onboardingHeightWeightSub": "Необходимо для ИМТ и дневных калорий.",
+  "waterToday": "Вода сегодня",
+  "reset": "Сброс",
+  "confirmDelete": "Все данные будут сброшены. Вы уверены?"
 }

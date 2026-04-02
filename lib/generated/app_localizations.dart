@@ -1379,6 +1379,78 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'VKI ve günlük kalori ihtiyacın için gerekli.'**
   String get onboardingHeightWeightSub;
+
+  /// No description provided for @waterToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugünkü Su'**
+  String get waterToday;
+
+  /// No description provided for @reset.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sıfırla'**
+  String get reset;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tüm veriler sıfırlanacak. Emin misiniz?'**
+  String get confirmDelete;
+
+  /// No description provided for @dailySummaryTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günün Özeti 📊'**
+  String get dailySummaryTitle;
+
+  /// No description provided for @dailySummaryBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün {cal}/{goal} kcal ve {water}L su tükettin. Harika gidiyorsun!'**
+  String dailySummaryBody(String cal, String goal, String water);
+
+  /// No description provided for @goalAchievement.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef Başarımı'**
+  String get goalAchievement;
+
+  /// No description provided for @consistency.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstikrar'**
+  String get consistency;
+
+  /// No description provided for @topDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Zirve Gün'**
+  String get topDay;
+
+  /// No description provided for @avgWater.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ort. Su'**
+  String get avgWater;
+
+  /// No description provided for @weeklyInsight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftalık Analiz'**
+  String get weeklyInsight;
+
+  /// No description provided for @monthlyInsight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık Analiz'**
+  String get monthlyInsight;
+
+  /// No description provided for @mostConsumedMeal.
+  ///
+  /// In tr, this message translates to:
+  /// **'En Yoğun Öğün'**
+  String get mostConsumedMeal;
 }
 
 class _AppLocalizationsDelegate

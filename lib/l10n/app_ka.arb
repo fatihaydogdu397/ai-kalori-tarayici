@@ -288,5 +288,8 @@
   "onboardingAge": "რამდენი წლის ხართ?",
   "onboardingAgeSub": "გამოიყენება მეტაბოლიზმის სიჩქარის გამოსათვლელად.",
   "onboardingHeightWeight": "სიმაღლე და წონა",
-  "onboardingHeightWeightSub": "საჭიროა BMI და კალორიებისთვის."
+  "onboardingHeightWeightSub": "საჭიროა BMI და კალორიებისთვის.",
+  "waterToday": "დღევანდელი წყალი",
+  "reset": "გასუფთავება",
+  "confirmDelete": "ყველა მონაცემი წაიშლება. დარწმუნებული ხართ?"
 }

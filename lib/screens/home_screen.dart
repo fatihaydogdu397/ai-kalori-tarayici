@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../models/food_analysis.dart';
 import '../generated/app_localizations.dart';
 import '../widgets/portion_picker_sheet.dart';
+import '../widgets/liquid_wave_progress.dart';
 import 'result_screen.dart';
 import 'progress_screen.dart';
 import 'profile_screen.dart';
@@ -36,10 +37,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final picked = await _picker.pickImage(source: source, imageQuality: 85, maxWidth: 1920, maxHeight: 1920);
+    final picked = await _picker.pickImage(
+      source: source,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 85,
+    );
     if (picked == null || !mounted) return;
 
-    // Porsiyon & pişirme seç
+    final provider = context.read<AppProvider>();
+    if (!provider.isPremium && provider.history.length >= 20) {
+      _showPaywall();
+      return;
+    }
+
+    // PorsiyonPickerSheet aç
     final result = await showModalBottomSheet<({int grams, CookingMethod cooking})>(
       context: context,
       isScrollControlled: true,
@@ -48,25 +60,38 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (result == null || !mounted) return;
 
-    final provider = context.read<AppProvider>();
-    await provider.analyzeImage(picked.path, portionGrams: result.grams, cooking: result.cooking);
+    // AI Analizine gönder (AppProvider kendi içinde kalıcı kopyalama yapıyor)
+    await provider.analyzeImage(
+      picked.path,
+      portionGrams: result.grams,
+      cooking: result.cooking,
+    );
 
     if (!mounted) return;
     if (provider.state == AnalysisState.success && provider.currentAnalysis != null) {
       final retry = await Navigator.push<bool>(
         context,
-        MaterialPageRoute(builder: (_) => ResultScreen(analysis: provider.currentAnalysis!, allowRetry: true)),
+        MaterialPageRoute(
+          builder: (_) => ResultScreen(
+            analysis: provider.currentAnalysis!,
+            allowRetry: true,
+          ),
+        ),
       );
       provider.resetState();
       if (retry == true && mounted) {
         _pickImage(source);
       }
     } else if (provider.state == AnalysisState.error) {
+      final l = AppLocalizations.of(context);
       if (provider.errorMessage == 'limit_reached') {
         _showPaywall();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context).errorGeneric}: ${provider.errorMessage}'), backgroundColor: AppColors.coral),
+          SnackBar(
+            content: Text('${l.errorGeneric}: ${provider.errorMessage}'),
+            backgroundColor: AppColors.coral,
+          ),
         );
       }
     }
@@ -219,76 +244,211 @@ class _HomeScreenState extends State<HomeScreen> {
     final l = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accent = isDark ? AppColors.mint : AppColors.mintDark;
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (sheetCtx) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, borderRadius: BorderRadius.circular(2)),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l.waterAdd,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkText : AppColors.lightText),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(sheetCtx);
-                    _showWaterGoalEditor(context);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(color: accent.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-                    child: Text(
-                      l.waterGoal,
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: accent),
-                    ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetCtx) {
+        final provider = context.watch<AppProvider>();
+        final water = provider.waterToday;
+        final goal = provider.waterGoal;
+        final progress = (water / goal).clamp(0.0, 1.0);
+
+        return Padding(
+          padding: EdgeInsets.fromLTRB(24, 12, 24, MediaQuery.of(sheetCtx).padding.bottom + 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, borderRadius: BorderRadius.circular(2)),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(color: accent.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+                    child: Text('💧', style: TextStyle(fontSize: 24.sp)),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [0.1, 0.2, 0.25, 0.33, 0.5].map((amount) {
-                return GestureDetector(
-                  onTap: () {
-                    context.read<AppProvider>().addWater(amount);
-                    Navigator.pop(sheetCtx);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-                    decoration: BoxDecoration(color: accent.withOpacity(0.15), borderRadius: BorderRadius.circular(12)),
+                  const SizedBox(width: 14),
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('💧', style: TextStyle(fontSize: 22)),
-                        const SizedBox(height: 4),
                         Text(
-                          '${(amount * 1000).toStringAsFixed(0)}ml',
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: accent),
+                          l.waterToday,
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textPrimary),
+                        ),
+                        Text(
+                          '${water.toStringAsFixed(1)}L / ${goal.toStringAsFixed(1)}L',
+                          style: TextStyle(fontSize: 13.sp, color: textMuted, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(sheetCtx);
+                      _showWaterGoalEditor(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: isDark ? AppColors.darkSurface : AppColors.lightSurface, shape: BoxShape.circle),
+                      child: Icon(Icons.settings_outlined, size: 18, color: textMuted),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              LiquidWaveProgress(
+                progress: progress,
+                color: accent,
+                size: 140.w,
+              ),
+              const SizedBox(height: 32),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final btnWidth = (constraints.maxWidth - 24) / 2;
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _WaterActionButton(
+                        label: '+250ml',
+                        width: btnWidth,
+                        accent: accent,
+                        isDark: isDark,
+                        onTap: () async {
+                          final provider = context.read<AppProvider>();
+                          await provider.addWater(0.25);
+                          if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
+                        },
+                      ),
+                      _WaterActionButton(
+                        label: '+500ml',
+                        width: btnWidth,
+                        accent: accent,
+                        isDark: isDark,
+                        onTap: () async {
+                          final provider = context.read<AppProvider>();
+                          await provider.addWater(0.5);
+                          if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
+                        },
+                      ),
+                      _WaterActionButton(
+                        label: '+700ml',
+                        width: btnWidth,
+                        accent: accent,
+                        isDark: isDark,
+                        onTap: () async {
+                          final provider = context.read<AppProvider>();
+                          await provider.addWater(0.7);
+                          if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
+                        },
+                      ),
+                      _WaterActionButton(
+                        label: AppLocalizations.of(context).manual,
+                        width: btnWidth,
+                        accent: accent,
+                        isDark: isDark,
+                        isSecondary: true,
+                        onTap: () => _showCustomWaterEditor(context),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 32),
+              TextButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(l.reset),
+                      content: Text(l.confirmDelete),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
+                        TextButton(
+                          onPressed: () async {
+                            final provider = context.read<AppProvider>();
+                            await provider.resetWater();
+                            if (context.mounted) {
+                              provider.syncNotification(AppLocalizations.of(context));
+                              Navigator.pop(ctx);
+                            }
+                          },
+                          child: Text(l.reset, style: const TextStyle(color: AppColors.coral)),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Text(
+                  l.reset.toUpperCase(),
+                  style: TextStyle(fontSize: 12.sp, color: AppColors.coral.withOpacity(0.8), fontWeight: FontWeight.w700, letterSpacing: 1),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showCustomWaterEditor(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.mint : AppColors.mintDark;
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(l.manual, style: TextStyle(color: isDark ? AppColors.darkText : AppColors.lightText)),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'ml (örn: 330)',
+            filled: true,
+            fillColor: isDark ? AppColors.darkBg : AppColors.lightBg,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          ),
         ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
+          ElevatedButton(
+            onPressed: () {
+              final ml = double.tryParse(controller.text);
+              if (ml != null && ml > 0) {
+                final provider = context.read<AppProvider>();
+                provider.addWater(ml / 1000).then((_) {
+                  if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
+                });
+                Navigator.pop(ctx);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(l.save),
+          ),
+        ],
       ),
     );
   }
+
 
   void _showWaterGoalEditor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -577,7 +737,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                         style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: AppColors.void_),
                                       ),
                                       Text(
-                                        provider.streak == 7 ? l.streakMilestone7 : provider.streak == 30 ? l.streakMilestone30 : l.streakMotivation,
+                                        provider.streak == 7
+                                            ? l.streakMilestone7
+                                            : provider.streak == 30
+                                            ? l.streakMilestone30
+                                            : l.streakMotivation,
                                         style: TextStyle(fontSize: 12.sp, color: AppColors.void_.withOpacity(0.8)),
                                       ),
                                     ],
@@ -757,40 +921,49 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: GestureDetector(
                             onTap: () => _showAddWater(context),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 9),
+                              padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
                               decoration: BoxDecoration(
                                 color: isDark ? AppColors.darkWaterBg : AppColors.lightWaterBg,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: AppColors.mint.withOpacity(0.25), width: 1),
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(color: AppColors.mint.withOpacity(0.4), width: 1.5),
                               ),
                               child: Column(
                                 children: [
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      '${water.toStringAsFixed(1)}L',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w800,
-                                        color: isDark ? AppColors.mint : AppColors.mintDark,
-                                        height: 1.1,
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text('💧', style: TextStyle(fontSize: 14.sp)),
+                                      SizedBox(width: 4.w),
+                                      Flexible(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: Text(
+                                            '${water.toStringAsFixed(1)}L',
+                                            style: TextStyle(
+                                              fontSize: 13.sp,
+                                              fontWeight: FontWeight.w800,
+                                              color: isDark ? AppColors.mint : AppColors.mintDark,
+                                              height: 1.1,
+                                            ),
+                                          ),
+                                        ),
                                       ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4.h),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: LinearProgressIndicator(
+                                      value: waterProgress,
+                                      minHeight: 5,
+                                      backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                                      valueColor: AlwaysStoppedAnimation(isDark ? AppColors.mint : AppColors.mintDark),
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text('/ ${waterGoal.toStringAsFixed(1)}L', style: TextStyle(fontSize: 9, color: textMuted)),
-                                  const SizedBox(height: 4),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(2),
-                                      child: LinearProgressIndicator(
-                                        value: waterProgress,
-                                        minHeight: 2,
-                                        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
-                                        valueColor: AlwaysStoppedAnimation(isDark ? AppColors.mint : AppColors.mintDark),
-                                      ),
-                                    ),
+                                  SizedBox(height: 4.h),
+                                  Text(
+                                    l.waterToday,
+                                    style: AppTypography.bodySmall.copyWith(color: textMuted, fontSize: 9.sp),
                                   ),
                                 ],
                               ),
@@ -824,17 +997,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             final fav = provider.favorites[i];
                             return GestureDetector(
                               onTap: () async {
-                                final newAnalysis = FoodAnalysis(
-                                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                                  imagePath: fav.imagePath,
-                                  foods: fav.foods,
-                                  totalNutrients: fav.totalNutrients,
-                                  summary: fav.summary,
-                                  advice: fav.advice,
-                                  analyzedAt: DateTime.now(),
-                                  mealCategory: MealCategoryX.fromTime(DateTime.now()),
-                                );
-                                await context.read<AppProvider>().saveManualEntry(newAnalysis);
+                                await context.read<AppProvider>().duplicateAnalysisToToday(fav);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('✓ ${l.addedToLog}'),
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: const Duration(seconds: 2),
+                                      backgroundColor: AppColors.limeDark,
+                                    ),
+                                  );
+                                }
                               },
                               onLongPress: () => context.read<AppProvider>().toggleFavorite(fav),
                               child: Container(
@@ -1074,7 +1247,8 @@ class _MealRow extends StatelessWidget {
                         : analysis.summary.isNotEmpty
                         ? analysis.summary
                         : 'Öğün',
-                    style: AppTypography.bodyLarge.copyWith(color: textPrimary, fontWeight: FontWeight.w700),
+                    maxLines: 2,
+                    style: AppTypography.bodyLarge.copyWith(color: textPrimary, fontWeight: FontWeight.w700, overflow: TextOverflow.ellipsis),
                   ),
                   SizedBox(height: 2.h),
                   Text(_timeAgo(analysis.analyzedAt), style: AppTypography.bodySmall.copyWith(color: textMuted)),
@@ -1083,22 +1257,18 @@ class _MealRow extends StatelessWidget {
             ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkBg : AppColors.lightSurface,
-                borderRadius: BorderRadius.circular(10.r),
-              ),
+              decoration: BoxDecoration(color: isDark ? AppColors.darkBg : AppColors.lightSurface, borderRadius: BorderRadius.circular(10.r)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     analysis.totalCalories.toStringAsFixed(0),
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w800,
-                      color: calColor,
-                    ),
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: calColor),
                   ),
-                  Text('kcal', style: TextStyle(fontSize: 10.sp, color: textMuted)),
+                  Text(
+                    'kcal',
+                    style: TextStyle(fontSize: 10.sp, color: textMuted),
+                  ),
                 ],
               ),
             ),
@@ -1182,6 +1352,68 @@ class _SheetButton extends StatelessWidget {
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WaterActionButton extends StatelessWidget {
+  final String label;
+  final double width;
+  final Color accent;
+  final bool isDark;
+  final VoidCallback onTap;
+  final bool isSecondary;
+
+  const _WaterActionButton({
+    required this.label,
+    required this.width,
+    required this.accent,
+    required this.isDark,
+    required this.onTap,
+    this.isSecondary = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: width,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isSecondary
+              ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
+              : accent.withOpacity(isDark ? 0.15 : 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSecondary
+                ? (isDark ? AppColors.darkSurface : AppColors.lightBorder)
+                : accent.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: isDark
+              ? []
+              : [
+                  BoxShadow(
+                    color: accent.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w800,
+              color: isSecondary
+                  ? (isDark ? AppColors.darkText : AppColors.lightText)
+                  : (isDark ? accent : AppColors.mintDark),
+            ),
           ),
         ),
       ),

@@ -666,4 +666,42 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get onboardingHeightWeightSub =>
       'مطلوب لتحديد مؤشر كتلة الجسم والسعرات.';
+
+  @override
+  String get waterToday => 'ماء اليوم';
+
+  @override
+  String get reset => 'إعادة ضبط';
+
+  @override
+  String get confirmDelete => 'سيتم إعادة ضبط جميع البيانات. هل أنت متأكد؟';
+
+  @override
+  String get dailySummaryTitle => 'Günün Özeti 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+  }
+
+  @override
+  String get goalAchievement => 'Hedef Başarımı';
+
+  @override
+  String get consistency => 'İstikrar';
+
+  @override
+  String get topDay => 'Zirve Gün';
+
+  @override
+  String get avgWater => 'Ort. Su';
+
+  @override
+  String get weeklyInsight => 'Haftalık Analiz';
+
+  @override
+  String get monthlyInsight => 'Aylık Analiz';
+
+  @override
+  String get mostConsumedMeal => 'En Yoğun Öğün';
 }

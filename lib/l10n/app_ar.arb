@@ -288,5 +288,8 @@
   "onboardingAge": "كم عمرك؟",
   "onboardingAgeSub": "يستخدم لحساب معدل الأيض الخاص بك.",
   "onboardingHeightWeight": "الطول والوزن",
-  "onboardingHeightWeightSub": "مطلوب لتحديد مؤشر كتلة الجسم والسعرات."
+  "onboardingHeightWeightSub": "مطلوب لتحديد مؤشر كتلة الجسم والسعرات.",
+  "waterToday": "ماء اليوم",
+  "reset": "إعادة ضبط",
+  "confirmDelete": "سيتم إعادة ضبط جميع البيانات. هل أنت متأكد؟"
 }

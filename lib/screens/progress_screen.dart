@@ -267,11 +267,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text(
                 l.macroBreakdown,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: textPrimary,
-                ),
+                style: AppTypography.titleMedium.copyWith(color: textPrimary),
               ),
               SizedBox(height: 14.h),
               Builder(
@@ -405,11 +401,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text(
                 l.weeklyCalories,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: textPrimary,
-                ),
+                style: AppTypography.titleMedium.copyWith(color: textPrimary),
               ),
               SizedBox(height: 16.h),
               SizedBox(
@@ -530,11 +522,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text(
                 l.macroBreakdown,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: textPrimary,
-                ),
+                style: AppTypography.titleMedium.copyWith(color: textPrimary),
               ),
               SizedBox(height: 14.h),
               if (weekly.isEmpty)
@@ -635,6 +623,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ],
           ),
         ),
+        SizedBox(height: 16.h),
+        _AnalysisGrid(
+          insights: provider.weeklyInsights,
+          isWeekly: true,
+          isDark: isDark,
+          cardBg: cardBg,
+          textPrimary: textPrimary,
+          textMuted: textMuted,
+          accent: accent,
+          border: border,
+          l: l,
+        ),
       ],
     );
   }
@@ -693,11 +693,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text(
                 "30 Gün Trend",
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: textPrimary,
-                ),
+                style: AppTypography.titleMedium.copyWith(color: textPrimary),
               ),
               SizedBox(height: 16.h),
               SizedBox(
@@ -797,11 +793,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text(
                 l.macroBreakdown,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: textPrimary,
-                ),
+                style: AppTypography.titleMedium.copyWith(color: textPrimary),
               ),
               SizedBox(height: 14.h),
               if (monthly.isEmpty)
@@ -901,6 +893,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
             ],
           ),
+        ),
+        SizedBox(height: 16.h),
+        _AnalysisGrid(
+          insights: provider.monthlyInsights,
+          isWeekly: false,
+          isDark: isDark,
+          cardBg: cardBg,
+          textPrimary: textPrimary,
+          textMuted: textMuted,
+          accent: accent,
+          border: border,
+          l: l,
         ),
       ],
     );
@@ -1217,6 +1221,172 @@ class _MacroBar extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+class _AnalysisGrid extends StatelessWidget {
+  final Map<String, dynamic> insights;
+  final bool isWeekly, isDark;
+  final Color cardBg, textPrimary, textMuted, accent;
+  final Border? border;
+  final AppLocalizations l;
+
+  const _AnalysisGrid({
+    required this.insights,
+    required this.isWeekly,
+    required this.isDark,
+    required this.cardBg,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.accent,
+    this.border,
+    required this.l,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (insights.isEmpty) return const SizedBox.shrink();
+
+    final achievement = insights['goalAchievement'] as double;
+    final consistency = insights['consistencyScore'] as double;
+    final avgWater = insights['avgWater'] as double;
+    final topMeal = insights['topMeal'] as String?;
+
+    String mealStr = '-';
+    if (topMeal != null) {
+      if (topMeal == 'breakfast') mealStr = l.mealBreakfast;
+      if (topMeal == 'lunch') mealStr = l.mealLunch;
+      if (topMeal == 'dinner') mealStr = l.mealDinner;
+      if (topMeal == 'snack') mealStr = l.mealSnack;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            isWeekly ? l.weeklyInsight : l.monthlyInsight,
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
+          ),
+        ),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          childAspectRatio: 1.4,
+          children: [
+            _InsightItem(
+              label: l.goalAchievement,
+              value: '%${achievement.toStringAsFixed(0)}',
+              icon: Icons.track_changes_rounded,
+              iconColor: accent,
+              cardBg: cardBg,
+              border: border,
+              textPrimary: textPrimary,
+              textMuted: textMuted,
+            ),
+            _InsightItem(
+              label: l.consistency,
+              value: '%${consistency.toStringAsFixed(0)}',
+              icon: Icons.auto_awesome_rounded,
+              iconColor: AppColors.amber,
+              cardBg: cardBg,
+              border: border,
+              textPrimary: textPrimary,
+              textMuted: textMuted,
+            ),
+            _InsightItem(
+              label: l.avgWater,
+              value: '${avgWater.toStringAsFixed(1)}L',
+              icon: Icons.water_drop_rounded,
+              iconColor: Colors.blueAccent,
+              cardBg: cardBg,
+              border: border,
+              textPrimary: textPrimary,
+              textMuted: textMuted,
+            ),
+            _InsightItem(
+              label: l.mostConsumedMeal,
+              value: mealStr,
+              icon: Icons.restaurant_rounded,
+              iconColor: AppColors.coral,
+              cardBg: cardBg,
+              border: border,
+              textPrimary: textPrimary,
+              textMuted: textMuted,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _InsightItem extends StatelessWidget {
+  final String label, value;
+  final IconData icon;
+  final Color iconColor, cardBg, textPrimary, textMuted;
+  final Border? border;
+
+  const _InsightItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.iconColor,
+    required this.cardBg,
+    this.border,
+    required this.textPrimary,
+    required this.textMuted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14.r),
+        border: border,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: iconColor, size: 16.sp),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w800,
+              color: textPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -288,5 +288,8 @@
   "onboardingAge": "Qual a sua idade?",
   "onboardingAgeSub": "Usado para calcular sua taxa metabólica.",
   "onboardingHeightWeight": "Altura e Peso",
-  "onboardingHeightWeightSub": "Necessário para cálculos de IMC e calorias."
+  "onboardingHeightWeightSub": "Necessário para cálculos de IMC e calorias.",
+  "waterToday": "Água hoje",
+  "reset": "Redefinir",
+  "confirmDelete": "Todos os dados serão redefinidos. Você tem certeza?"
 }

@@ -670,4 +670,42 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get onboardingHeightWeightSub => 'Necessario per BMI e calorie.';
+
+  @override
+  String get waterToday => 'Acqua oggi';
+
+  @override
+  String get reset => 'Ripristina';
+
+  @override
+  String get confirmDelete => 'Tutti i dati verranno ripristinati. Sei sicuro?';
+
+  @override
+  String get dailySummaryTitle => 'Günün Özeti 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+  }
+
+  @override
+  String get goalAchievement => 'Hedef Başarımı';
+
+  @override
+  String get consistency => 'İstikrar';
+
+  @override
+  String get topDay => 'Zirve Gün';
+
+  @override
+  String get avgWater => 'Ort. Su';
+
+  @override
+  String get weeklyInsight => 'Haftalık Analiz';
+
+  @override
+  String get monthlyInsight => 'Aylık Analiz';
+
+  @override
+  String get mostConsumedMeal => 'En Yoğun Öğün';
 }

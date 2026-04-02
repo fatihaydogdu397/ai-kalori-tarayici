@@ -288,5 +288,8 @@
   "onboardingAge": "¿Cuántos años tienes?",
   "onboardingAgeSub": "Usado para calcular tu metabolismo.",
   "onboardingHeightWeight": "Altura y Peso",
-  "onboardingHeightWeightSub": "Necesario para el IMC y calorías."
+  "onboardingHeightWeightSub": "Necesario para el IMC y calorías.",
+  "waterToday": "Agua de hoy",
+  "reset": "Restablecer",
+  "confirmDelete": "¿Se restablecerán todos los datos. ¿Estás seguro?"
 }

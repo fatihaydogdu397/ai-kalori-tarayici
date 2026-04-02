@@ -668,4 +668,42 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get onboardingHeightWeightSub =>
       'VKI ve günlük kalori ihtiyacın için gerekli.';
+
+  @override
+  String get waterToday => 'Bugünkü Su';
+
+  @override
+  String get reset => 'Sıfırla';
+
+  @override
+  String get confirmDelete => 'Tüm veriler sıfırlanacak. Emin misiniz?';
+
+  @override
+  String get dailySummaryTitle => 'Günün Özeti 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+  }
+
+  @override
+  String get goalAchievement => 'Hedef Başarımı';
+
+  @override
+  String get consistency => 'İstikrar';
+
+  @override
+  String get topDay => 'Zirve Gün';
+
+  @override
+  String get avgWater => 'Ort. Su';
+
+  @override
+  String get weeklyInsight => 'Haftalık Analiz';
+
+  @override
+  String get monthlyInsight => 'Aylık Analiz';
+
+  @override
+  String get mostConsumedMeal => 'En Yoğun Öğün';
 }

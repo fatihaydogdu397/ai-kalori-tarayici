@@ -182,15 +182,11 @@ class DatabaseService {
   // Weekly stats
   // ---------------------------------------------------------------------------
 
-  /// Returns a list of maps with aggregated nutrition data for the last 7 days.
-  /// Each map contains: date (String), calories, protein, carbs, fat (double).
-  /// Days with no analyses are included with 0 values so the caller always gets
-  /// exactly 7 entries ordered oldest → newest.
+  /// Returns a list of maps with aggregated nutrition and water data for the last 7 days.
   Future<List<Map<String, dynamic>>> getWeeklyStats() async {
     final db = await database;
     final now = DateTime.now();
 
-    // Build a list of the last 7 date strings (oldest first)
     final dates = List.generate(7, (i) {
       final d = now.subtract(Duration(days: 6 - i));
       return '${d.year.toString().padLeft(4, '0')}-'
@@ -203,7 +199,7 @@ class DatabaseService {
     final endOfRange =
         DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-    final rows = await db.rawQuery('''
+    final mealRows = await db.rawQuery('''
       SELECT
         SUBSTR(analyzedAt, 1, 10) as date,
         SUM(totalCalories) as calories,
@@ -215,33 +211,32 @@ class DatabaseService {
       GROUP BY SUBSTR(analyzedAt, 1, 10)
     ''', [startOfRange.toIso8601String(), endOfRange.toIso8601String()]);
 
-    // Index DB results by date for O(1) lookup
-    final Map<String, Map<String, dynamic>> indexed = {
-      for (final row in rows) row['date'] as String: row,
+    final waterRows = await db.rawQuery('''
+      SELECT date, liters FROM water_log
+      WHERE date BETWEEN ? AND ?
+    ''', [dates.first, dates.last]);
+
+    final Map<String, Map<String, dynamic>> mealIndexed = {
+      for (final row in mealRows) row['date'] as String: row,
+    };
+    final Map<String, double> waterIndexed = {
+      for (final row in waterRows) row['date'] as String: (row['liters'] as num).toDouble(),
     };
 
     return dates.map((date) {
-      if (indexed.containsKey(date)) {
-        final row = indexed[date]!;
-        return <String, dynamic>{
-          'date': date,
-          'calories': (row['calories'] as num?)?.toDouble() ?? 0.0,
-          'protein': (row['protein'] as num?)?.toDouble() ?? 0.0,
-          'carbs': (row['carbs'] as num?)?.toDouble() ?? 0.0,
-          'fat': (row['fat'] as num?)?.toDouble() ?? 0.0,
-        };
-      }
+      final meal = mealIndexed[date];
       return <String, dynamic>{
         'date': date,
-        'calories': 0.0,
-        'protein': 0.0,
-        'carbs': 0.0,
-        'fat': 0.0,
+        'calories': (meal?['calories'] as num?)?.toDouble() ?? 0.0,
+        'protein': (meal?['protein'] as num?)?.toDouble() ?? 0.0,
+        'carbs': (meal?['carbs'] as num?)?.toDouble() ?? 0.0,
+        'fat': (meal?['fat'] as num?)?.toDouble() ?? 0.0,
+        'water': waterIndexed[date] ?? 0.0,
       };
     }).toList();
   }
 
-  /// Returns a list of maps with aggregated nutrition data for the last 30 days.
+  /// Returns a list of maps with aggregated nutrition and water data for the last 30 days.
   Future<List<Map<String, dynamic>>> getMonthlyStats() async {
     final db = await database;
     final now = DateTime.now();
@@ -258,7 +253,7 @@ class DatabaseService {
     final endOfRange =
         DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-    final rows = await db.rawQuery('''
+    final mealRows = await db.rawQuery('''
       SELECT
         SUBSTR(analyzedAt, 1, 10) as date,
         SUM(totalCalories) as calories,
@@ -270,30 +265,51 @@ class DatabaseService {
       GROUP BY SUBSTR(analyzedAt, 1, 10)
     ''', [startOfRange.toIso8601String(), endOfRange.toIso8601String()]);
 
-    final Map<String, Map<String, dynamic>> indexed = {
-      for (final row in rows) row['date'] as String: row,
+    final waterRows = await db.rawQuery('''
+      SELECT date, liters FROM water_log
+      WHERE date BETWEEN ? AND ?
+    ''', [dates.first, dates.last]);
+
+    final Map<String, Map<String, dynamic>> mealIndexed = {
+      for (final row in mealRows) row['date'] as String: row,
+    };
+    final Map<String, double> waterIndexed = {
+      for (final row in waterRows) row['date'] as String: (row['liters'] as num).toDouble(),
     };
 
     return dates.map((date) {
-      if (indexed.containsKey(date)) {
-        final row = indexed[date]!;
-        return <String, dynamic>{
-          'date': date,
-          'calories': (row['calories'] as num?)?.toDouble() ?? 0.0,
-          'protein': (row['protein'] as num?)?.toDouble() ?? 0.0,
-          'carbs': (row['carbs'] as num?)?.toDouble() ?? 0.0,
-          'fat': (row['fat'] as num?)?.toDouble() ?? 0.0,
-        };
-      }
+      final meal = mealIndexed[date];
       return <String, dynamic>{
         'date': date,
-        'calories': 0.0,
-        'protein': 0.0,
-        'carbs': 0.0,
-        'fat': 0.0,
+        'calories': (meal?['calories'] as num?)?.toDouble() ?? 0.0,
+        'protein': (meal?['protein'] as num?)?.toDouble() ?? 0.0,
+        'carbs': (meal?['carbs'] as num?)?.toDouble() ?? 0.0,
+        'fat': (meal?['fat'] as num?)?.toDouble() ?? 0.0,
+        'water': waterIndexed[date] ?? 0.0,
       };
     }).toList();
   }
+
+  /// Returns the most consumed meal category (by calories) in the last [days] days.
+  Future<String?> getTopMealCategory(int days) async {
+    final db = await database;
+    final now = DateTime.now();
+    final startOfRange = DateTime(now.year, now.month, now.day).subtract(Duration(days: days - 1));
+
+    final result = await db.rawQuery('''
+      SELECT mealCategory, SUM(totalCalories) as total
+      FROM analyses
+      WHERE analyzedAt >= ?
+      GROUP BY mealCategory
+      ORDER BY total DESC
+      LIMIT 1
+    ''', [startOfRange.toIso8601String()]);
+
+    if (result.isNotEmpty) return result.first['mealCategory'] as String?;
+    return null;
+  }
+
+  // --- KİLO METOTLARI ---
 
   // --- KİLO METOTLARI ---
   Future<void> saveWeight(double weight, DateTime date) async {

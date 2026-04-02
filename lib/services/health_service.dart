@@ -17,7 +17,7 @@ class HealthService {
   static final _readTypes = [
     HealthDataType.ACTIVE_ENERGY_BURNED,
     HealthDataType.STEPS,
-    HealthDataType.BODY_MASS,
+    HealthDataType.WEIGHT,
   ];
 
   static final _writePermissions =
@@ -108,7 +108,7 @@ class HealthService {
       final data = await health.getHealthDataFromTypes(
         startTime: start,
         endTime: now,
-        types: [HealthDataType.BODY_MASS],
+        types: [HealthDataType.WEIGHT],
       );
       if (data.isEmpty) return null;
       data.sort((a, b) => b.dateFrom.compareTo(a.dateFrom));

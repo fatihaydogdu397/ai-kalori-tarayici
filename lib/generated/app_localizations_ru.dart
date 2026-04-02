@@ -663,8 +663,47 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingAgeSub => 'Используется для расчета обмена веществ.';
 
   @override
-  String get onboardingHeightWeight => 'Рост и Вес';
+  String get onboardingHeightWeight => 'Рост и вес';
 
   @override
-  String get onboardingHeightWeightSub => 'Необходимо для ИМТ и калорий.';
+  String get onboardingHeightWeightSub =>
+      'Необходимо для ИМТ и дневных калорий.';
+
+  @override
+  String get waterToday => 'Вода сегодня';
+
+  @override
+  String get reset => 'Сброс';
+
+  @override
+  String get confirmDelete => 'Все данные будут сброшены. Вы уверены?';
+
+  @override
+  String get dailySummaryTitle => 'Günün Özeti 📊';
+
+  @override
+  String dailySummaryBody(String cal, String goal, String water) {
+    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+  }
+
+  @override
+  String get goalAchievement => 'Hedef Başarımı';
+
+  @override
+  String get consistency => 'İstikrar';
+
+  @override
+  String get topDay => 'Zirve Gün';
+
+  @override
+  String get avgWater => 'Ort. Su';
+
+  @override
+  String get weeklyInsight => 'Haftalık Analiz';
+
+  @override
+  String get monthlyInsight => 'Aylık Analiz';
+
+  @override
+  String get mostConsumedMeal => 'En Yoğun Öğün';
 }

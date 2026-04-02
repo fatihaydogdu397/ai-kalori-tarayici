@@ -46,10 +46,11 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _saveChanges() async {
+    final provider = context.read<AppProvider>();
     if (_portionChanged) {
-      // Sadece porsiyon değiştiğinde DB ve Provider update edilsin
-      await context.read<AppProvider>().saveManualEntry(_currentAnalysis);
+      await provider.saveManualEntry(_currentAnalysis);
     }
+    await provider.syncNotification(AppLocalizations.of(context));
     if (mounted) Navigator.pop(context, false);
   }
 

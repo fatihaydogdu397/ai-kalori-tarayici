@@ -135,12 +135,28 @@ class FoodAnalysis {
     this.isFavorite = false,
   }) : mealCategory = mealCategory ?? MealCategoryX.fromTime(analyzedAt);
 
-  FoodAnalysis copyWith({bool? isFavorite, List<FoodItem>? foods, NutrientInfo? totalNutrients}) => FoodAnalysis(
-    id: id, imagePath: imagePath, foods: foods ?? this.foods,
-    totalNutrients: totalNutrients ?? this.totalNutrients, summary: summary, advice: advice,
-    analyzedAt: analyzedAt, mealCategory: mealCategory,
-    isFavorite: isFavorite ?? this.isFavorite,
-  );
+  FoodAnalysis copyWith({
+    String? id,
+    String? imagePath,
+    List<FoodItem>? foods,
+    NutrientInfo? totalNutrients,
+    String? summary,
+    String? advice,
+    DateTime? analyzedAt,
+    MealCategory? mealCategory,
+    bool? isFavorite,
+  }) =>
+      FoodAnalysis(
+        id: id ?? this.id,
+        imagePath: imagePath ?? this.imagePath,
+        foods: foods ?? this.foods,
+        totalNutrients: totalNutrients ?? this.totalNutrients,
+        summary: summary ?? this.summary,
+        advice: advice ?? this.advice,
+        analyzedAt: analyzedAt ?? this.analyzedAt,
+        mealCategory: mealCategory ?? this.mealCategory,
+        isFavorite: isFavorite ?? this.isFavorite,
+      );
 
   FoodAnalysis copyWithScaled(double scaleFactor) {
     if (scaleFactor == 1.0) return this;

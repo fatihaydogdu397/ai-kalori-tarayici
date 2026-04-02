@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../models/food_analysis.dart';
 import '../services/app_provider.dart';
@@ -82,11 +83,7 @@ class HistoryScreen extends StatelessWidget {
                   const SizedBox(width: 12),
                   Text(
                     l.historyTitle,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: textPrimary,
-                    ),
+                    style: AppTypography.titleLarge.copyWith(color: textPrimary),
                   ),
                   const Spacer(),
                   if (totalScans > 0)
@@ -141,11 +138,7 @@ class HistoryScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             l.noScansYet,
-            style: TextStyle(
-              color: textPrimary,
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppTypography.titleMedium.copyWith(color: textPrimary),
           ),
           const SizedBox(height: 6),
           Text(
@@ -226,12 +219,8 @@ class HistoryScreen extends StatelessWidget {
                   children: [
                     Text(
                       dateLabel,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                        color: isDark
-                            ? AppColors.darkText
-                            : AppColors.lightText,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: isDark ? AppColors.darkText : AppColors.lightText,
                       ),
                     ),
                     const SizedBox(width: 6),
@@ -296,6 +285,19 @@ class HistoryScreen extends StatelessWidget {
                   ),
                   onDelete: () => provider.deleteAnalysis(a.id),
                   onFavorite: () => provider.toggleFavorite(a),
+                  onAddToToday: () async {
+                    await provider.duplicateAnalysisToToday(a);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('✓ ${l.addedToLog}'),
+                          behavior: SnackBarBehavior.floating,
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: AppColors.limeDark,
+                        ),
+                      );
+                    }
+                  },
                 ),
               ),
               const SizedBox(height: 8),
@@ -347,6 +349,7 @@ class _HistoryCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback? onFavorite;
+  final VoidCallback? onAddToToday;
 
   const _HistoryCard({
     super.key,
@@ -355,6 +358,7 @@ class _HistoryCard extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
     this.onFavorite,
+    this.onAddToToday,
   });
 
   String _categoryEmoji(MealCategory cat) {
@@ -457,11 +461,7 @@ class _HistoryCard extends StatelessWidget {
                           : analysis.summary,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                        color: textPrimary,
-                      ),
+                      style: AppTypography.bodyLarge.copyWith(color: textPrimary),
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -506,21 +506,31 @@ class _HistoryCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  GestureDetector(
-                    onTap: onFavorite,
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Icon(
-                        analysis.isFavorite
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        size: 16,
-                        color: analysis.isFavorite
-                            ? AppColors.coral
-                            : textMuted,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (onAddToToday != null)
+                        GestureDetector(
+                          onTap: onAddToToday,
+                          behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 4, right: 10),
+                            child: Icon(Icons.add_circle_outline_rounded, size: 18, color: calColor),
+                          ),
+                        ),
+                      GestureDetector(
+                        onTap: onFavorite,
+                        behavior: HitTestBehavior.opaque,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Icon(
+                            analysis.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                            size: 16,
+                            color: analysis.isFavorite ? AppColors.coral : textMuted,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                   Text(
                     analysis.totalCalories.toStringAsFixed(0),

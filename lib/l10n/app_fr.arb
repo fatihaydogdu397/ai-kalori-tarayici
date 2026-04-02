@@ -287,6 +287,9 @@
   "onboardingGenderSub": "Utilisé pour calculer ton métabolisme.",
   "onboardingAge": "Quel âge as-tu ?",
   "onboardingAgeSub": "Utilisé pour calculer ton métabolisme.",
-  "onboardingHeightWeight": "Taille et Poids",
-  "onboardingHeightWeightSub": "Requis pour l'IMC et les calories."
+  "onboardingHeightWeight": "Taille et poids",
+  "onboardingHeightWeightSub": "Requis pour l'IMC et les calories quotidiennes.",
+  "waterToday": "Eau aujourd'hui",
+  "reset": "Réinitialiser",
+  "confirmDelete": "Toutes les données seront réinitialisées. Êtes-vous sûr ?"
 }

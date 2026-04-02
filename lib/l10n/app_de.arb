@@ -288,5 +288,8 @@
   "onboardingAge": "Wie alt bist du?",
   "onboardingAgeSub": "Wird zur Berechnung der Stoffwechselrate benötigt.",
   "onboardingHeightWeight": "Größe & Gewicht",
-  "onboardingHeightWeightSub": "Erforderlich für den BMI und tägliche Kalorien."
+  "onboardingHeightWeightSub": "Erforderlich für BMI und Tageskalorien.",
+  "waterToday": "Wasser heute",
+  "reset": "Zurücksetzen",
+  "confirmDelete": "Alle Daten werden zurückgesetzt. Bist du sicher?"
 }
