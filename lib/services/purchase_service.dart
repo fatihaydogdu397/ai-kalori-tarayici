@@ -1,16 +1,18 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// RevenueCat entegrasyonu
-/// API key'leri --dart-define ile geçirin:
-/// --dart-define=RC_IOS_KEY=appl_xxx --dart-define=RC_ANDROID_KEY=goog_xxx
+/// API key'leri .env içinden okunur:
+/// RC_IOS_KEY=appl_xxx
+/// RC_ANDROID_KEY=goog_xxx
 class PurchaseService {
-  static const _iosKey = String.fromEnvironment('RC_IOS_KEY', defaultValue: '');
-  static const _androidKey = String.fromEnvironment('RC_ANDROID_KEY', defaultValue: '');
+  static String get _iosKey => dotenv.env['RC_IOS_KEY'] ?? '';
+  static String get _androidKey => dotenv.env['RC_ANDROID_KEY'] ?? '';
 
-  static const monthlyId = 'eatiq_pro_monthly';   // ₺149/ay
-  static const yearlyId = 'eatiq_pro_yearly';     // ₺999/yıl
+  static const monthlyId = 'com.fatihaydogdu.eatiq.premium.monthly';
+  static const yearlyId = 'com.fatihaydogdu.eatiq.premium.yearly';
 
   static Future<void> init() async {
     if (_iosKey.isEmpty && _androidKey.isEmpty) {
@@ -27,7 +29,7 @@ class PurchaseService {
   static Future<bool> checkPremium() async {
     try {
       final info = await Purchases.getCustomerInfo();
-      return info.entitlements.active.containsKey('pro');
+      return info.entitlements.active.containsKey('eatiq Premium');
     } catch (_) {
       return false;
     }
@@ -53,7 +55,7 @@ class PurchaseService {
   static Future<bool> restore() async {
     try {
       final info = await Purchases.restorePurchases();
-      return info.entitlements.active.containsKey('pro');
+      return info.entitlements.active.containsKey('eatiq Premium');
     } catch (_) {
       return false;
     }
