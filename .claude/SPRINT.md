@@ -148,6 +148,7 @@
 | 4 | RevenueCat App Store | **Fatih** | 🔄 Aktif — hesap alındı |
 | 5 | kUseMockData = false | — | ❌ İptal — canlıya almadan önce |
 | 6 | App Store Screenshots + Metadata (TR+EN) | **Gemini** | ⏳ |
+| I | Apple Health okuma → home/progress UI (adım, aktif kalori, kilo) | **Gemini** | 🔴 YAPILMADI |
 | 7 | Günlük AI Bildirimi (dinamik) | **Claude** | ⏳ |
 | 8 | Android kamera izni (AndroidManifest) | **Gemini** | ✅ Tamamlandı |
 | 9 | Android Widget | **Gemini** | ✅ Tamamlandı |

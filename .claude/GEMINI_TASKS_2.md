@@ -371,7 +371,7 @@ Butonlar eşit genişlikte, hafif rounded, accent rengi (cyan/mavi).
 ---
 
 ## Görev I — Apple Health Okuma Entegrasyonu
-**Öncelik: 🟡 ÖNEMLİ**
+**Öncelik: 🔴 KRİTİK — HÂLÂ YAPILMADI, bir daha atlama**
 **Dosyalar:** `lib/services/app_provider.dart`, `lib/screens/home_screen.dart`, `lib/screens/progress_screen.dart`
 
 ### Arka Plan:
