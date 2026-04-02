@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 
 class WidgetService {
-  static const String appGroupId = 'group.com.ai.eatiq';
+  static const String appGroupId = 'group.com.fatihaydogdu.eatiq';
   static const String iOSWidgetName = 'EatiqWidget';
 
   static Future<void> updateData({

@@ -17,7 +17,7 @@ struct Provider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        let userDefaults = UserDefaults(suiteName: "group.com.ai.eatiq")
+        let userDefaults = UserDefaults(suiteName: "group.com.fatihaydogdu.eatiq")
         let calories = userDefaults?.integer(forKey: "calories") ?? 0
         let water = userDefaults?.double(forKey: "water") ?? 0.0
         let streak = userDefaults?.integer(forKey: "streak") ?? 0
