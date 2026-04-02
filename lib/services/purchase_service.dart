@@ -39,15 +39,23 @@ class PurchaseService {
   static Future<bool> purchase({required bool yearly}) async {
     try {
       final offerings = await Purchases.getOfferings();
+      if (offerings.current == null) {
+        debugPrint('[PurchaseService] Offerings boş — App Store Connect bağlantısı kontrol edilmeli');
+        return false;
+      }
       final pkg = yearly
-          ? offerings.current?.annual
-          : offerings.current?.monthly;
+          ? offerings.current!.annual
+          : offerings.current!.monthly;
       if (pkg == null) return false;
       await Purchases.purchasePackage(pkg);
       return true;
     } on PurchasesErrorCode catch (e) {
       if (e == PurchasesErrorCode.purchaseCancelledError) return false;
-      rethrow;
+      debugPrint('[PurchaseService] Satın alma hatası: $e');
+      return false;
+    } catch (e) {
+      debugPrint('[PurchaseService] Beklenmedik hata: $e');
+      return false;
     }
   }
 
