@@ -7,7 +7,7 @@ import '../services/database_service.dart';
 //  true  → uygulama başlarken otomatik seed eder
 //  false → hiçbir şeye dokunmaz
 // ============================================================
-const bool kUseMockData = true;
+const bool kUseMockData = false;
 
 Future<void> seedIfNeeded(DatabaseService db) async {
   if (!kUseMockData) return;
