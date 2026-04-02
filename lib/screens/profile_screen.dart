@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
 import '../generated/app_localizations.dart';
 import 'settings_screen.dart';
+import '../services/purchase_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -226,8 +227,12 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); /* TODO: RevenueCat */
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final success = await PurchaseService.purchase(yearly: true);
+                  if (success && context.mounted) {
+                    await context.read<AppProvider>().refreshPremiumStatus();
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: accent,

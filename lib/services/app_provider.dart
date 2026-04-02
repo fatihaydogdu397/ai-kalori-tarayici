@@ -11,6 +11,7 @@ import 'database_service.dart';
 import 'health_service.dart';
 import 'widget_service.dart';
 import 'notification_service.dart';
+import 'purchase_service.dart';
 import '../generated/app_localizations.dart';
 
 enum AnalysisState { idle, loading, success, error }
@@ -426,8 +427,13 @@ class AppProvider extends ChangeNotifier {
 
   // Freemium — günlük 5 ücretsiz tarama
   static const int freeDailyLimit = 5;
-  final bool _isPremium = false;
+  bool _isPremium = false;
   bool get isPremium => _isPremium;
+
+  Future<void> refreshPremiumStatus() async {
+    _isPremium = await PurchaseService.checkPremium();
+    notifyListeners();
+  }
 
   Future<int> _getTodayScanCount() async {
     final prefs = await SharedPreferences.getInstance();

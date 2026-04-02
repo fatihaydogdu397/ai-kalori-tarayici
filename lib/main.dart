@@ -22,6 +22,7 @@ void main() async {
 
   final provider = AppProvider();
   await Future.wait([provider.loadTheme(), provider.loadLocale(), PurchaseService.init(), NotificationService.init()]);
+  await provider.refreshPremiumStatus();
 
   await seedIfNeeded(DatabaseService());
   await provider.loadProfile();

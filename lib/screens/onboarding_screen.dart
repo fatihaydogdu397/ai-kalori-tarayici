@@ -521,8 +521,8 @@ class _PageActivity extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
