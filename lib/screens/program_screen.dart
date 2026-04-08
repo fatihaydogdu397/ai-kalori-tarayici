@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
 import '../generated/app_localizations.dart';
+import 'dietary_anamnesis_screen.dart';
 
 class ProgramScreen extends StatelessWidget {
   const ProgramScreen({super.key});
@@ -87,7 +88,10 @@ class ProgramScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // TODO: Navigate to dietary anamnesis flow
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DietaryAnamnesisScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accent,
