@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,7 +80,8 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> analyzeImage(
     String imagePath, {
-    int? portionGrams,
+    int? portionAmount,
+    bool isLiquid = false,
     CookingMethod? cooking,
   }) async {
     if (!await canScan()) {
@@ -102,28 +104,44 @@ class AppProvider extends ChangeNotifier {
         'goal': _goal,
       };
 
-      // Resim kaydetme işlemi (Kalıcı olarak uygulamanın belgeler dizinine kopyalama)
+      // Resim kalıcı kayıt — HEIC dahil her formatı JPEG'e çevirir
       String localPath = imagePath;
       try {
-        if (File(imagePath).existsSync()) {
-          final ext = p.extension(imagePath);
-          final uniqueName = '${DateTime.now().millisecondsSinceEpoch}$ext';
+        final srcFile = File(imagePath);
+        if (srcFile.existsSync()) {
+          final uniqueName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
           final appDir = await getApplicationDocumentsDirectory();
           localPath = p.join(appDir.path, uniqueName);
-          await File(imagePath).copy(localPath);
+          final bytes = await FlutterImageCompress.compressWithFile(
+            imagePath,
+            minWidth: 1200,
+            minHeight: 1200,
+            quality: 85,
+            format: CompressFormat.jpeg,
+          );
+          if (bytes != null) {
+            await File(localPath).writeAsBytes(bytes);
+          } else {
+            await srcFile.copy(localPath);
+          }
         }
       } catch (e) {
-        debugPrint('Resim kopyalanırken hata: $e');
+        debugPrint('[IMG] Hata: $e');
       }
 
       final analysis = await _claudeService.analyzeFood(
         localPath,
-        portionGrams: portionGrams,
+        portionAmount: portionAmount,
+        isLiquid: isLiquid,
         cooking: cooking,
         userProfile: profile,
       );
-      _currentAnalysis = analysis;
-      await _dbService.saveAnalysis(analysis);
+      // DB'ye sadece dosya adını kaydet — UUID değişse bile çalışır
+      final filename = p.basename(localPath);
+      final relAnalysis = analysis.copyWith(imagePath: filename);
+      await _dbService.saveAnalysis(relAnalysis);
+      // _currentAnalysis tam path tutar (anlık gösterim için)
+      _currentAnalysis = analysis.copyWith(imagePath: localPath);
       await _incrementScanCount();
       await _updateStreak();
       await loadHistory();
@@ -156,6 +174,7 @@ class AppProvider extends ChangeNotifier {
     _todayStats = await _dbService.getTodayStats();
     notifyListeners();
     unawaited(_syncWidget());
+    unawaited(loadTodaySteps());
   }
 
   Future<void> saveManualEntry(FoodAnalysis analysis) async {
@@ -241,6 +260,9 @@ class AppProvider extends ChangeNotifier {
   String _gender = '';
   String _goal = '';
   String _activityLevel = 'active';
+  double _targetWeight = 0;
+  double _weeklyPace = 0.5;
+  String _dietType = 'standard';
 
   // Weight tracking history
   List<Map<String, dynamic>> _weightLogs = [];
@@ -253,6 +275,9 @@ class AppProvider extends ChangeNotifier {
   String get gender => _gender;
   String get goal => _goal;
   String get activityLevel => _activityLevel;
+  double get targetWeight => _targetWeight;
+  double get weeklyPace => _weeklyPace;
+  String get dietType => _dietType;
 
   double get bmi => (_height > 0 && _weight > 0)
       ? _weight / ((_height / 100) * (_height / 100))
@@ -267,12 +292,13 @@ class AppProvider extends ChangeNotifier {
   double get tdee {
     if (bmr <= 0) return 0;
     double multiplier = 1.55; // active
-    if (_activityLevel == 'sedentary')
+    if (_activityLevel == 'sedentary') {
       multiplier = 1.2;
-    else if (_activityLevel == 'light')
+    } else if (_activityLevel == 'light') {
       multiplier = 1.375;
-    else if (_activityLevel == 'very_active')
+    } else if (_activityLevel == 'very_active') {
       multiplier = 1.725;
+    }
     return bmr * multiplier;
   }
 
@@ -291,6 +317,9 @@ class AppProvider extends ChangeNotifier {
     _gender = prefs.getString('gender') ?? '';
     _goal = prefs.getString('goal') ?? '';
     _activityLevel = prefs.getString('activityLevel') ?? 'active';
+    _targetWeight = prefs.getDouble('targetWeight') ?? 0;
+    _weeklyPace = prefs.getDouble('weeklyPace') ?? 0.5;
+    _dietType = prefs.getString('dietType') ?? 'standard';
     _healthEnabled = await _healthService.isEnabled();
     await loadWeightLogs();
     notifyListeners();
@@ -325,6 +354,9 @@ class AppProvider extends ChangeNotifier {
     required String gender,
     required String goal,
     String? activityLevel,
+    double? targetWeight,
+    double? weeklyPace,
+    String? dietType,
   }) async {
     final actLevel = activityLevel ?? _activityLevel;
     // Mifflin-St Jeor BMR
@@ -336,15 +368,19 @@ class AppProvider extends ChangeNotifier {
     }
 
     double multiplier = 1.55; // active
-    if (actLevel == 'sedentary')
+    if (actLevel == 'sedentary') {
       multiplier = 1.2;
-    else if (actLevel == 'light')
+    } else if (actLevel == 'light') {
       multiplier = 1.375;
-    else if (actLevel == 'very_active')
+    } else if (actLevel == 'very_active') {
       multiplier = 1.725;
+    }
 
     double tdee = bmr * multiplier;
-    if (goal == 'lose') tdee -= 400;
+    if (goal == 'lose') {
+      final pace = weeklyPace ?? 0.5;
+      tdee -= (pace * 7700 / 7).clamp(200, 700);
+    }
     if (goal == 'gain') tdee += 300;
 
     final prefs = await SharedPreferences.getInstance();
@@ -357,6 +393,9 @@ class AppProvider extends ChangeNotifier {
     await prefs.setString('gender', gender);
     await prefs.setString('goal', goal);
     await prefs.setString('activityLevel', actLevel);
+    if (targetWeight != null) await prefs.setDouble('targetWeight', targetWeight);
+    if (weeklyPace != null) await prefs.setDouble('weeklyPace', weeklyPace);
+    if (dietType != null) await prefs.setString('dietType', dietType);
 
     _userName = name;
     _dailyCalorieGoal = tdee;
@@ -366,10 +405,26 @@ class AppProvider extends ChangeNotifier {
     _gender = gender;
     _goal = goal;
     _activityLevel = actLevel;
+    if (targetWeight != null) _targetWeight = targetWeight;
+    if (weeklyPace != null) _weeklyPace = weeklyPace;
+    if (dietType != null) _dietType = dietType;
 
     // Ayrıca bu değişikliği (veya mevcut kiloyu) DB'de Kilo Logu olarak sakla
     await logWeight(weight, DateTime.now());
 
+    notifyListeners();
+  }
+
+  // Steps (Apple Health, iOS only)
+  int _todaySteps = 0;
+  double _todayActiveCalories = 0;
+  int get todaySteps => _todaySteps;
+  double get todayActiveCalories => _todayActiveCalories;
+
+  Future<void> loadTodaySteps() async {
+    if (!_healthEnabled) return;
+    _todaySteps = await _healthService.getTodaySteps();
+    _todayActiveCalories = await _healthService.getTodayActiveCalories();
     notifyListeners();
   }
 

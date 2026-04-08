@@ -1451,6 +1451,162 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'En Yoğun Öğün'**
   String get mostConsumedMeal;
+
+  /// No description provided for @splashTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalori takibi artık çok kolay'**
+  String get splashTitle;
+
+  /// No description provided for @onboardingBirthDate.
+  ///
+  /// In tr, this message translates to:
+  /// **'Doğum Tarihiniz'**
+  String get onboardingBirthDate;
+
+  /// No description provided for @onboardingBirthDateSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yaşınıza göre metabolizma hızınızı hesaplayacağız'**
+  String get onboardingBirthDateSub;
+
+  /// No description provided for @onboardingTargetWeight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hangi kiloya ulaşmak istiyorsunuz?'**
+  String get onboardingTargetWeight;
+
+  /// No description provided for @onboardingTargetWeightSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef kilonuzu girin'**
+  String get onboardingTargetWeightSub;
+
+  /// No description provided for @onboardingWeeklyPace.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedefinize ne kadar hızlı ulaşmak istiyorsunuz?'**
+  String get onboardingWeeklyPace;
+
+  /// No description provided for @onboardingWeeklyPaceSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftalık kilo değişim hızı'**
+  String get onboardingWeeklyPaceSub;
+
+  /// No description provided for @onboardingDietType.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beslenme Türünüzü Seçin'**
+  String get onboardingDietType;
+
+  /// No description provided for @onboardingDietTypeSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Size uygun makro oranlarını hesaplayalım'**
+  String get onboardingDietTypeSub;
+
+  /// No description provided for @dietStandard.
+  ///
+  /// In tr, this message translates to:
+  /// **'Standart Beslenme'**
+  String get dietStandard;
+
+  /// No description provided for @dietLowCarb.
+  ///
+  /// In tr, this message translates to:
+  /// **'Düşük Karbonhidrat'**
+  String get dietLowCarb;
+
+  /// No description provided for @dietKeto.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ketojenik'**
+  String get dietKeto;
+
+  /// No description provided for @dietHighProtein.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüksek Protein'**
+  String get dietHighProtein;
+
+  /// No description provided for @dietCustom.
+  ///
+  /// In tr, this message translates to:
+  /// **'Özel Beslenme'**
+  String get dietCustom;
+
+  /// No description provided for @onboardingNotifTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimler'**
+  String get onboardingNotifTitle;
+
+  /// No description provided for @onboardingNotifSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedeflerinize ulaşmanız için size hatırlatmalar gönderelim'**
+  String get onboardingNotifSub;
+
+  /// No description provided for @notifMealReminder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğün hatırlatmaları'**
+  String get notifMealReminder;
+
+  /// No description provided for @notifWaterReminder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Su içme hatırlatmaları'**
+  String get notifWaterReminder;
+
+  /// No description provided for @notifGoalReminder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef başarı bildirimleri'**
+  String get notifGoalReminder;
+
+  /// No description provided for @enableNotifications.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bildirimleri Aç'**
+  String get enableNotifications;
+
+  /// No description provided for @skipForNow.
+  ///
+  /// In tr, this message translates to:
+  /// **'Şimdilik Geç'**
+  String get skipForNow;
+
+  /// No description provided for @navDaily.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük'**
+  String get navDaily;
+
+  /// No description provided for @navProgram.
+  ///
+  /// In tr, this message translates to:
+  /// **'Program'**
+  String get navProgram;
+
+  /// No description provided for @stepsToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Adım'**
+  String get stepsToday;
+
+  /// No description provided for @stepsGoal.
+  ///
+  /// In tr, this message translates to:
+  /// **'{steps} / {goal}'**
+  String stepsGoal(String steps, String goal);
+
+  /// No description provided for @caloriesBurned.
+  ///
+  /// In tr, this message translates to:
+  /// **'yakıldı'**
+  String get caloriesBurned;
 }
 
 class _AppLocalizationsDelegate

@@ -705,4 +705,87 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mostConsumedMeal => 'Top Meal';
+
+  @override
+  String get splashTitle => 'Calorie tracking made easy';
+
+  @override
+  String get onboardingBirthDate => 'Date of Birth';
+
+  @override
+  String get onboardingBirthDateSub =>
+      'We\'ll calculate your metabolic rate based on your age';
+
+  @override
+  String get onboardingTargetWeight => 'What\'s your target weight?';
+
+  @override
+  String get onboardingTargetWeightSub => 'Enter your goal weight';
+
+  @override
+  String get onboardingWeeklyPace => 'How fast do you want to reach your goal?';
+
+  @override
+  String get onboardingWeeklyPaceSub => 'Weekly weight change pace';
+
+  @override
+  String get onboardingDietType => 'Choose Your Diet Type';
+
+  @override
+  String get onboardingDietTypeSub =>
+      'We\'ll calculate your ideal macro ratios';
+
+  @override
+  String get dietStandard => 'Standard Diet';
+
+  @override
+  String get dietLowCarb => 'Low Carbohydrate';
+
+  @override
+  String get dietKeto => 'Ketogenic';
+
+  @override
+  String get dietHighProtein => 'High Protein';
+
+  @override
+  String get dietCustom => 'Custom Diet';
+
+  @override
+  String get onboardingNotifTitle => 'Notifications';
+
+  @override
+  String get onboardingNotifSub =>
+      'We\'ll send you reminders to help reach your goals';
+
+  @override
+  String get notifMealReminder => 'Meal reminders';
+
+  @override
+  String get notifWaterReminder => 'Water intake reminders';
+
+  @override
+  String get notifGoalReminder => 'Goal achievement notifications';
+
+  @override
+  String get enableNotifications => 'Enable Notifications';
+
+  @override
+  String get skipForNow => 'Skip for now';
+
+  @override
+  String get navDaily => 'Daily';
+
+  @override
+  String get navProgram => 'Program';
+
+  @override
+  String get stepsToday => 'Steps';
+
+  @override
+  String stepsGoal(String steps, String goal) {
+    return '$steps / $goal';
+  }
+
+  @override
+  String get caloriesBurned => 'burned';
 }

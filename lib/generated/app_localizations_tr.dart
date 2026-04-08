@@ -706,4 +706,88 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get mostConsumedMeal => 'En Yoğun Öğün';
+
+  @override
+  String get splashTitle => 'Kalori takibi artık çok kolay';
+
+  @override
+  String get onboardingBirthDate => 'Doğum Tarihiniz';
+
+  @override
+  String get onboardingBirthDateSub =>
+      'Yaşınıza göre metabolizma hızınızı hesaplayacağız';
+
+  @override
+  String get onboardingTargetWeight => 'Hangi kiloya ulaşmak istiyorsunuz?';
+
+  @override
+  String get onboardingTargetWeightSub => 'Hedef kilonuzu girin';
+
+  @override
+  String get onboardingWeeklyPace =>
+      'Hedefinize ne kadar hızlı ulaşmak istiyorsunuz?';
+
+  @override
+  String get onboardingWeeklyPaceSub => 'Haftalık kilo değişim hızı';
+
+  @override
+  String get onboardingDietType => 'Beslenme Türünüzü Seçin';
+
+  @override
+  String get onboardingDietTypeSub =>
+      'Size uygun makro oranlarını hesaplayalım';
+
+  @override
+  String get dietStandard => 'Standart Beslenme';
+
+  @override
+  String get dietLowCarb => 'Düşük Karbonhidrat';
+
+  @override
+  String get dietKeto => 'Ketojenik';
+
+  @override
+  String get dietHighProtein => 'Yüksek Protein';
+
+  @override
+  String get dietCustom => 'Özel Beslenme';
+
+  @override
+  String get onboardingNotifTitle => 'Bildirimler';
+
+  @override
+  String get onboardingNotifSub =>
+      'Hedeflerinize ulaşmanız için size hatırlatmalar gönderelim';
+
+  @override
+  String get notifMealReminder => 'Öğün hatırlatmaları';
+
+  @override
+  String get notifWaterReminder => 'Su içme hatırlatmaları';
+
+  @override
+  String get notifGoalReminder => 'Hedef başarı bildirimleri';
+
+  @override
+  String get enableNotifications => 'Bildirimleri Aç';
+
+  @override
+  String get skipForNow => 'Şimdilik Geç';
+
+  @override
+  String get navDaily => 'Günlük';
+
+  @override
+  String get navProgram => 'Program';
+
+  @override
+  String get stepsToday => 'Adım';
+
+  @override
+  String stepsGoal(String steps, String goal) {
+    return '$steps / $goal';
+  }
+
+  @override
+  String get caloriesBurned => 'yakıldı';
 }

@@ -309,5 +309,37 @@
   "avgWater": "Ort. Su",
   "weeklyInsight": "Haftalık Analiz",
   "monthlyInsight": "Aylık Analiz",
-  "mostConsumedMeal": "En Yoğun Öğün"
+  "mostConsumedMeal": "En Yoğun Öğün",
+  "splashTitle": "Kalori takibi artık çok kolay",
+  "onboardingBirthDate": "Doğum Tarihiniz",
+  "onboardingBirthDateSub": "Yaşınıza göre metabolizma hızınızı hesaplayacağız",
+  "onboardingTargetWeight": "Hangi kiloya ulaşmak istiyorsunuz?",
+  "onboardingTargetWeightSub": "Hedef kilonuzu girin",
+  "onboardingWeeklyPace": "Hedefinize ne kadar hızlı ulaşmak istiyorsunuz?",
+  "onboardingWeeklyPaceSub": "Haftalık kilo değişim hızı",
+  "onboardingDietType": "Beslenme Türünüzü Seçin",
+  "onboardingDietTypeSub": "Size uygun makro oranlarını hesaplayalım",
+  "dietStandard": "Standart Beslenme",
+  "dietLowCarb": "Düşük Karbonhidrat",
+  "dietKeto": "Ketojenik",
+  "dietHighProtein": "Yüksek Protein",
+  "dietCustom": "Özel Beslenme",
+  "onboardingNotifTitle": "Bildirimler",
+  "onboardingNotifSub": "Hedeflerinize ulaşmanız için size hatırlatmalar gönderelim",
+  "notifMealReminder": "Öğün hatırlatmaları",
+  "notifWaterReminder": "Su içme hatırlatmaları",
+  "notifGoalReminder": "Hedef başarı bildirimleri",
+  "enableNotifications": "Bildirimleri Aç",
+  "skipForNow": "Şimdilik Geç",
+  "navDaily": "Günlük",
+  "navProgram": "Program",
+  "stepsToday": "Adım",
+  "stepsGoal": "{steps} / {goal}",
+  "@stepsGoal": {
+    "placeholders": {
+      "steps": { "type": "String" },
+      "goal": { "type": "String" }
+    }
+  },
+  "caloriesBurned": "yakıldı"
 }
