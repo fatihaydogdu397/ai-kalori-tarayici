@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +10,8 @@ import '../widgets/portion_picker_sheet.dart';
 import '../widgets/liquid_wave_progress.dart';
 import 'result_screen.dart';
 import 'progress_screen.dart';
-import 'profile_screen.dart';
+import 'program_screen.dart';
+import 'settings_screen.dart';
 import 'history_screen.dart';
 import 'manual_entry_screen.dart';
 import 'barcode_scanner_screen.dart';
@@ -52,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     // PorsiyonPickerSheet aç
-    final result = await showModalBottomSheet<({int grams, CookingMethod cooking})>(
+    final result = await showModalBottomSheet<({int amount, bool isLiquid, CookingMethod? cooking})>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -63,7 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // AI Analizine gönder (AppProvider kendi içinde kalıcı kopyalama yapıyor)
     await provider.analyzeImage(
       picked.path,
-      portionGrams: result.grams,
+      portionAmount: result.amount,
+      isLiquid: result.isLiquid,
       cooking: result.cooking,
     );
 
@@ -273,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: accent.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: accent.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
                     child: Text('💧', style: TextStyle(fontSize: 24.sp)),
                   ),
                   const SizedBox(width: 14),
@@ -391,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 child: Text(
                   l.reset.toUpperCase(),
-                  style: TextStyle(fontSize: 12.sp, color: AppColors.coral.withOpacity(0.8), fontWeight: FontWeight.w700, letterSpacing: 1),
+                  style: TextStyle(fontSize: 12.sp, color: AppColors.coral.withValues(alpha: 0.8), fontWeight: FontWeight.w700, letterSpacing: 1),
                 ),
               ),
             ],
@@ -489,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 max: 5.0,
                 divisions: 16,
                 activeColor: accent,
-                inactiveColor: accent.withOpacity(0.2),
+                inactiveColor: accent.withValues(alpha: 0.2),
                 onChanged: (v) => setS(() => tempGoal = v),
               ),
               Row(
@@ -528,25 +531,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final pages = [
       _buildDashboardPage(isDark),
-      const SizedBox.shrink(), // Tara — FAB ile açılıyor
       const ProgressScreen(),
-      const ProfileScreen(),
+      const ProgramScreen(),
+      const SettingsScreen(),
     ];
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
+      floatingActionButton: _buildFAB(isDark),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Consumer<AppProvider>(
         builder: (context, provider, _) {
-          if (_tab == 1) {
-            // Tara tab'ına basıldığında direkt sheet aç, 0'a dön
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (_tab == 1) {
-                setState(() => _tab = 0);
-                _showScanSheet();
-              }
-            });
-            return pages[0];
-          }
           if (provider.state == AnalysisState.loading && _tab == 0) {
             return _buildLoading(isDark);
           }
@@ -626,7 +621,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final meals = todayMeals.where((a) => a.mealCategory == cat).toList();
       if (meals.isEmpty) continue;
       final (icon, label) = labels[cat]!;
-      final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+      final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
       widgets.add(
         Padding(
           padding: const EdgeInsets.only(top: 8, bottom: 4),
@@ -682,7 +677,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
         final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-        final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+        final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
         final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
         final calories = provider.todayStats['calories'] ?? 0;
         final goal = provider.dailyCalorieGoal;
@@ -708,11 +703,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(dateStr, style: TextStyle(fontSize: 11, color: textMuted)),
+                      Text(dateStr, style: TextStyle(fontSize: 13, color: textMuted)),
                       const SizedBox(height: 2),
                       Text(
                         l.greeting(name),
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textPrimary),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: textPrimary),
                       ),
                     ],
                   ),
@@ -742,7 +737,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             : provider.streak == 30
                                             ? l.streakMilestone30
                                             : l.streakMotivation,
-                                        style: TextStyle(fontSize: 12.sp, color: AppColors.void_.withOpacity(0.8)),
+                                        style: TextStyle(fontSize: 12.sp, color: AppColors.void_.withValues(alpha: 0.8)),
                                       ),
                                     ],
                                   ),
@@ -759,7 +754,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                        decoration: BoxDecoration(color: AppColors.amber.withOpacity(isDark ? 0.2 : 0.15), borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(color: AppColors.amber.withValues(alpha: isDark ? 0.2 : 0.15), borderRadius: BorderRadius.circular(20)),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -788,6 +783,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
+            ),
+            // Weekly calendar strip
+            SliverToBoxAdapter(
+              child: _WeeklyCalendar(isDark: isDark),
             ),
             SliverToBoxAdapter(
               child: Padding(
@@ -916,7 +915,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           bg: isDark ? AppColors.darkFatBg : AppColors.lightFatBg,
                         ),
                         const SizedBox(width: 6),
-                        // Su — tıklanınca su ekleme sheet'i açar
+                        // Su makro pill (compact)
                         Expanded(
                           child: GestureDetector(
                             onTap: () => _showAddWater(context),
@@ -925,7 +924,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               decoration: BoxDecoration(
                                 color: isDark ? AppColors.darkWaterBg : AppColors.lightWaterBg,
                                 borderRadius: BorderRadius.circular(12.r),
-                                border: Border.all(color: AppColors.mint.withOpacity(0.4), width: 1.5),
+                                border: Border.all(color: AppColors.mint.withValues(alpha: 0.4), width: 1.5),
                               ),
                               child: Column(
                                 children: [
@@ -972,6 +971,45 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 10),
+
+                    // Health widgets row: Steps + Water
+                    Row(
+                      children: [
+                        // Step counter (iOS only via Apple Health)
+                        if (provider.healthEnabled)
+                          Expanded(
+                            child: _StepCounterCard(
+                              steps: provider.todaySteps,
+                              burnedCal: provider.todayActiveCalories,
+                              isDark: isDark,
+                              textPrimary: textPrimary,
+                              textMuted: textMuted,
+                              cardBg: cardBg,
+                            ),
+                          ),
+                        if (provider.healthEnabled) const SizedBox(width: 10),
+                        // Water tracking card
+                        Expanded(
+                          child: _WaterInlineCard(
+                            water: water,
+                            waterGoal: waterGoal,
+                            waterProgress: waterProgress,
+                            isDark: isDark,
+                            textPrimary: textPrimary,
+                            textMuted: textMuted,
+                            cardBg: cardBg,
+                            onTap: () => _showAddWater(context),
+                            onAdd: (liters) async {
+                              await provider.addWater(liters);
+                              if (context.mounted) {
+                                provider.syncNotification(AppLocalizations.of(context));
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 20),
 
                     // Favoriler
@@ -992,7 +1030,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: provider.favorites.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 8),
+                          separatorBuilder: (context2, s) => const SizedBox(width: 8),
                           itemBuilder: (_, i) {
                             final fav = provider.favorites[i];
                             return GestureDetector(
@@ -1017,7 +1055,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: isDark ? AppColors.darkCard : AppColors.lightCard,
                                   borderRadius: BorderRadius.circular(10),
                                   border: isDark
-                                      ? Border.all(color: AppColors.coral.withOpacity(0.25), width: 1)
+                                      ? Border.all(color: AppColors.coral.withValues(alpha: 0.25), width: 1)
                                       : Border.all(color: AppColors.lightBorder, width: 0.5),
                                 ),
                                 child: Column(
@@ -1100,21 +1138,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildFAB(bool isDark) {
+    final fabBg = isDark ? AppColors.lime : AppColors.void_;
+    final fabFg = isDark ? AppColors.void_ : AppColors.snow;
+    return FloatingActionButton(
+      onPressed: _showScanSheet,
+      backgroundColor: fabBg,
+      foregroundColor: fabFg,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+      child: Icon(Icons.add_rounded, size: 28.sp),
+    );
+  }
+
   Widget _buildNavBar(bool isDark) {
     final l = AppLocalizations.of(context);
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final border = isDark ? AppColors.darkCard : AppColors.lightBorder;
     final iconActive = isDark ? AppColors.darkText : AppColors.lightText;
     final iconInactive = isDark ? AppColors.darkTextMuted : const Color(0xFFCCCCDD);
-    final camBg = isDark ? AppColors.lime : AppColors.void_;
-    final camIcon = isDark ? AppColors.void_ : AppColors.lime;
     final labelActive = isDark ? AppColors.lime : AppColors.void_;
 
     final items = [
-      (Icons.home_rounded, l.home),
-      (Icons.camera_alt_rounded, l.scan),
+      (Icons.home_rounded, l.navDaily),
       (Icons.bar_chart_rounded, l.progress),
-      (Icons.person_rounded, l.profile),
+      (Icons.restaurant_menu_rounded, l.navProgram),
+      (Icons.settings_rounded, l.settings),
     ];
 
     return Container(
@@ -1130,26 +1179,18 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(items.length, (i) {
               final isActive = _tab == i;
-              final isCam = i == 1;
               return GestureDetector(
                 onTap: () => setState(() => _tab = i),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    isCam
-                        ? Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(color: camBg, borderRadius: BorderRadius.circular(12)),
-                            child: Icon(items[i].$1, color: camIcon, size: 20),
-                          )
-                        : Icon(items[i].$1, color: isActive ? iconActive : iconInactive, size: 22),
+                    Icon(items[i].$1, color: isActive ? iconActive : iconInactive, size: 22),
                     const SizedBox(height: 3),
                     Text(
                       items[i].$2,
                       style: AppTypography.labelSmall.copyWith(
                         fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                        color: isCam ? (isDark ? AppColors.darkTextMuted : const Color(0xFFBBBBCC)) : (isActive ? labelActive : iconInactive),
+                        color: isActive ? labelActive : iconInactive,
                       ),
                     ),
                   ],
@@ -1178,7 +1219,7 @@ class _MacroPill extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: valueColor.withOpacity(0.2), width: 1),
+          border: Border.all(color: valueColor.withValues(alpha: 0.2), width: 1),
         ),
         child: Column(
           children: [
@@ -1215,10 +1256,9 @@ class _MealRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
     final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
-    final iconBg = isDark ? AppColors.darkCarbsBg : AppColors.lightCarbsBg;
 
     final card = GestureDetector(
       onTap: onTap,
@@ -1228,13 +1268,10 @@ class _MealRow extends StatelessWidget {
         decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(10), border: border),
         child: Row(
           children: [
-            Container(
-              width: 40.w,
-              height: 40.w,
-              decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(10.r)),
-              child: Center(
-                child: Text(_categoryEmoji(analysis.mealCategory), style: TextStyle(fontSize: 20.sp)),
-              ),
+            _mealThumb(
+              imagePath: analysis.imagePath,
+              category: analysis.mealCategory,
+              isDark: isDark,
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -1297,23 +1334,76 @@ class _MealRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 6),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 18),
-        decoration: BoxDecoration(color: AppColors.coral.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(color: AppColors.coral.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
         child: const Icon(Icons.delete_rounded, color: AppColors.coral, size: 20),
       ),
       child: card,
     );
   }
 
-  String _categoryEmoji(MealCategory cat) {
+  Widget _mealThumb({
+    required String imagePath,
+    required MealCategory category,
+    required bool isDark,
+  }) {
+    const size = 44.0;
+    const radius = 10.0;
+
+    // Fotoğraf varsa göster
+    if (imagePath.isNotEmpty) {
+      final file = File(imagePath);
+      if (file.existsSync()) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: Image.file(
+            file,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
+        );
+      }
+    }
+
+    // Fotoğraf yoksa kategori placeholder
+    final cfg = _categoryConfig(category, isDark);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: cfg.gradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(radius),
+      ),
+      child: Icon(cfg.icon, color: Colors.white.withValues(alpha: 0.92), size: 22),
+    );
+  }
+
+  ({List<Color> gradient, IconData icon}) _categoryConfig(MealCategory cat, bool isDark) {
     switch (cat) {
       case MealCategory.breakfast:
-        return '🌅';
+        return (
+          gradient: [const Color(0xFFF97316), const Color(0xFFFBBF24)],
+          icon: Icons.coffee_rounded,
+        );
       case MealCategory.lunch:
-        return '☀️';
+        return (
+          gradient: [const Color(0xFF0EA5E9), const Color(0xFF38BDF8)],
+          icon: Icons.lunch_dining_rounded,
+        );
       case MealCategory.dinner:
-        return '🌙';
+        return (
+          gradient: [const Color(0xFF7C3AED), const Color(0xFFA78BFA)],
+          icon: Icons.dinner_dining_rounded,
+        );
       case MealCategory.snack:
-        return '🍎';
+        return (
+          gradient: [const Color(0xFF10B981), const Color(0xFF34D399)],
+          icon: Icons.cookie_rounded,
+        );
     }
   }
 
@@ -1359,6 +1449,269 @@ class _SheetButton extends StatelessWidget {
   }
 }
 
+// ── Weekly Calendar Strip ─────────────────────────────────────────────────────
+class _WeeklyCalendar extends StatelessWidget {
+  final bool isDark;
+  const _WeeklyCalendar({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
+    final accent = isDark ? AppColors.lime : AppColors.void_;
+    final accentFg = isDark ? AppColors.void_ : AppColors.snow;
+
+    // Show 7 days: Mon of current week → Sun
+    final weekday = now.weekday; // 1=Mon ... 7=Sun
+    final startOfWeek = now.subtract(Duration(days: weekday - 1));
+    final dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    return Container(
+      color: isDark ? AppColors.darkBg : AppColors.lightBg,
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: List.generate(7, (i) {
+          final day = startOfWeek.add(Duration(days: i));
+          final isToday = day.day == now.day && day.month == now.month;
+          return GestureDetector(
+            onTap: () {}, // future: show that day's meals
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  dayLabels[i],
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                    color: isToday ? accent : textMuted,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  width: 30.w,
+                  height: 30.w,
+                  decoration: BoxDecoration(
+                    color: isToday ? accent : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w700,
+                        color: isToday ? accentFg : textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ── Step Counter Card ─────────────────────────────────────────────────────────
+class _StepCounterCard extends StatelessWidget {
+  final int steps;
+  final double burnedCal;
+  final bool isDark;
+  final Color textPrimary, textMuted, cardBg;
+  static const int stepGoal = 10000;
+
+  const _StepCounterCard({
+    required this.steps,
+    required this.burnedCal,
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.cardBg,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = (steps / stepGoal).clamp(0.0, 1.0);
+    final accentColor = isDark ? AppColors.violet : AppColors.violetDark;
+
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14.r),
+        border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.directions_walk_rounded, size: 16.sp, color: accentColor),
+              const SizedBox(width: 6),
+              Text(
+                AppLocalizations.of(context).stepsToday,
+                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: textMuted),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            steps.toString().replaceAllMapped(
+              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+              (m) => '${m[1]}.',
+            ),
+            style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: textPrimary),
+          ),
+          Text(
+            '/ $stepGoal',
+            style: TextStyle(fontSize: 10.sp, color: textMuted),
+          ),
+          SizedBox(height: 6.h),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 4,
+              backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+              valueColor: AlwaysStoppedAnimation<Color>(accentColor),
+            ),
+          ),
+          if (burnedCal > 0) ...[
+            SizedBox(height: 6.h),
+            Text(
+              '🔥 ${burnedCal.toStringAsFixed(0)} ${AppLocalizations.of(context).caloriesBurned}',
+              style: TextStyle(fontSize: 10.sp, color: textMuted),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Water Inline Card ─────────────────────────────────────────────────────────
+class _WaterInlineCard extends StatelessWidget {
+  final double water, waterGoal, waterProgress;
+  final bool isDark;
+  final Color textPrimary, textMuted, cardBg;
+  final VoidCallback onTap;
+  final Future<void> Function(double liters) onAdd;
+
+  const _WaterInlineCard({
+    required this.water,
+    required this.waterGoal,
+    required this.waterProgress,
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.cardBg,
+    required this.onTap,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isDark ? AppColors.mint : AppColors.mintDark;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(14.w),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(14.r),
+          border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('💧', style: TextStyle(fontSize: 14.sp)),
+                const SizedBox(width: 4),
+                Text(
+                  AppLocalizations.of(context).waterToday,
+                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: textMuted),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              '${water.toStringAsFixed(1)} L',
+              style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: accent),
+            ),
+            Text(
+              '/ ${waterGoal.toStringAsFixed(1)} L',
+              style: TextStyle(fontSize: 10.sp, color: textMuted),
+            ),
+            SizedBox(height: 6.h),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: waterProgress,
+                minHeight: 4,
+                backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                valueColor: AlwaysStoppedAnimation<Color>(accent),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                _WaterBtn(
+                  label: '-',
+                  accent: accent,
+                  isDark: isDark,
+                  onTap: () => onAdd(-0.25),
+                ),
+                const SizedBox(width: 8),
+                _WaterBtn(
+                  label: '+',
+                  accent: accent,
+                  isDark: isDark,
+                  onTap: () => onAdd(0.25),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WaterBtn extends StatelessWidget {
+  final String label;
+  final Color accent;
+  final bool isDark;
+  final VoidCallback onTap;
+  const _WaterBtn({required this.label, required this.accent, required this.isDark, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          decoration: BoxDecoration(
+            color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: accent),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _WaterActionButton extends StatelessWidget {
   final String label;
   final double width;
@@ -1386,19 +1739,19 @@ class _WaterActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSecondary
               ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
-              : accent.withOpacity(isDark ? 0.15 : 0.1),
+              : accent.withValues(alpha: isDark ? 0.15 : 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSecondary
                 ? (isDark ? AppColors.darkSurface : AppColors.lightBorder)
-                : accent.withOpacity(0.3),
+                : accent.withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: isDark
               ? []
               : [
                   BoxShadow(
-                    color: accent.withOpacity(0.1),
+                    color: accent.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
