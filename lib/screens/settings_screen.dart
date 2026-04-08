@@ -374,6 +374,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
 
+                      const SizedBox(height: 16),
+
+                      // ── Subscription & Legal ──────────────────────────────
+                      _SectionLabel(
+                        label: 'Subscription & Legal',
+                        textMuted: textMuted,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(14),
+                          border: border,
+                        ),
+                        child: Column(
+                          children: [
+                            // Restore Purchases
+                            _SettingRow(
+                              icon: Icons.restore_rounded,
+                              iconColor: isDark
+                                  ? AppColors.lime
+                                  : AppColors.limeDark,
+                              label: 'Restore Purchases',
+                              trailing: Icon(
+                                Icons.chevron_right_rounded,
+                                size: 18,
+                                color: textMuted,
+                              ),
+                              divColor: divColor,
+                              textPrimary: textPrimary,
+                              showDivider: true,
+                            ),
+                            // Terms of Service
+                            GestureDetector(
+                              onTap: () => launchUrl(
+                                Uri.parse('https://eatiq.app/terms'),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                              child: _SettingRow(
+                                icon: Icons.description_outlined,
+                                iconColor: textMuted,
+                                label: 'Terms of Service',
+                                trailing: Icon(
+                                  Icons.open_in_new_rounded,
+                                  size: 16,
+                                  color: textMuted,
+                                ),
+                                divColor: divColor,
+                                textPrimary: textPrimary,
+                                showDivider: true,
+                              ),
+                            ),
+                            // Privacy Policy
+                            GestureDetector(
+                              onTap: () => launchUrl(
+                                Uri.parse('https://eatiq.app/privacy'),
+                                mode: LaunchMode.externalApplication,
+                              ),
+                              child: _SettingRow(
+                                icon: Icons.shield_outlined,
+                                iconColor: textMuted,
+                                label: 'Privacy Policy',
+                                trailing: Icon(
+                                  Icons.open_in_new_rounded,
+                                  size: 16,
+                                  color: textMuted,
+                                ),
+                                divColor: divColor,
+                                textPrimary: textPrimary,
+                                showDivider: false,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                       const SizedBox(height: 100),
                     ],
                   ),

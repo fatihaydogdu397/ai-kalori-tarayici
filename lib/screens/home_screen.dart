@@ -16,6 +16,8 @@ import 'history_screen.dart';
 import 'manual_entry_screen.dart';
 import 'barcode_scanner_screen.dart';
 import 'paywall_screen.dart';
+import 'food_search_screen.dart';
+import 'ai_dietitian_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -162,6 +164,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()));
                   },
                 ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _SheetButton(
+                  icon: Icons.search_rounded,
+                  label: 'Search',
+                  isDark: isDark,
+                  iconColor: isDark ? AppColors.lime : AppColors.limeDark,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const FoodSearchScreen()));
+                  },
+                ),
+                const SizedBox(width: 12),
+                _SheetButton(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  label: 'Dietitian',
+                  isDark: isDark,
+                  iconColor: isDark ? AppColors.violet : AppColors.violetDark,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AiDietitianScreen()));
+                  },
+                ),
+                const SizedBox(width: 12),
+                const Spacer(),
+                const Spacer(),
               ],
             ),
           ],
