@@ -66,9 +66,7 @@ const _mockFoods = [
   _FoodItem(name: 'Rice Cake', emoji: '🍘', cal: 387, protein: 8, carbs: 81, fat: 2.9, category: 'Snacks'),
 ];
 
-const _categories = [
-  'All', 'Protein', 'Dairy', 'Carbs', 'Fruit', 'Fats', 'Vegetables', 'Fast Food', 'Snacks',
-];
+const _categories = ['All', 'Protein', 'Dairy', 'Carbs', 'Fruit', 'Fats', 'Vegetables', 'Fast Food', 'Snacks'];
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -105,12 +103,9 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
     final accent = isDark ? AppColors.lime : AppColors.limeDark;
-    final border = isDark
-        ? null
-        : Border.all(color: AppColors.lightBorder, width: 0.5);
+    final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
 
     final results = _filtered;
 
@@ -130,26 +125,14 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                     child: Container(
                       width: 36.w,
                       height: 36.w,
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: border,
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16.sp,
-                        color: textMuted,
-                      ),
+                      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(10.r), border: border),
+                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 16.sp, color: textMuted),
                     ),
                   ),
                   SizedBox(width: 12.w),
                   Text(
                     'Food Search',
-                    style: TextStyle(
-                      fontSize: 22.sp,
-                      fontWeight: FontWeight.w800,
-                      color: textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: textPrimary),
                   ),
                 ],
               ),
@@ -161,11 +144,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Container(
                 height: 46.h,
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(14.r),
-                  border: border,
-                ),
+                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14.r), border: border),
                 child: Row(
                   children: [
                     SizedBox(width: 14.w),
@@ -175,19 +154,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       child: TextField(
                         controller: _searchCtrl,
                         onChanged: (v) => setState(() => _query = v),
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          color: textPrimary,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(fontSize: 15.sp, color: textPrimary, fontWeight: FontWeight.w500),
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Search foods...',
-                          hintStyle: TextStyle(
-                            fontSize: 15.sp,
-                            color: textMuted,
-                            fontWeight: FontWeight.w400,
-                          ),
+                          hintStyle: TextStyle(fontSize: 15.sp, color: textMuted, fontWeight: FontWeight.w400),
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -201,11 +172,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         },
                         child: Padding(
                           padding: EdgeInsets.all(10.w),
-                          child: Icon(
-                            Icons.close_rounded,
-                            color: textMuted,
-                            size: 18.sp,
-                          ),
+                          child: Icon(Icons.close_rounded, color: textMuted, size: 18.sp),
                         ),
                       ),
                   ],
@@ -235,23 +202,15 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         borderRadius: BorderRadius.circular(17.r),
                         border: selected
                             ? null
-                            : (isDark
-                                ? Border.all(
-                                    color: AppColors.darkSurface, width: 1)
-                                : Border.all(
-                                    color: AppColors.lightBorder, width: 0.5)),
+                            : (isDark ? Border.all(color: AppColors.darkSurface, width: 1) : Border.all(color: AppColors.lightBorder, width: 0.5)),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         cat,
                         style: TextStyle(
                           fontSize: 12.sp,
-                          fontWeight: selected
-                              ? FontWeight.w700
-                              : FontWeight.w500,
-                          color: selected
-                              ? (isDark ? AppColors.void_ : Colors.white)
-                              : textMuted,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          color: selected ? (isDark ? AppColors.void_ : Colors.white) : textMuted,
                         ),
                       ),
                     ),
@@ -266,11 +225,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
               child: Text(
                 '${results.length} foods',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: textMuted,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 12.sp, color: textMuted, fontWeight: FontWeight.w500),
               ),
             ),
 
@@ -281,18 +236,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '🔍',
-                            style: TextStyle(fontSize: 40.sp),
-                          ),
+                          Text('🔍', style: TextStyle(fontSize: 40.sp)),
                           SizedBox(height: 12.h),
                           Text(
                             'No foods found',
-                            style: TextStyle(
-                              color: textMuted,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(color: textMuted, fontSize: 14.sp, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
@@ -309,8 +257,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         textMuted: textMuted,
                         accent: accent,
                         isDark: isDark,
-                        onAdd: () => _showAddSheet(context, results[i], isDark,
-                            cardBg, textPrimary, textMuted, accent),
+                        onAdd: () => _showAddSheet(context, results[i], isDark, cardBg, textPrimary, textMuted, accent),
                       ),
                     ),
             ),
@@ -320,15 +267,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     );
   }
 
-  void _showAddSheet(
-    BuildContext context,
-    _FoodItem food,
-    bool isDark,
-    Color cardBg,
-    Color textPrimary,
-    Color textMuted,
-    Color accent,
-  ) {
+  void _showAddSheet(BuildContext context, _FoodItem food, bool isDark, Color cardBg, Color textPrimary, Color textMuted, Color accent) {
     double grams = 100;
     showModalBottomSheet(
       context: context,
@@ -345,15 +284,9 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
           return Container(
             decoration: BoxDecoration(
               color: isDark ? AppColors.darkCard : AppColors.lightCard,
-              borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(24.r)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
             ),
-            padding: EdgeInsets.fromLTRB(
-              24.w,
-              12.h,
-              24.w,
-              MediaQuery.of(context).padding.bottom + 24.h,
-            ),
+            padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, MediaQuery.of(context).padding.bottom + 24.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,9 +296,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                     width: 36.w,
                     height: 4.h,
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkSurface
-                          : AppColors.lightBorder,
+                      color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -375,8 +306,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                 // Food name + emoji
                 Row(
                   children: [
-                    Text(food.emoji,
-                        style: TextStyle(fontSize: 32.sp)),
+                    Text(food.emoji, style: TextStyle(fontSize: 32.sp)),
                     SizedBox(width: 12.w),
                     Expanded(
                       child: Column(
@@ -384,19 +314,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         children: [
                           Text(
                             food.name,
-                            style: TextStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w800,
-                              color: textPrimary,
-                            ),
+                            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textPrimary),
                           ),
                           Text(
                             '${cal.toStringAsFixed(0)} kcal',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: accent,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: TextStyle(fontSize: 14.sp, color: accent, fontWeight: FontWeight.w700),
                           ),
                         ],
                       ),
@@ -420,11 +342,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                 // Portion slider
                 Text(
                   'Portion: ${grams.toStringAsFixed(0)} g',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
                 ),
                 Slider(
                   value: grams,
@@ -448,19 +366,13 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accent,
-                      foregroundColor:
-                          isDark ? AppColors.void_ : Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
+                      foregroundColor: isDark ? AppColors.void_ : Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                       elevation: 0,
                     ),
                     child: Text(
                       'Add to Log',
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),
@@ -488,15 +400,18 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       timestamp: DateTime.now(),
       mealCategory: MealCategoryX.fromTime(DateTime.now()),
       isFavorite: false,
+      imagePath: '',
+      foods: [],
+      totalNutrients: null,
+      summary: '',
+      advice: '',
+      analyzedAt: null,
     );
     provider.saveManualEntry(analysis);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${food.name} added to log'),
-        backgroundColor:
-            Theme.of(context).brightness == Brightness.dark
-                ? AppColors.darkCard
-                : AppColors.lightText,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : AppColors.lightText,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
@@ -529,11 +444,7 @@ class _FoodCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(14.r),
-        border: border,
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14.r), border: border),
       child: Row(
         children: [
           // Emoji
@@ -547,32 +458,20 @@ class _FoodCard extends StatelessWidget {
               children: [
                 Text(
                   item.name,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
                 ),
                 SizedBox(height: 4.h),
                 Row(
                   children: [
                     Text(
                       '${item.cal.toStringAsFixed(0)} kcal',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: accent,
-                      ),
+                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: accent),
                     ),
                     Text(
                       '  ·  P${item.protein.toStringAsFixed(0)}g'
                       '  C${item.carbs.toStringAsFixed(0)}g'
                       '  F${item.fat.toStringAsFixed(0)}g',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: textMuted,
-                        fontWeight: FontWeight.w400,
-                      ),
+                      style: TextStyle(fontSize: 11.sp, color: textMuted, fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),
@@ -605,44 +504,28 @@ class _SheetMacro extends StatelessWidget {
   final String label, value;
   final Color color;
 
-  const _SheetMacro({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
+  const _SheetMacro({required this.label, required this.value, required this.color});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
-    final textMuted =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
 
     return Expanded(
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 10.h),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(10.r),
-        ),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10.r)),
         child: Column(
           children: [
             Text(
               value,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: color),
             ),
             SizedBox(height: 2.h),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 10.sp,
-                color: textMuted,
-                fontWeight: FontWeight.w400,
-              ),
+              style: TextStyle(fontSize: 10.sp, color: textMuted, fontWeight: FontWeight.w400),
             ),
           ],
         ),
