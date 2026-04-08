@@ -590,11 +590,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get barcodeNotFound => 'Product not found. Try manual entry.';
 
   @override
-  String get noWeightData => 'Henüz kilo geçmişi yok.';
+  String get noWeightData => 'No weight data yet.';
 
   @override
-  String get noWeightDataHint =>
-      'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
+  String get noWeightDataHint => 'Log your weight to see your progress here.';
 
   @override
   String streakDays(int count) {
