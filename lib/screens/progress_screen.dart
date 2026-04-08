@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
-import '../generated/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProgressScreen extends StatefulWidget {
@@ -16,7 +14,7 @@ class ProgressScreen extends StatefulWidget {
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
-  int _tabIndex = 1; // 0: Günlük, 1: Haftalık, 2: Aylık
+  int _tabIndex = 1; // 0: Today, 1: This Week, 2: 30 Days, 3: Weight
 
   @override
   void initState() {
@@ -29,14 +27,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark
-        ? AppColors.darkTextSecondary
-        : AppColors.lightTextSecondary;
+    final textMuted =
+        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
     final accent = isDark ? AppColors.lime : AppColors.limeDark;
     final border = isDark
         ? null
@@ -48,6 +44,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         builder: (context, provider, _) {
           return CustomScrollView(
             slivers: [
+              // ── App Bar ───────────────────────────────────────────────────
               SliverAppBar(
                 pinned: true,
                 floating: false,
@@ -57,7 +54,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 elevation: 0,
                 toolbarHeight: 56,
                 title: Text(
-                  l.progress,
+                  'Progress',
                   style: TextStyle(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.w800,
@@ -65,79 +62,58 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   ),
                 ),
               ),
+
+              // ── Hero + Tabs + Content ─────────────────────────────────────
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: CupertinoSlidingSegmentedControl<int>(
-                    groupValue: _tabIndex,
-                    children: {
-                      0: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          l.today,
-                          style: TextStyle(
-                            color: _tabIndex == 0
-                                ? (isDark ? Colors.black : Colors.white)
-                                : textPrimary,
-                          ),
-                        ),
+                  padding:
+                      EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Hero summary card (above tabs)
+                      _buildHeroSection(
+                        context,
+                        provider,
+                        cardBg,
+                        textPrimary,
+                        textMuted,
+                        accent,
+                        border,
+                        isDark,
                       ),
-                      1: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          l.thisWeek,
-                          style: TextStyle(
-                            color: _tabIndex == 1
-                                ? (isDark ? Colors.black : Colors.white)
-                                : textPrimary,
-                          ),
-                        ),
+                      SizedBox(height: 12.h),
+
+                      // Pill tab bar (full-width)
+                      _PillTabBar(
+                        selectedIndex: _tabIndex,
+                        labels: const [
+                          'Today',
+                          'This Week',
+                          '30 Days',
+                          'Weight',
+                        ],
+                        accent: accent,
+                        cardBg: cardBg,
+                        textPrimary: textPrimary,
+                        textMuted: textMuted,
+                        isDark: isDark,
+                        onTap: (i) => setState(() => _tabIndex = i),
                       ),
-                      2: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          "30 Gün",
-                          style: TextStyle(
-                            color: _tabIndex == 2
-                                ? (isDark ? Colors.black : Colors.white)
-                                : textPrimary,
-                          ),
-                        ),
+                      SizedBox(height: 16.h),
+
+                      // Tab content (charts, breakdowns, insights)
+                      _buildTabContent(
+                        context,
+                        provider,
+                        cardBg,
+                        textPrimary,
+                        textMuted,
+                        accent,
+                        border,
+                        isDark,
                       ),
-                      3: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          l.weight,
-                          style: TextStyle(
-                            color: _tabIndex == 3
-                                ? (isDark ? Colors.black : Colors.white)
-                                : textPrimary,
-                          ),
-                        ),
-                      ),
-                    },
-                    thumbColor: accent,
-                    backgroundColor: cardBg,
-                    onValueChanged: (val) {
-                      if (val != null) setState(() => _tabIndex = val);
-                    },
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 8, 20, 100),
-                  child: _buildSelectedView(
-                    context,
-                    provider,
-                    bg,
-                    cardBg,
-                    textPrimary,
-                    textMuted,
-                    accent,
-                    border,
-                    l,
-                    isDark,
+                    ],
                   ),
                 ),
               ),
@@ -148,482 +124,549 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildSelectedView(
+  // ── HERO SECTION ──────────────────────────────────────────────────────────
+  // Shows a summary card above the tab bar; content changes per selected tab.
+
+  Widget _buildHeroSection(
     BuildContext context,
     AppProvider provider,
-    Color bg,
     Color cardBg,
     Color textPrimary,
     Color textMuted,
     Color accent,
     Border? border,
-    AppLocalizations l,
     bool isDark,
   ) {
-    if (_tabIndex == 0)
-      return _buildDailyView(
-        context,
-        provider,
-        cardBg,
-        textPrimary,
-        textMuted,
-        accent,
-        border,
-        l,
-        isDark,
-      );
-    if (_tabIndex == 1)
-      return _buildWeeklyView(
-        context,
-        provider,
-        cardBg,
-        textPrimary,
-        textMuted,
-        accent,
-        border,
-        l,
-        isDark,
-      );
-    if (_tabIndex == 2)
-      return _buildMonthlyView(
-        context,
-        provider,
-        cardBg,
-        textPrimary,
-        textMuted,
-        accent,
-        border,
-        l,
-        isDark,
-      );
-    return _buildWeightView(
-      context,
-      provider,
-      cardBg,
-      textPrimary,
-      textMuted,
-      accent,
-      border,
-      l,
-      isDark,
-    );
+    switch (_tabIndex) {
+      case 0:
+        return _buildTodayHero(
+            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+      case 1:
+        return _buildWeekHero(
+            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+      case 2:
+        return _buildMonthHero(
+            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+      default:
+        return _buildWeightHero(
+            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+    }
   }
 
-  Widget _buildDailyView(
-    BuildContext context,
+  Widget _buildTodayHero(
     AppProvider provider,
     Color cardBg,
     Color textPrimary,
     Color textMuted,
     Color accent,
     Border? border,
-    AppLocalizations l,
     bool isDark,
   ) {
     final tStats = provider.todayStats;
-    final cal = tStats['calories'] ?? 0.0;
-    final pro = tStats['protein'] ?? 0.0;
-    final car = tStats['carbs'] ?? 0.0;
-    final fat = tStats['fat'] ?? 0.0;
+    final cal = (tStats['calories'] as num? ?? 0).toDouble();
+    final pro = (tStats['protein'] as num? ?? 0).toDouble();
+    final car = (tStats['carbs'] as num? ?? 0).toDouble();
+    final fat = (tStats['fat'] as num? ?? 0).toDouble();
+    final goal = provider.dailyCalorieGoal;
+    final calProgress = goal > 0 ? (cal / goal).clamp(0.0, 1.0) : 0.0;
+    final remaining = (goal - cal).clamp(0.0, double.infinity);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            _StatCard(
-              label: l.caloriestoday,
-              value: cal.toStringAsFixed(0),
-              unit: 'kcal',
-              color: accent,
-              bg: cardBg,
-              border: border,
-              textPrimary: textPrimary,
-              textMuted: textMuted,
-            ),
-            SizedBox(width: 10.w),
-            _StatCard(
-              label: l.water,
-              value: provider.waterToday.toStringAsFixed(1),
-              unit: 'L',
-              color: Colors.cyan,
-              bg: cardBg,
-              border: border,
-              textPrimary: textPrimary,
-              textMuted: textMuted,
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(14.r),
-            border: border,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20.r),
+        border: border,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label row with streak chip
+          Row(
             children: [
               Text(
-                l.macroBreakdown,
-                style: AppTypography.titleMedium.copyWith(color: textPrimary),
+                'Today',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: textMuted,
+                  letterSpacing: 0.5,
+                ),
               ),
-              SizedBox(height: 14.h),
-              Builder(
-                builder: (context) {
-                  final total = pro + car + fat;
-                  return Row(
-                    children: [
-                      SizedBox(
-                        width: 100.w,
-                        height: 100.w,
-                        child: total > 0
-                            ? PieChart(
-                                PieChartData(
-                                  sectionsSpace: 2,
-                                  centerSpaceRadius: 30.w,
-                                  sections: [
-                                    PieChartSectionData(
-                                      color: AppColors.violet,
-                                      value: pro,
-                                      title: '',
-                                      radius: 12.w,
-                                    ),
-                                    PieChartSectionData(
-                                      color: AppColors.amber,
-                                      value: car,
-                                      title: '',
-                                      radius: 12.w,
-                                    ),
-                                    PieChartSectionData(
-                                      color: AppColors.coral,
-                                      value: fat,
-                                      title: '',
-                                      radius: 12.w,
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : const SizedBox(),
-                      ),
-                      SizedBox(width: 20.w),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            _MacroBar(
-                              label: l.protein,
-                              value: pro,
-                              color: AppColors.violet,
-                              textPrimary: textPrimary,
-                              textMuted: textMuted,
-                              isDark: isDark,
-                            ),
-                            SizedBox(height: 10.h),
-                            _MacroBar(
-                              label: l.carbs,
-                              value: car,
-                              color: AppColors.amber,
-                              textPrimary: textPrimary,
-                              textMuted: textMuted,
-                              isDark: isDark,
-                            ),
-                            SizedBox(height: 10.h),
-                            _MacroBar(
-                              label: l.fat,
-                              value: fat,
-                              color: AppColors.coral,
-                              textPrimary: textPrimary,
-                              textMuted: textMuted,
-                              isDark: isDark,
-                            ),
-                          ],
+              const Spacer(),
+              if (provider.streak > 0)
+                _StreakChip(streak: provider.streak, accent: accent, isDark: isDark),
+            ],
+          ),
+          SizedBox(height: 12.h),
+
+          // Big number + ring
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          cal.toStringAsFixed(0),
+                          style: TextStyle(
+                            fontSize: 52.sp,
+                            fontWeight: FontWeight.w900,
+                            color: accent,
+                            height: 1,
+                          ),
                         ),
+                        SizedBox(width: 6.w),
+                        Text(
+                          'kcal',
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w500,
+                            color: textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      goal > 0
+                          ? '${remaining.toStringAsFixed(0)} kcal remaining · goal ${goal.toStringAsFixed(0)}'
+                          : 'No goal set',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: textMuted,
+                        fontWeight: FontWeight.w400,
                       ),
-                    ],
-                  );
-                },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 16.w),
+              SizedBox(
+                width: 68.w,
+                height: 68.w,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: 1.0,
+                      strokeWidth: 7,
+                      color: accent.withValues(alpha: 0.15),
+                    ),
+                    CircularProgressIndicator(
+                      value: calProgress,
+                      strokeWidth: 7,
+                      color: accent,
+                      strokeCap: StrokeCap.round,
+                    ),
+                    Text(
+                      '${(calProgress * 100).toStringAsFixed(0)}%',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-      ],
+          SizedBox(height: 16.h),
+
+          // 4 macro pills
+          Row(
+            children: [
+              _MacroPill(
+                label: 'Protein',
+                value: '${pro.toStringAsFixed(0)}g',
+                color: AppColors.violet,
+                bg: isDark
+                    ? AppColors.darkProteinBg
+                    : AppColors.lightProteinBg,
+                textPrimary: textPrimary,
+                textMuted: textMuted,
+              ),
+              SizedBox(width: 8.w),
+              _MacroPill(
+                label: 'Carbs',
+                value: '${car.toStringAsFixed(0)}g',
+                color: AppColors.amber,
+                bg: isDark
+                    ? AppColors.darkCarbsBg
+                    : AppColors.lightCarbsBg,
+                textPrimary: textPrimary,
+                textMuted: textMuted,
+              ),
+              SizedBox(width: 8.w),
+              _MacroPill(
+                label: 'Fat',
+                value: '${fat.toStringAsFixed(0)}g',
+                color: AppColors.coral,
+                bg: isDark
+                    ? AppColors.darkFatBg
+                    : AppColors.lightFatBg,
+                textPrimary: textPrimary,
+                textMuted: textMuted,
+              ),
+              SizedBox(width: 8.w),
+              _MacroPill(
+                label: 'Water',
+                value: '${provider.waterToday.toStringAsFixed(1)}L',
+                color: AppColors.mint,
+                bg: isDark
+                    ? AppColors.darkWaterBg
+                    : AppColors.lightWaterBg,
+                textPrimary: textPrimary,
+                textMuted: textMuted,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildWeeklyView(
-    BuildContext context,
+  Widget _buildWeekHero(
     AppProvider provider,
     Color cardBg,
     Color textPrimary,
     Color textMuted,
     Color accent,
     Border? border,
-    AppLocalizations l,
     bool isDark,
   ) {
     final weekly = provider.weeklyStats;
     final avgCal = weekly.isEmpty
         ? 0.0
         : weekly.fold<double>(
-                0,
-                (s, d) => s + (d['calories'] as num).toDouble(),
-              ) /
-              weekly.length;
+                0, (s, d) => s + (d['calories'] as num).toDouble()) /
+            weekly.length;
+    final totalMeals = weekly.fold<int>(
+      0,
+      (s, d) => s + ((d['mealCount'] as num?)?.toInt() ?? 0),
+    );
+    final insights = provider.weeklyInsights;
+    final achievement = insights.isNotEmpty
+        ? (insights['goalAchievement'] as double)
+        : 0.0;
+
+    return _HeroStatRow(
+      label: 'This Week',
+      leftValue: avgCal.toStringAsFixed(0),
+      leftUnit: 'kcal',
+      leftSub: 'avg / day',
+      leftColor: accent,
+      rightValue: totalMeals.toString(),
+      rightUnit: '',
+      rightSub: 'meals logged',
+      rightColor: AppColors.violet,
+      badgeLabel: achievement > 0
+          ? 'Goal ${achievement.toStringAsFixed(0)}% hit'
+          : null,
+      badgeColor: accent,
+      cardBg: cardBg,
+      border: border,
+      textPrimary: textPrimary,
+      textMuted: textMuted,
+      isDark: isDark,
+    );
+  }
+
+  Widget _buildMonthHero(
+    AppProvider provider,
+    Color cardBg,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+    Border? border,
+    bool isDark,
+  ) {
+    final monthly = provider.monthlyStats;
+    final avgCal = monthly.isEmpty
+        ? 0.0
+        : monthly.fold<double>(
+                0, (s, d) => s + (d['calories'] as num).toDouble()) /
+            monthly.length;
+    final totalMeals = monthly.fold<int>(
+      0,
+      (s, d) => s + ((d['mealCount'] as num?)?.toInt() ?? 0),
+    );
+    final insights = provider.monthlyInsights;
+    final consistency = insights.isNotEmpty
+        ? (insights['consistencyScore'] as double)
+        : 0.0;
+
+    return _HeroStatRow(
+      label: '30 Days',
+      leftValue: avgCal.toStringAsFixed(0),
+      leftUnit: 'kcal',
+      leftSub: 'avg / day',
+      leftColor: accent,
+      rightValue: totalMeals.toString(),
+      rightUnit: '',
+      rightSub: 'meals logged',
+      rightColor: AppColors.violet,
+      badgeLabel: consistency > 0
+          ? '${consistency.toStringAsFixed(0)}% consistent'
+          : null,
+      badgeColor: AppColors.amber,
+      cardBg: cardBg,
+      border: border,
+      textPrimary: textPrimary,
+      textMuted: textMuted,
+      isDark: isDark,
+    );
+  }
+
+  Widget _buildWeightHero(
+    AppProvider provider,
+    Color cardBg,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+    Border? border,
+    bool isDark,
+  ) {
+    final logs = provider.weightLogs;
+    final isImperial = provider.unitSystem == UnitSystem.imperial;
+    final unit = isImperial ? 'lb' : 'kg';
+    final lastWeight = logs.isNotEmpty
+        ? (logs.last['weight'] as num).toDouble()
+        : provider.weight;
+    final targetWeight = provider.targetWeight;
+    final startWeight = logs.isNotEmpty
+        ? (logs.first['weight'] as num).toDouble()
+        : lastWeight;
+    final delta = lastWeight - startWeight;
+    final hasDelta = logs.length > 1;
+
+    String deltaBadge = '';
+    Color deltaColor = textMuted;
+    if (hasDelta) {
+      if (delta < 0) {
+        deltaBadge = '↓ ${delta.abs().toStringAsFixed(1)} $unit lost';
+        deltaColor = AppColors.mint;
+      } else if (delta > 0) {
+        deltaBadge = '↑ ${delta.toStringAsFixed(1)} $unit gained';
+        deltaColor = AppColors.coral;
+      } else {
+        deltaBadge = 'Stable weight';
+        deltaColor = textMuted;
+      }
+    }
+
+    return _HeroStatRow(
+      label: 'Weight',
+      leftValue: lastWeight.toStringAsFixed(1),
+      leftUnit: unit,
+      leftSub: 'current',
+      leftColor: AppColors.violet,
+      rightValue: targetWeight > 0 ? targetWeight.toStringAsFixed(1) : '—',
+      rightUnit: targetWeight > 0 ? unit : '',
+      rightSub: 'target',
+      rightColor: accent,
+      badgeLabel: hasDelta ? deltaBadge : null,
+      badgeColor: deltaColor,
+      cardBg: cardBg,
+      border: border,
+      textPrimary: textPrimary,
+      textMuted: textMuted,
+      isDark: isDark,
+    );
+  }
+
+  // ── TAB CONTENT ───────────────────────────────────────────────────────────
+  // Charts, macro breakdowns, insights — no stat cards here (they're in hero).
+
+  Widget _buildTabContent(
+    BuildContext context,
+    AppProvider provider,
+    Color cardBg,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+    Border? border,
+    bool isDark,
+  ) {
+    switch (_tabIndex) {
+      case 0:
+        return _buildTodayContent(
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+      case 1:
+        return _buildWeeklyContent(
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+      case 2:
+        return _buildMonthlyContent(
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+      default:
+        return _buildWeightContent(
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+    }
+  }
+
+  // ── TODAY CONTENT ─────────────────────────────────────────────────────────
+
+  Widget _buildTodayContent(
+    BuildContext context,
+    AppProvider provider,
+    Color cardBg,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+    Border? border,
+    bool isDark,
+  ) {
+    final tStats = provider.todayStats;
+    final pro = (tStats['protein'] as num? ?? 0).toDouble();
+    final car = (tStats['carbs'] as num? ?? 0).toDouble();
+    final fat = (tStats['fat'] as num? ?? 0).toDouble();
+
+    return _MacroBreakdownCard(
+      pro: pro,
+      car: car,
+      fat: fat,
+      cardBg: cardBg,
+      border: border,
+      textPrimary: textPrimary,
+      textMuted: textMuted,
+      isDark: isDark,
+    );
+  }
+
+  // ── WEEKLY CONTENT ────────────────────────────────────────────────────────
+
+  Widget _buildWeeklyContent(
+    BuildContext context,
+    AppProvider provider,
+    Color cardBg,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+    Border? border,
+    bool isDark,
+  ) {
+    final weekly = provider.weeklyStats;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            _StatCard(
-              label: l.avgCalories,
-              value: avgCal.toStringAsFixed(0),
-              unit: 'kcal',
-              color: accent,
-              bg: cardBg,
-              border: border,
-              textPrimary: textPrimary,
-              textMuted: textMuted,
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(14.r),
-            border: border,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l.weeklyCalories,
-                style: AppTypography.titleMedium.copyWith(color: textPrimary),
-              ),
-              SizedBox(height: 16.h),
-              SizedBox(
-                height: 160,
-                child: weekly.isEmpty
-                    ? Center(
-                        child: Text(
-                          l.noMeals.split('\n').first,
-                          style: TextStyle(color: textMuted, fontSize: 12.sp),
-                        ),
-                      )
-                    : BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.spaceAround,
-                          maxY:
-                              weekly.fold<double>(
-                                    0,
-                                    (m, d) =>
-                                        (d['calories'] as num).toDouble() > m
-                                        ? (d['calories'] as num).toDouble()
-                                        : m,
-                                  ) *
-                                  1.3 +
-                              100,
-                          barTouchData: BarTouchData(enabled: false),
-                          titlesData: FlTitlesData(
-                            show: true,
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (val, meta) {
-                                  final idx = val.toInt();
-                                  if (idx < 0 || idx >= weekly.length)
-                                    return SizedBox();
-                                  final dateStr = weekly[idx]['date'] as String;
-                                  try {
-                                    final d = DateTime.parse(dateStr);
-                                    // Sadece başlangıç gün harfleri (örn. P, S, Ç, P, C, C, P)
-                                    final dayName = DateFormat(
-                                      'E',
-                                      l.localeName,
-                                    ).format(d);
-                                    return Padding(
-                                      padding: EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        dayName,
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          color: textMuted,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    return SizedBox();
-                                  }
-                                },
-                              ),
-                            ),
-                            leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                          ),
-                          gridData: FlGridData(
-                            show: true,
-                            drawVerticalLine: false,
-                            getDrawingHorizontalLine: (_) => FlLine(
-                              color: isDark
-                                  ? AppColors.darkSurface
-                                  : AppColors.lightBorder,
-                              strokeWidth: 0.5,
-                            ),
-                          ),
-                          borderData: FlBorderData(show: false),
-                          barGroups: List.generate(weekly.length, (i) {
-                            final cal = (weekly[i]['calories'] as num)
-                                .toDouble();
-                            return BarChartGroupData(
-                              x: i,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: cal,
-                                  color: cal > 0
-                                      ? accent
-                                      : (isDark
-                                            ? AppColors.darkSurface
-                                            : AppColors.lightBorder),
-                                  width: 14,
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(4.r),
+        // Bar chart
+        _ChartCard(
+          title: 'Calories',
+          cardBg: cardBg,
+          border: border,
+          textPrimary: textPrimary,
+          child: weekly.isEmpty
+              ? _EmptyChart(textMuted: textMuted)
+              : SizedBox(
+                  height: 160.h,
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: weekly.fold<double>(
+                                  0,
+                                  (m, d) =>
+                                      (d['calories'] as num).toDouble() > m
+                                          ? (d['calories'] as num).toDouble()
+                                          : m,
+                                ) *
+                              1.3 +
+                          100,
+                      barTouchData: BarTouchData(enabled: false),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (val, meta) {
+                              final idx = val.toInt();
+                              if (idx < 0 || idx >= weekly.length) {
+                                return const SizedBox.shrink();
+                              }
+                              final dateStr = weekly[idx]['date'] as String;
+                              try {
+                                final d = DateTime.parse(dateStr);
+                                return Padding(
+                                  padding: EdgeInsets.only(top: 8.h),
+                                  child: Text(
+                                    DateFormat('E').format(d),
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: textMuted,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            );
-                          }),
+                                );
+                              } catch (_) {
+                                return const SizedBox.shrink();
+                              }
+                            },
+                          ),
+                        ),
+                        leftTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
                         ),
                       ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(14.r),
-            border: border,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l.macroBreakdown,
-                style: AppTypography.titleMedium.copyWith(color: textPrimary),
-              ),
-              SizedBox(height: 14.h),
-              if (weekly.isEmpty)
-                Center(
-                  child: Text(
-                    l.noMeals.split('\n').first,
-                    style: TextStyle(color: textMuted, fontSize: 12.sp),
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        getDrawingHorizontalLine: (_) => FlLine(
+                          color: isDark
+                              ? AppColors.darkSurface
+                              : AppColors.lightBorder,
+                          strokeWidth: 0.5,
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      barGroups: List.generate(weekly.length, (i) {
+                        final calVal =
+                            (weekly[i]['calories'] as num).toDouble();
+                        return BarChartGroupData(
+                          x: i,
+                          barRods: [
+                            BarChartRodData(
+                              toY: calVal,
+                              color: calVal > 0
+                                  ? accent
+                                  : (isDark
+                                      ? AppColors.darkSurface
+                                      : AppColors.lightBorder),
+                              width: 14,
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(4.r),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
                   ),
-                )
-              else
-                Builder(
-                  builder: (context) {
-                    final pro = weekly.fold<double>(
-                      0,
-                      (s, d) => s + (d['protein'] as num).toDouble(),
-                    );
-                    final car = weekly.fold<double>(
-                      0,
-                      (s, d) => s + (d['carbs'] as num).toDouble(),
-                    );
-                    final fat = weekly.fold<double>(
-                      0,
-                      (s, d) => s + (d['fat'] as num).toDouble(),
-                    );
-                    final total = pro + car + fat;
-
-                    return Row(
-                      children: [
-                        SizedBox(
-                          width: 100.w,
-                          height: 100.w,
-                          child: total > 0
-                              ? PieChart(
-                                  PieChartData(
-                                    sectionsSpace: 2,
-                                    centerSpaceRadius: 30.w,
-                                    sections: [
-                                      PieChartSectionData(
-                                        color: AppColors.violet,
-                                        value: pro,
-                                        title: '',
-                                        radius: 12.w,
-                                      ),
-                                      PieChartSectionData(
-                                        color: AppColors.amber,
-                                        value: car,
-                                        title: '',
-                                        radius: 12.w,
-                                      ),
-                                      PieChartSectionData(
-                                        color: AppColors.coral,
-                                        value: fat,
-                                        title: '',
-                                        radius: 12.w,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : const SizedBox(),
-                        ),
-                        SizedBox(width: 20.w),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              _MacroBar(
-                                label: l.protein,
-                                value: pro,
-                                color: AppColors.violet,
-                                textPrimary: textPrimary,
-                                textMuted: textMuted,
-                                isDark: isDark,
-                              ),
-                              SizedBox(height: 10.h),
-                              _MacroBar(
-                                label: l.carbs,
-                                value: car,
-                                color: AppColors.amber,
-                                textPrimary: textPrimary,
-                                textMuted: textMuted,
-                                isDark: isDark,
-                              ),
-                              SizedBox(height: 10.h),
-                              _MacroBar(
-                                label: l.fat,
-                                value: fat,
-                                color: AppColors.coral,
-                                textPrimary: textPrimary,
-                                textMuted: textMuted,
-                                isDark: isDark,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
                 ),
-            ],
-          ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 12.h),
+
+        _MacroBreakdownFromList(
+          stats: weekly,
+          cardBg: cardBg,
+          border: border,
+          textPrimary: textPrimary,
+          textMuted: textMuted,
+          isDark: isDark,
+        ),
+        SizedBox(height: 12.h),
+
         _AnalysisGrid(
           insights: provider.weeklyInsights,
           isWeekly: true,
@@ -633,13 +676,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
           textMuted: textMuted,
           accent: accent,
           border: border,
-          l: l,
         ),
       ],
     );
   }
 
-  Widget _buildMonthlyView(
+  // ── MONTHLY CONTENT ───────────────────────────────────────────────────────
+
+  Widget _buildMonthlyContent(
     BuildContext context,
     AppProvider provider,
     Color cardBg,
@@ -647,254 +691,112 @@ class _ProgressScreenState extends State<ProgressScreen> {
     Color textMuted,
     Color accent,
     Border? border,
-    AppLocalizations l,
     bool isDark,
   ) {
     final monthly = provider.monthlyStats;
-    final avgCal = monthly.isEmpty
-        ? 0.0
-        : monthly.fold<double>(
-                0,
-                (s, d) => s + (d['calories'] as num).toDouble(),
-              ) /
-              monthly.length;
-
-    final spots = List.generate(monthly.length, (i) {
-      return FlSpot(i.toDouble(), (monthly[i]['calories'] as num).toDouble());
-    });
+    final spots = List.generate(
+      monthly.length,
+      (i) => FlSpot(i.toDouble(), (monthly[i]['calories'] as num).toDouble()),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            _StatCard(
-              label: l.avgCalories,
-              value: avgCal.toStringAsFixed(0),
-              unit: 'kcal',
-              color: accent,
-              bg: cardBg,
-              border: border,
-              textPrimary: textPrimary,
-              textMuted: textMuted,
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(14.r),
-            border: border,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "30 Gün Trend",
-                style: AppTypography.titleMedium.copyWith(color: textPrimary),
-              ),
-              SizedBox(height: 16.h),
-              SizedBox(
-                height: 160,
-                child: monthly.isEmpty
-                    ? Center(
-                        child: Text(
-                          l.noMeals.split('\n').first,
-                          style: TextStyle(color: textMuted, fontSize: 12.sp),
-                        ),
-                      )
-                    : LineChart(
-                        LineChartData(
-                          gridData: FlGridData(
-                            show: true,
-                            drawVerticalLine: false,
-                            getDrawingHorizontalLine: (_) => FlLine(
-                              color: isDark
-                                  ? AppColors.darkSurface
-                                  : AppColors.lightBorder,
-                              strokeWidth: 0.5,
-                            ),
-                          ),
-                          titlesData: FlTitlesData(
-                            show: true,
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 22,
-                                interval: 7,
-                                getTitlesWidget: (value, meta) {
-                                  final idx = value.toInt();
-                                  if (idx < 0 || idx >= monthly.length)
-                                    return SizedBox();
-                                  final dateStr =
-                                      monthly[idx]['date'] as String;
-                                  try {
-                                    final d = DateTime.parse(dateStr);
-                                    return Padding(
-                                      padding: EdgeInsets.only(top: 8),
-                                      child: Text(
-                                        '${d.day}/${d.month}',
-                                        style: TextStyle(
-                                          color: textMuted,
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    );
-                                  } catch (_) {
-                                    return SizedBox();
-                                  }
-                                },
-                              ),
-                            ),
-                            leftTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                          ),
-                          borderData: FlBorderData(show: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: spots,
-                              isCurved: true,
-                              color: accent,
-                              barWidth: 3,
-                              isStrokeCapRound: true,
-                              dotData: const FlDotData(show: false),
-                              belowBarData: BarAreaData(
-                                show: true,
-                                color: accent.withOpacity(0.15),
-                              ),
-                            ),
-                          ],
+        // Line chart
+        _ChartCard(
+          title: 'Calories',
+          cardBg: cardBg,
+          border: border,
+          textPrimary: textPrimary,
+          child: monthly.isEmpty
+              ? _EmptyChart(textMuted: textMuted)
+              : SizedBox(
+                  height: 160.h,
+                  child: LineChart(
+                    LineChartData(
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        getDrawingHorizontalLine: (_) => FlLine(
+                          color: isDark
+                              ? AppColors.darkSurface
+                              : AppColors.lightBorder,
+                          strokeWidth: 0.5,
                         ),
                       ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 16.h),
-        Container(
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(14.r),
-            border: border,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l.macroBreakdown,
-                style: AppTypography.titleMedium.copyWith(color: textPrimary),
-              ),
-              SizedBox(height: 14.h),
-              if (monthly.isEmpty)
-                Center(
-                  child: Text(
-                    l.noMeals.split('\n').first,
-                    style: TextStyle(color: textMuted, fontSize: 12.sp),
-                  ),
-                )
-              else
-                Builder(
-                  builder: (context) {
-                    final pro = monthly.fold<double>(
-                      0,
-                      (s, d) => s + (d['protein'] as num).toDouble(),
-                    );
-                    final car = monthly.fold<double>(
-                      0,
-                      (s, d) => s + (d['carbs'] as num).toDouble(),
-                    );
-                    final fat = monthly.fold<double>(
-                      0,
-                      (s, d) => s + (d['fat'] as num).toDouble(),
-                    );
-                    final total = pro + car + fat;
-
-                    return Row(
-                      children: [
-                        SizedBox(
-                          width: 100.w,
-                          height: 100.w,
-                          child: total > 0
-                              ? PieChart(
-                                  PieChartData(
-                                    sectionsSpace: 2,
-                                    centerSpaceRadius: 30.w,
-                                    sections: [
-                                      PieChartSectionData(
-                                        color: AppColors.violet,
-                                        value: pro,
-                                        title: '',
-                                        radius: 12.w,
-                                      ),
-                                      PieChartSectionData(
-                                        color: AppColors.amber,
-                                        value: car,
-                                        title: '',
-                                        radius: 12.w,
-                                      ),
-                                      PieChartSectionData(
-                                        color: AppColors.coral,
-                                        value: fat,
-                                        title: '',
-                                        radius: 12.w,
-                                      ),
-                                    ],
+                      titlesData: FlTitlesData(
+                        show: true,
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 22,
+                            interval: 7,
+                            getTitlesWidget: (value, meta) {
+                              final idx = value.toInt();
+                              if (idx < 0 || idx >= monthly.length) {
+                                return const SizedBox.shrink();
+                              }
+                              final dateStr = monthly[idx]['date'] as String;
+                              try {
+                                final d = DateTime.parse(dateStr);
+                                return Padding(
+                                  padding: EdgeInsets.only(top: 8.h),
+                                  child: Text(
+                                    '${d.day}/${d.month}',
+                                    style: TextStyle(
+                                      color: textMuted,
+                                      fontSize: 10.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                )
-                              : const SizedBox(),
+                                );
+                              } catch (_) {
+                                return const SizedBox.shrink();
+                              }
+                            },
+                          ),
                         ),
-                        SizedBox(width: 20.w),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              _MacroBar(
-                                label: l.protein,
-                                value: pro,
-                                color: AppColors.violet,
-                                textPrimary: textPrimary,
-                                textMuted: textMuted,
-                                isDark: isDark,
-                              ),
-                              SizedBox(height: 10.h),
-                              _MacroBar(
-                                label: l.carbs,
-                                value: car,
-                                color: AppColors.amber,
-                                textPrimary: textPrimary,
-                                textMuted: textMuted,
-                                isDark: isDark,
-                              ),
-                              SizedBox(height: 10.h),
-                              _MacroBar(
-                                label: l.fat,
-                                value: fat,
-                                color: AppColors.coral,
-                                textPrimary: textPrimary,
-                                textMuted: textMuted,
-                                isDark: isDark,
-                              ),
-                            ],
+                        leftTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: spots,
+                          isCurved: true,
+                          color: accent,
+                          barWidth: 3,
+                          isStrokeCapRound: true,
+                          dotData: const FlDotData(show: false),
+                          belowBarData: BarAreaData(
+                            show: true,
+                            color: accent.withValues(alpha: 0.15),
                           ),
                         ),
                       ],
-                    );
-                  },
+                    ),
+                  ),
                 ),
-            ],
-          ),
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 12.h),
+
+        _MacroBreakdownFromList(
+          stats: monthly,
+          cardBg: cardBg,
+          border: border,
+          textPrimary: textPrimary,
+          textMuted: textMuted,
+          isDark: isDark,
+        ),
+        SizedBox(height: 12.h),
+
         _AnalysisGrid(
           insights: provider.monthlyInsights,
           isWeekly: false,
@@ -904,13 +806,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
           textMuted: textMuted,
           accent: accent,
           border: border,
-          l: l,
         ),
       ],
     );
   }
 
-  Widget _buildWeightView(
+  // ── WEIGHT CONTENT ────────────────────────────────────────────────────────
+
+  Widget _buildWeightContent(
     BuildContext context,
     AppProvider provider,
     Color cardBg,
@@ -918,10 +821,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
     Color textMuted,
     Color accent,
     Border? border,
-    AppLocalizations l,
     bool isDark,
   ) {
     final logs = provider.weightLogs;
+    final isImperial = provider.unitSystem == UnitSystem.imperial;
+    final unit = isImperial ? 'lb' : 'kg';
+
     if (logs.isEmpty) {
       return Center(
         child: Padding(
@@ -930,12 +835,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Icon(
                 Icons.monitor_weight_rounded,
-                size: 48,
-                color: textMuted.withOpacity(0.5),
+                size: 48.sp,
+                color: textMuted.withValues(alpha: 0.4),
               ),
               SizedBox(height: 16.h),
               Text(
-                '${l.noWeightData}\n${l.noWeightDataHint}',
+                'No weight data yet.\nLog your weight to see your progress here.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: textMuted, fontSize: 13.sp),
               ),
@@ -955,35 +860,17 @@ class _ProgressScreenState extends State<ProgressScreen> {
       if (w > maxW) maxW = w;
       spots.add(FlSpot(i.toDouble(), w));
     }
-
     if (minW == double.infinity) minW = 50;
     minW = (minW - 5).clamp(20.0, 300.0);
     maxW = maxW + 5;
 
-    final isImperial = provider.unitSystem == UnitSystem.imperial;
-    final unit = isImperial ? 'lb' : 'kg';
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            _StatCard(
-              label: l.weight,
-              value: provider.weight.toStringAsFixed(1),
-              unit: unit,
-              color: AppColors.violet,
-              bg: cardBg,
-              border: border,
-              textPrimary: textPrimary,
-              textMuted: textMuted,
-            ),
-          ],
-        ),
-        SizedBox(height: 16.h),
+        // Line chart
         Container(
           height: 250.h,
-          padding: EdgeInsets.fromLTRB(16, 24, 24, 16),
+          padding: EdgeInsets.fromLTRB(16.w, 24.h, 24.w, 16.h),
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(16.r),
@@ -1003,24 +890,25 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ),
               titlesData: FlTitlesData(
                 show: true,
-                rightTitles: AxisTitles(
+                rightTitles: const AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
                 ),
-                topTitles: AxisTitles(
+                topTitles: const AxisTitles(
                   sideTitles: SideTitles(showTitles: false),
                 ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 22,
-                    interval: (logs.length / 5).clamp(1.0, 10.0).toDouble(),
+                    interval: (logs.length / 5).clamp(1.0, 10.0),
                     getTitlesWidget: (value, meta) {
                       final i = value.toInt();
-                      if (i < 0 || i >= logs.length)
+                      if (i < 0 || i >= logs.length) {
                         return const SizedBox.shrink();
-                      final dt = DateTime.parse(logs[i]['date']);
+                      }
+                      final dt = DateTime.parse(logs[i]['date'] as String);
                       return Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding: EdgeInsets.only(top: 8.h),
                         child: Text(
                           '${dt.day}/${dt.month}',
                           style: TextStyle(
@@ -1040,7 +928,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     reservedSize: 32,
                     getTitlesWidget: (value, meta) {
                       return Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: EdgeInsets.only(right: 8.w),
                         child: Text(
                           value.toInt().toString(),
                           style: TextStyle(
@@ -1081,11 +969,64 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   ),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: AppColors.violet.withOpacity(0.15),
+                    color: AppColors.violet.withValues(alpha: 0.15),
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+        SizedBox(height: 12.h),
+
+        // Last 5 logs
+        Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(16.r),
+            border: border,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Recent Logs',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              ...logs.reversed.take(5).map((log) {
+                final dt = DateTime.parse(log['date'] as String);
+                final w = (log['weight'] as num).toDouble();
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 10.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        DateFormat('d MMM y').format(dt),
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: textMuted,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Text(
+                        '${w.toStringAsFixed(1)} $unit',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
           ),
         ),
       ],
@@ -1093,18 +1034,297 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final String label, value, unit;
-  final Color color, bg;
+// ── PILL TAB BAR ─────────────────────────────────────────────────────────────
+// Full-width segmented control, no horizontal scroll.
+
+class _PillTabBar extends StatelessWidget {
+  final int selectedIndex;
+  final List<String> labels;
+  final Color accent, cardBg, textPrimary, textMuted;
+  final bool isDark;
+  final void Function(int) onTap;
+
+  const _PillTabBar({
+    required this.selectedIndex,
+    required this.labels,
+    required this.accent,
+    required this.cardBg,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 44.h,
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(22.r),
+      ),
+      child: Row(
+        children: List.generate(labels.length, (i) {
+          final selected = i == selectedIndex;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onTap(i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  color: selected ? accent : Colors.transparent,
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  labels[i],
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight:
+                        selected ? FontWeight.w700 : FontWeight.w500,
+                    color: selected
+                        ? (isDark ? AppColors.void_ : Colors.white)
+                        : textMuted,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ── HERO STAT ROW ─────────────────────────────────────────────────────────────
+// Used for Week / Month / Weight hero sections.
+
+class _HeroStatRow extends StatelessWidget {
+  final String label;
+  final String leftValue, leftUnit, leftSub;
+  final Color leftColor;
+  final String rightValue, rightUnit, rightSub;
+  final Color rightColor;
+  final String? badgeLabel;
+  final Color? badgeColor;
+  final Color cardBg, textPrimary, textMuted;
   final Border? border;
-  final Color textPrimary, textMuted;
-  const _StatCard({
+  final bool isDark;
+
+  const _HeroStatRow({
     required this.label,
+    required this.leftValue,
+    required this.leftUnit,
+    required this.leftSub,
+    required this.leftColor,
+    required this.rightValue,
+    required this.rightUnit,
+    required this.rightSub,
+    required this.rightColor,
+    this.badgeLabel,
+    this.badgeColor,
+    required this.cardBg,
+    required this.textPrimary,
+    required this.textMuted,
+    this.border,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20.r),
+        border: border,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Label row with optional badge
+          Row(
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: textMuted,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              if (badgeLabel != null) ...[
+                const Spacer(),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: (badgeColor ?? textMuted)
+                        .withValues(alpha: isDark ? 0.15 : 0.12),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    badgeLabel!,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: badgeColor ?? textMuted,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          SizedBox(height: 16.h),
+
+          // Two stat columns
+          Row(
+            children: [
+              Expanded(child: _HeroStat(
+                value: leftValue,
+                unit: leftUnit,
+                sub: leftSub,
+                color: leftColor,
+                textPrimary: textPrimary,
+                textMuted: textMuted,
+              )),
+              Container(
+                width: 1,
+                height: 40.h,
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                color: textMuted.withValues(alpha: 0.15),
+              ),
+              Expanded(child: _HeroStat(
+                value: rightValue,
+                unit: rightUnit,
+                sub: rightSub,
+                color: rightColor,
+                textPrimary: textPrimary,
+                textMuted: textMuted,
+              )),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroStat extends StatelessWidget {
+  final String value, unit, sub;
+  final Color color, textPrimary, textMuted;
+
+  const _HeroStat({
     required this.value,
     required this.unit,
+    required this.sub,
+    required this.color,
+    required this.textPrimary,
+    required this.textMuted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 28.sp,
+                fontWeight: FontWeight.w900,
+                color: color,
+                height: 1,
+              ),
+            ),
+            if (unit.isNotEmpty) ...[
+              SizedBox(width: 4.w),
+              Text(
+                unit,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w400,
+                  color: textMuted,
+                ),
+              ),
+            ],
+          ],
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          sub,
+          style: TextStyle(
+            fontSize: 11.sp,
+            color: textMuted,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── STREAK CHIP ──────────────────────────────────────────────────────────────
+
+class _StreakChip extends StatelessWidget {
+  final int streak;
+  final Color accent;
+  final bool isDark;
+
+  const _StreakChip({
+    required this.streak,
+    required this.accent,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('🔥', style: TextStyle(fontSize: 13.sp)),
+          SizedBox(width: 4.w),
+          Text(
+            '$streak day streak',
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: accent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── MACRO PILL ───────────────────────────────────────────────────────────────
+
+class _MacroPill extends StatelessWidget {
+  final String label, value;
+  final Color color, bg;
+  final Color textPrimary, textMuted;
+
+  const _MacroPill({
+    required this.label,
+    required this.value,
     required this.color,
     required this.bg,
-    this.border,
     required this.textPrimary,
     required this.textMuted,
   });
@@ -1113,53 +1333,31 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.all(14),
+        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(14.r),
-          border: border,
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+            SizedBox(height: 2.h),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 10.sp,
                 fontWeight: FontWeight.w400,
                 color: textMuted,
               ),
-            ),
-            SizedBox(height: 4.h),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      value,
-                      style: TextStyle(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w800,
-                        color: color,
-                        height: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 4.w),
-                Text(
-                  unit,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: textMuted,
-                  ),
-                ),
-              ],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -1168,12 +1366,235 @@ class _StatCard extends StatelessWidget {
   }
 }
 
+// ── CHART CARD ────────────────────────────────────────────────────────────────
+
+class _ChartCard extends StatelessWidget {
+  final String title;
+  final Color cardBg, textPrimary;
+  final Border? border;
+  final Widget child;
+
+  const _ChartCard({
+    required this.title,
+    required this.cardBg,
+    required this.textPrimary,
+    this.border,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16.r),
+        border: border,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+// ── EMPTY CHART ───────────────────────────────────────────────────────────────
+
+class _EmptyChart extends StatelessWidget {
+  final Color textMuted;
+  const _EmptyChart({required this.textMuted});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 80.h,
+      child: Center(
+        child: Text(
+          'No data yet',
+          style: TextStyle(color: textMuted, fontSize: 12.sp),
+        ),
+      ),
+    );
+  }
+}
+
+// ── MACRO BREAKDOWN CARD (from raw values) ────────────────────────────────────
+
+class _MacroBreakdownCard extends StatelessWidget {
+  final double pro, car, fat;
+  final Color cardBg, textPrimary, textMuted;
+  final Border? border;
+  final bool isDark;
+
+  const _MacroBreakdownCard({
+    required this.pro,
+    required this.car,
+    required this.fat,
+    required this.cardBg,
+    this.border,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final total = pro + car + fat;
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16.r),
+        border: border,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Macro Breakdown',
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
+          ),
+          SizedBox(height: 14.h),
+          Row(
+            children: [
+              SizedBox(
+                width: 100.w,
+                height: 100.w,
+                child: total > 0
+                    ? PieChart(
+                        PieChartData(
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 30.w,
+                          sections: [
+                            PieChartSectionData(
+                              color: AppColors.violet,
+                              value: pro,
+                              title: '',
+                              radius: 12.w,
+                            ),
+                            PieChartSectionData(
+                              color: AppColors.amber,
+                              value: car,
+                              title: '',
+                              radius: 12.w,
+                            ),
+                            PieChartSectionData(
+                              color: AppColors.coral,
+                              value: fat,
+                              title: '',
+                              radius: 12.w,
+                            ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox(),
+              ),
+              SizedBox(width: 20.w),
+              Expanded(
+                child: Column(
+                  children: [
+                    _MacroBar(
+                      label: 'Protein',
+                      value: pro,
+                      color: AppColors.violet,
+                      textPrimary: textPrimary,
+                      textMuted: textMuted,
+                      isDark: isDark,
+                    ),
+                    SizedBox(height: 10.h),
+                    _MacroBar(
+                      label: 'Carbs',
+                      value: car,
+                      color: AppColors.amber,
+                      textPrimary: textPrimary,
+                      textMuted: textMuted,
+                      isDark: isDark,
+                    ),
+                    SizedBox(height: 10.h),
+                    _MacroBar(
+                      label: 'Fat',
+                      value: fat,
+                      color: AppColors.coral,
+                      textPrimary: textPrimary,
+                      textMuted: textMuted,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── MACRO BREAKDOWN FROM LIST ─────────────────────────────────────────────────
+
+class _MacroBreakdownFromList extends StatelessWidget {
+  final List<Map<String, dynamic>> stats;
+  final Color cardBg, textPrimary, textMuted;
+  final Border? border;
+  final bool isDark;
+
+  const _MacroBreakdownFromList({
+    required this.stats,
+    required this.cardBg,
+    this.border,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (stats.isEmpty) return const SizedBox.shrink();
+    final pro = stats.fold<double>(
+        0, (s, d) => s + (d['protein'] as num).toDouble());
+    final car =
+        stats.fold<double>(0, (s, d) => s + (d['carbs'] as num).toDouble());
+    final fat =
+        stats.fold<double>(0, (s, d) => s + (d['fat'] as num).toDouble());
+
+    return _MacroBreakdownCard(
+      pro: pro,
+      car: car,
+      fat: fat,
+      cardBg: cardBg,
+      border: border,
+      textPrimary: textPrimary,
+      textMuted: textMuted,
+      isDark: isDark,
+    );
+  }
+}
+
+// ── MACRO BAR ─────────────────────────────────────────────────────────────────
+
 class _MacroBar extends StatelessWidget {
   final String label;
   final double value;
   final Color color;
   final Color textPrimary, textMuted;
   final bool isDark;
+
   const _MacroBar({
     required this.label,
     required this.value,
@@ -1214,9 +1635,8 @@ class _MacroBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: value > 0 ? (value / 700).clamp(0.0, 1.0) : 0,
             minHeight: 6,
-            backgroundColor: isDark
-                ? AppColors.darkSurface
-                : AppColors.lightBorder,
+            backgroundColor:
+                isDark ? AppColors.darkSurface : AppColors.lightBorder,
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ),
@@ -1224,12 +1644,14 @@ class _MacroBar extends StatelessWidget {
     );
   }
 }
+
+// ── ANALYSIS GRID ─────────────────────────────────────────────────────────────
+
 class _AnalysisGrid extends StatelessWidget {
   final Map<String, dynamic> insights;
   final bool isWeekly, isDark;
   final Color cardBg, textPrimary, textMuted, accent;
   final Border? border;
-  final AppLocalizations l;
 
   const _AnalysisGrid({
     required this.insights,
@@ -1240,7 +1662,6 @@ class _AnalysisGrid extends StatelessWidget {
     required this.textMuted,
     required this.accent,
     this.border,
-    required this.l,
   });
 
   @override
@@ -1254,19 +1675,22 @@ class _AnalysisGrid extends StatelessWidget {
 
     String mealStr = '-';
     if (topMeal != null) {
-      if (topMeal == 'breakfast') mealStr = l.mealBreakfast;
-      if (topMeal == 'lunch') mealStr = l.mealLunch;
-      if (topMeal == 'dinner') mealStr = l.mealDinner;
-      if (topMeal == 'snack') mealStr = l.mealSnack;
+      const map = {
+        'breakfast': 'Breakfast',
+        'lunch': 'Lunch',
+        'dinner': 'Dinner',
+        'snack': 'Snack',
+      };
+      mealStr = map[topMeal] ?? topMeal;
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 12),
+          padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
           child: Text(
-            isWeekly ? l.weeklyInsight : l.monthlyInsight,
+            isWeekly ? 'Weekly Insights' : 'Monthly Insights',
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
@@ -1283,7 +1707,7 @@ class _AnalysisGrid extends StatelessWidget {
           childAspectRatio: 1.4,
           children: [
             _InsightItem(
-              label: l.goalAchievement,
+              label: 'Goal Achievement',
               value: '%${achievement.toStringAsFixed(0)}',
               icon: Icons.track_changes_rounded,
               iconColor: accent,
@@ -1293,7 +1717,7 @@ class _AnalysisGrid extends StatelessWidget {
               textMuted: textMuted,
             ),
             _InsightItem(
-              label: l.consistency,
+              label: 'Consistency',
               value: '%${consistency.toStringAsFixed(0)}',
               icon: Icons.auto_awesome_rounded,
               iconColor: AppColors.amber,
@@ -1303,7 +1727,7 @@ class _AnalysisGrid extends StatelessWidget {
               textMuted: textMuted,
             ),
             _InsightItem(
-              label: l.avgWater,
+              label: 'Avg Water',
               value: '${avgWater.toStringAsFixed(1)}L',
               icon: Icons.water_drop_rounded,
               iconColor: Colors.blueAccent,
@@ -1313,7 +1737,7 @@ class _AnalysisGrid extends StatelessWidget {
               textMuted: textMuted,
             ),
             _InsightItem(
-              label: l.mostConsumedMeal,
+              label: 'Top Meal',
               value: mealStr,
               icon: Icons.restaurant_rounded,
               iconColor: AppColors.coral,
@@ -1328,6 +1752,8 @@ class _AnalysisGrid extends StatelessWidget {
     );
   }
 }
+
+// ── INSIGHT ITEM ──────────────────────────────────────────────────────────────
 
 class _InsightItem extends StatelessWidget {
   final String label, value;
@@ -1349,10 +1775,10 @@ class _InsightItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(16.r),
         border: border,
       ),
       child: Column(
