@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../services/app_provider.dart';
 import 'diet_plan_loading_screen.dart';
 
 // ── Multi-select pill data ────────────────────────────────────────────────────
@@ -78,14 +80,30 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
     }
   }
 
-  void _finish() {
+  Future<void> _finish() async {
+    final restrictions = _selectedRestrictions.toList();
+    final cuisines = _selectedCuisines.toList();
+    final notes = _notesController.text.trim();
+
+    // Provider'a kaydet (persist)
+    await context.read<AppProvider>().saveAnamnesisProfile(
+      restrictions: restrictions,
+      cuisines: cuisines,
+      mealsPerDay: _mealsPerDay,
+      cookingTime: _cookingTime,
+      budget: _budget,
+      notes: notes,
+    );
+
+    if (!mounted) return;
+
     final data = {
-      'restrictions': _selectedRestrictions.toList(),
-      'cuisines': _selectedCuisines.toList(),
+      'restrictions': restrictions,
+      'cuisines': cuisines,
       'mealsPerDay': _mealsPerDay,
       'cookingTime': _cookingTime,
       'budget': _budget,
-      'notes': _notesController.text.trim(),
+      'notes': notes,
     };
     Navigator.pushReplacement(
       context,

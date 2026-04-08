@@ -264,6 +264,14 @@ class AppProvider extends ChangeNotifier {
   double _weeklyPace = 0.5;
   String _dietType = 'standard';
 
+  // Dietary anamnesis (program tab)
+  List<String> _dietRestrictions = [];
+  List<String> _dietCuisines = [];
+  int _dietMealsPerDay = 4;
+  String _dietCookingTime = 'medium';
+  String _dietBudget = 'medium';
+  String _dietNotes = '';
+
   // Weight tracking history
   List<Map<String, dynamic>> _weightLogs = [];
   List<Map<String, dynamic>> get weightLogs => _weightLogs;
@@ -278,6 +286,14 @@ class AppProvider extends ChangeNotifier {
   double get targetWeight => _targetWeight;
   double get weeklyPace => _weeklyPace;
   String get dietType => _dietType;
+
+  List<String> get dietRestrictions => _dietRestrictions;
+  List<String> get dietCuisines => _dietCuisines;
+  int get dietMealsPerDay => _dietMealsPerDay;
+  String get dietCookingTime => _dietCookingTime;
+  String get dietBudget => _dietBudget;
+  String get dietNotes => _dietNotes;
+  bool get hasDietPlan => _dietRestrictions.isNotEmpty || _dietCuisines.isNotEmpty;
 
   double get bmi => (_height > 0 && _weight > 0)
       ? _weight / ((_height / 100) * (_height / 100))
@@ -320,8 +336,38 @@ class AppProvider extends ChangeNotifier {
     _targetWeight = prefs.getDouble('targetWeight') ?? 0;
     _weeklyPace = prefs.getDouble('weeklyPace') ?? 0.5;
     _dietType = prefs.getString('dietType') ?? 'standard';
+    _dietRestrictions = prefs.getStringList('dietRestrictions') ?? [];
+    _dietCuisines = prefs.getStringList('dietCuisines') ?? [];
+    _dietMealsPerDay = prefs.getInt('dietMealsPerDay') ?? 4;
+    _dietCookingTime = prefs.getString('dietCookingTime') ?? 'medium';
+    _dietBudget = prefs.getString('dietBudget') ?? 'medium';
+    _dietNotes = prefs.getString('dietNotes') ?? '';
     _healthEnabled = await _healthService.isEnabled();
     await loadWeightLogs();
+    notifyListeners();
+  }
+
+  Future<void> saveAnamnesisProfile({
+    required List<String> restrictions,
+    required List<String> cuisines,
+    required int mealsPerDay,
+    required String cookingTime,
+    required String budget,
+    required String notes,
+  }) async {
+    _dietRestrictions = restrictions;
+    _dietCuisines = cuisines;
+    _dietMealsPerDay = mealsPerDay;
+    _dietCookingTime = cookingTime;
+    _dietBudget = budget;
+    _dietNotes = notes;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('dietRestrictions', restrictions);
+    await prefs.setStringList('dietCuisines', cuisines);
+    await prefs.setInt('dietMealsPerDay', mealsPerDay);
+    await prefs.setString('dietCookingTime', cookingTime);
+    await prefs.setString('dietBudget', budget);
+    await prefs.setString('dietNotes', notes);
     notifyListeners();
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
+import 'diet_profile_edit_screen.dart';
 
 // ── Data models ───────────────────────────────────────────────────────────────
 class DietMeal {
@@ -368,8 +369,11 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               textColor: textPrimary,
               isDark: isDark,
               onTap: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.pop(context); // close sheet
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DietProfileEditScreen()),
+                );
               },
             ),
           ],
