@@ -490,6 +490,15 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> restorePurchases() async {
+    final restored = await PurchaseService.restore();
+    if (restored) {
+      _isPremium = true;
+      notifyListeners();
+    }
+    return restored;
+  }
+
   Future<int> _getTodayScanCount() async {
     final prefs = await SharedPreferences.getInstance();
     final today = DateTime.now().toIso8601String().substring(0, 10);

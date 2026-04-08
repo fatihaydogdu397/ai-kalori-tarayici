@@ -15,6 +15,7 @@ import 'settings_screen.dart';
 import 'history_screen.dart';
 import 'manual_entry_screen.dart';
 import 'barcode_scanner_screen.dart';
+import 'paywall_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -170,76 +171,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showPaywall() {
-    final l = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? AppColors.lime : AppColors.void_;
-    final accentFg = isDark ? AppColors.void_ : AppColors.lime;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, borderRadius: BorderRadius.circular(2)),
-            ),
-            const SizedBox(height: 24),
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(16)),
-              child: const Center(child: Text('⚡', style: TextStyle(fontSize: 28))),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              l.limitReached,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: isDark ? AppColors.darkText : AppColors.lightText),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l.limitReachedSub,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary, height: 1.5),
-            ),
-            const SizedBox(height: 24),
-            ...[l.unlimitedScans, l.unlimitedHistory, l.weeklyReport, l.turkishDB].map(
-              (f) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle_rounded, color: accent, size: 18),
-                    const SizedBox(width: 10),
-                    Text(f, style: TextStyle(fontSize: 14, color: isDark ? AppColors.darkText : AppColors.lightText)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: accentFg,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(l.goProBtn, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(l.yearlyDiscount, style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
-          ],
-        ),
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const PaywallScreen(fromLimit: true)),
     );
   }
 
