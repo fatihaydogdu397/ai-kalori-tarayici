@@ -13,6 +13,11 @@ import 'health_service.dart';
 import 'widget_service.dart';
 import 'notification_service.dart';
 import 'purchase_service.dart';
+import 'api/api_client.dart';
+import 'api/api_exception.dart';
+import 'api/auth_service.dart';
+import 'api/token_storage.dart';
+import 'api/user_service.dart';
 import '../generated/app_localizations.dart';
 
 enum AnalysisState { idle, loading, success, error }
@@ -39,20 +44,31 @@ class AppProvider extends ChangeNotifier {
   final _dbService = DatabaseService();
   final _healthService = HealthService();
 
-  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode _themeMode = ThemeMode.system;
   ThemeMode get themeMode => _themeMode;
 
   Future<void> loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    final isDark = prefs.getBool('isDark') ?? true;
-    _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    if (prefs.containsKey('isDark')) {
+      final isDark = prefs.getBool('isDark')!;
+      _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    } else {
+      _themeMode = ThemeMode.system; // First launch uses system
+    }
     notifyListeners();
   }
 
   Future<void> toggleTheme() async {
-    _themeMode = _themeMode == ThemeMode.dark
-        ? ThemeMode.light
-        : ThemeMode.dark;
+    bool isCurrentlyDark;
+    if (_themeMode == ThemeMode.system) {
+      final brightness = WidgetsBinding.instance.window.platformBrightness;
+      isCurrentlyDark = brightness == Brightness.dark;
+    } else {
+      isCurrentlyDark = _themeMode == ThemeMode.dark;
+    }
+
+    _themeMode = isCurrentlyDark ? ThemeMode.light : ThemeMode.dark;
+    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDark', _themeMode == ThemeMode.dark);
     notifyListeners();
@@ -73,6 +89,28 @@ class AppProvider extends ChangeNotifier {
   Map<String, double> get todayStats => _todayStats;
   String get errorMessage => _errorMessage;
   double get dailyCalorieGoal => _dailyCalorieGoal;
+
+  DateTime _selectedDate = DateTime.now();
+  DateTime get selectedDate => _selectedDate;
+
+  bool get isTodaySelected {
+    final now = DateTime.now();
+    return _selectedDate.year == now.year &&
+           _selectedDate.month == now.month &&
+           _selectedDate.day == now.day;
+  }
+
+  void setSelectedDate(DateTime date) {
+    _selectedDate = date;
+    fetchHistoryByDate(date);
+    notifyListeners();
+  }
+
+  Future<void> fetchHistoryByDate(DateTime date) async {
+    // TODO: Connect to GraphQL getDailyMeals(date) API
+    // As a placeholder, we load the whole local history
+    await loadHistory();
+  }
 
   double get todayCalories => _todayStats['calories'] ?? 0;
   double get calorieProgress =>
@@ -209,6 +247,8 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> toggleFavorite(FoodAnalysis analysis) async {
     final newVal = !analysis.isFavorite;
+    // TODO: Connect to GraphQL toggleFavoriteMeal(mealId, isFavorite)
+    // For now we persist it locally as a mock
     await _dbService.setFavorite(analysis.id, newVal);
     final idx = _history.indexWhere((a) => a.id == analysis.id);
     if (idx != -1) {
@@ -247,9 +287,17 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> setUnitSystem(UnitSystem system) async {
     _unitSystem = system;
+    notifyListeners();
+    if (_isLoggedIn) {
+      try {
+        await _userService.updateProfile(unitSystem: system.name);
+      } on ApiException {
+        // Sessiz geç — UI'da kullanıcı görse de zararsız; bir sonraki
+        // açılışta `me` ile yeniden senkron olacak.
+      }
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('unitSystem', system.name);
-    notifyListeners();
   }
 
   // Profile
@@ -320,28 +368,15 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
-    _userName = prefs.getString('userName') ?? '';
+    // NOT: Backend entegrasyonu mimarisine geçildiği için profil verileri localden
+    // değil sunucudan (şu an mock RAM'den) alınıyor. Sadece gerekli flag'ler çekilir.
     _dailyCalorieGoal = prefs.getDouble('calorieGoal') ?? 2000;
     _waterGoal = prefs.getDouble('waterGoal') ?? 2.0;
     _streak = prefs.getInt('streak') ?? 0;
     _unitSystem = (prefs.getString('unitSystem') == 'imperial')
         ? UnitSystem.imperial
         : UnitSystem.metric;
-    _age = prefs.getInt('age') ?? 0;
-    _height = prefs.getDouble('height') ?? 0;
-    _weight = prefs.getDouble('weight') ?? 0;
-    _gender = prefs.getString('gender') ?? '';
-    _goal = prefs.getString('goal') ?? '';
-    _activityLevel = prefs.getString('activityLevel') ?? 'active';
-    _targetWeight = prefs.getDouble('targetWeight') ?? 0;
-    _weeklyPace = prefs.getDouble('weeklyPace') ?? 0.5;
-    _dietType = prefs.getString('dietType') ?? 'standard';
-    _dietRestrictions = prefs.getStringList('dietRestrictions') ?? [];
-    _dietCuisines = prefs.getStringList('dietCuisines') ?? [];
-    _dietMealsPerDay = prefs.getInt('dietMealsPerDay') ?? 4;
-    _dietCookingTime = prefs.getString('dietCookingTime') ?? 'medium';
-    _dietBudget = prefs.getString('dietBudget') ?? 'medium';
-    _dietNotes = prefs.getString('dietNotes') ?? '';
+    
     _healthEnabled = await _healthService.isEnabled();
     await loadWeightLogs();
     notifyListeners();
@@ -361,13 +396,19 @@ class AppProvider extends ChangeNotifier {
     _dietCookingTime = cookingTime;
     _dietBudget = budget;
     _dietNotes = notes;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('dietRestrictions', restrictions);
-    await prefs.setStringList('dietCuisines', cuisines);
-    await prefs.setInt('dietMealsPerDay', mealsPerDay);
-    await prefs.setString('dietCookingTime', cookingTime);
-    await prefs.setString('dietBudget', budget);
-    await prefs.setString('dietNotes', notes);
+
+    // Backend'de şu an sadece mealsPerDay + allergens (restrictions) saklanıyor.
+    // Geri kalan anamnesis alanları EAT-117 ile backend'e eklenecek.
+    try {
+      final res = await _userService.updateProfile(
+        mealsPerDay: mealsPerDay,
+        allergens: restrictions,
+      );
+      _applyBackendUser(res);
+    } on ApiException {
+      rethrow;
+    }
+
     notifyListeners();
   }
 
@@ -405,57 +446,30 @@ class AppProvider extends ChangeNotifier {
     String? dietType,
   }) async {
     final actLevel = activityLevel ?? _activityLevel;
-    // Mifflin-St Jeor BMR
-    double bmr;
-    if (gender == 'male') {
-      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-    } else {
-      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-    }
 
-    double multiplier = 1.55; // active
-    if (actLevel == 'sedentary') {
-      multiplier = 1.2;
-    } else if (actLevel == 'light') {
-      multiplier = 1.375;
-    } else if (actLevel == 'very_active') {
-      multiplier = 1.725;
-    }
+    // Backend updateProfile'a gönder — dailyCalorieGoal ve makro hedefleri
+    // BE otomatik hesaplıyor (age+height+weight+activity+goal).
+    final res = await _userService.updateProfile(
+      name: name,
+      age: age,
+      height: height,
+      weight: weight,
+      gender: gender,
+      goal: goal,
+      activityLevel: actLevel,
+      dietType: dietType,
+    );
+    _applyBackendUser(res);
 
-    double tdee = bmr * multiplier;
-    if (goal == 'lose') {
-      final pace = weeklyPace ?? 0.5;
-      tdee -= (pace * 7700 / 7).clamp(200, 700);
-    }
-    if (goal == 'gain') tdee += 300;
-
+    // Onboarding flag local tutuluyor (BE'de karşılığı yok, hot-start cache).
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userName', name);
-    await prefs.setDouble('calorieGoal', tdee);
     await prefs.setBool('onboardingDone', true);
-    await prefs.setInt('age', age);
-    await prefs.setDouble('height', height);
-    await prefs.setDouble('weight', weight);
-    await prefs.setString('gender', gender);
-    await prefs.setString('goal', goal);
-    await prefs.setString('activityLevel', actLevel);
-    if (targetWeight != null) await prefs.setDouble('targetWeight', targetWeight);
-    if (weeklyPace != null) await prefs.setDouble('weeklyPace', weeklyPace);
-    if (dietType != null) await prefs.setString('dietType', dietType);
 
-    _userName = name;
-    _dailyCalorieGoal = tdee;
-    _age = age;
-    _height = height;
-    _weight = weight;
-    _gender = gender;
-    _goal = goal;
-    _activityLevel = actLevel;
+    // EAT-117'de BE'ye taşınana kadar bunlar local (RAM) tutuluyor.
     if (targetWeight != null) _targetWeight = targetWeight;
     if (weeklyPace != null) _weeklyPace = weeklyPace;
-    if (dietType != null) _dietType = dietType;
 
-    // Ayrıca bu değişikliği (veya mevcut kiloyu) DB'de Kilo Logu olarak sakla
+    // Kilo değişimini weight log'u olarak da kaydet.
     await logWeight(weight, DateTime.now());
 
     notifyListeners();
@@ -514,16 +528,186 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  Future<void> _syncLocaleToBackend(Locale locale) async {
+    if (!_isLoggedIn) return;
+    try {
+      await _userService.updateProfile(locale: locale.languageCode);
+    } on ApiException {
+      // Fire-and-forget: sonraki açılışta me ile senkron olur.
+    }
+  }
+
   Future<void> setLocale(Locale locale) async {
     _locale = locale;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('locale', locale.languageCode);
     notifyListeners();
+    await _syncLocaleToBackend(locale);
   }
 
   Future<bool> isOnboardingDone() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('onboardingDone') ?? false;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Authentication
+  // ---------------------------------------------------------------------------
+
+  bool _isLoggedIn = false;
+  bool get isLoggedIn => _isLoggedIn;
+
+  final TokenStorage _tokenStorage = TokenStorage();
+  final AuthService _authService = AuthService.instance;
+  final UserService _userService = UserService.instance;
+
+  /// App startup'ta çağrılır. Secure storage'da token varsa `me` sorgusuyla
+  /// profili yükler ve oturumu açar; yoksa çıkış durumuna kalır.
+  Future<void> bootstrapSession() async {
+    // ApiClient 401 sonrası otomatik logout tetikleyebilsin.
+    ApiClient.instance.onLogout = () async {
+      await authLogout();
+    };
+
+    if (!await _tokenStorage.hasSession()) {
+      _isLoggedIn = false;
+      notifyListeners();
+      return;
+    }
+    try {
+      final user = await _authService.me();
+      _applyBackendUser(user);
+      _isLoggedIn = true;
+    } on ApiException catch (e) {
+      if (e.isUnauthenticated) {
+        // Token geçersiz / expire → temizle.
+        await _tokenStorage.clear();
+        _isLoggedIn = false;
+      } else {
+        // Ağ hatası, BE down vb. → token dursun; kullanıcı daha sonra
+        // tekrar deneyebilsin. Offline-first yok ama ağ hatası ≠ logout.
+        _isLoggedIn = false;
+      }
+    }
+    notifyListeners();
+  }
+
+  Future<void> loadAuthStatus() => bootstrapSession();
+
+  Future<void> setLoggedIn(bool val) async {
+    _isLoggedIn = val;
+    notifyListeners();
+  }
+
+  Future<void> authLogin(String email, String password) async {
+    final res = await _authService.login(email: email, password: password);
+    _applyBackendUser(Map<String, dynamic>.from(res['user'] as Map));
+    _isLoggedIn = true;
+    notifyListeners();
+  }
+
+  Future<void> authRegister(
+      String name, String surname, String email, String password) async {
+    final res = await _authService.signup(
+      name: name,
+      surname: surname,
+      email: email,
+      password: password,
+    );
+    _applyBackendUser(Map<String, dynamic>.from(res['user'] as Map));
+
+    // Yeni kayıt: onboarding tamamlanmadı.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboardingDone', false);
+
+    _isLoggedIn = true;
+    notifyListeners();
+  }
+
+  Future<void> authSocialLogin(String provider) async {
+    // Native SDK entegrasyonu (Google/Apple/Facebook) EAT-109 kapsamında
+    // ayrı bir alt-task olarak eklenecek. O tamamlanınca buraya
+    // idToken geçilip AuthService.socialLogin çağrılacak.
+    throw UnimplementedError(
+      'Social login native SDK entegrasyonu henüz bağlanmadı (EAT-109)',
+    );
+  }
+
+  Future<void> authLogout() async {
+    try {
+      await _authService.logout();
+    } catch (_) {}
+    await _tokenStorage.clear();
+    _isLoggedIn = false;
+    _userName = '';
+    notifyListeners();
+  }
+
+  Future<void> sendPasswordResetOtp(String email) async {
+    await _authService.forgotPassword(email);
+  }
+
+  Future<void> verifyPasswordResetOtp(String email, String otp) async {
+    final ok = await _authService.verifyOtp(email: email, code: otp);
+    if (!ok) {
+      throw ApiException('Invalid OTP code', code: 'INVALID_OTP');
+    }
+  }
+
+  Future<void> resetPassword(
+      String email, String code, String newPassword) async {
+    final ok = await _authService.resetPassword(
+      email: email,
+      code: code,
+      newPassword: newPassword,
+    );
+    if (!ok) {
+      throw ApiException('Password reset failed', code: 'RESET_FAILED');
+    }
+  }
+
+  /// Backend User objesini AppProvider field'larına yayar.
+  /// Enum alanları BE'den UPPERCASE gelir (MALE, LOSE, SEDENTARY, vb.);
+  /// FE içinde lowercase tutulur.
+  void _applyBackendUser(Map<String, dynamic> user) {
+    final first = (user['name'] as String?)?.trim() ?? '';
+    final last = (user['surname'] as String?)?.trim() ?? '';
+    _userName = [first, last].where((s) => s.isNotEmpty).join(' ');
+
+    _isPremium = user['isPremium'] == true;
+    _streak = (user['streak'] as num?)?.toInt() ?? _streak;
+
+    _age = (user['age'] as num?)?.toInt() ?? _age;
+    _height = (user['height'] as num?)?.toDouble() ?? _height;
+    _weight = (user['weight'] as num?)?.toDouble() ?? _weight;
+
+    final gender = (user['gender'] as String?)?.toLowerCase();
+    if (gender != null && gender.isNotEmpty) _gender = gender;
+    final goal = (user['goal'] as String?)?.toLowerCase();
+    if (goal != null && goal.isNotEmpty) _goal = goal;
+    final act = (user['activityLevel'] as String?)?.toLowerCase();
+    if (act != null && act.isNotEmpty) _activityLevel = act;
+    final diet = (user['dietType'] as String?)?.toLowerCase();
+    if (diet != null && diet.isNotEmpty) _dietType = diet;
+    final mealsPerDay = (user['mealsPerDay'] as num?)?.toInt();
+    if (mealsPerDay != null) _dietMealsPerDay = mealsPerDay;
+
+    final waterGoal = (user['waterGoal'] as num?)?.toDouble();
+    if (waterGoal != null) _waterGoal = waterGoal;
+    final calorieGoal = (user['dailyCalorieGoal'] as num?)?.toDouble();
+    if (calorieGoal != null) _dailyCalorieGoal = calorieGoal;
+
+    final unit = (user['unitSystem'] as String?)?.toLowerCase();
+    if (unit == 'imperial') {
+      _unitSystem = UnitSystem.imperial;
+    } else if (unit == 'metric') {
+      _unitSystem = UnitSystem.metric;
+    }
+
+    final loc = user['locale'] as String?;
+    if (loc != null && loc.isNotEmpty) {
+      _locale = Locale(loc);
+    }
   }
 
   // Freemium — günlük 5 ücretsiz tarama
@@ -696,6 +880,32 @@ class AppProvider extends ChangeNotifier {
     _weeklyInsights = _calculateInsights(_weeklyStats, 7, topMeal);
     notifyListeners();
   }
+
+  // ---------------------------------------------------------------------------
+  // Backend Sync Mock
+  // ---------------------------------------------------------------------------
+  Future<void> syncBackendProfileAndSettings() async {
+    debugPrint('[BackendSync] Profil ve Settings bilgileri senkronize ediliyor...');
+    // TODO: Jira EAT-104 && EAT-105 endpoint bağlantıları yapılınca burası değişecek
+    await Future.delayed(const Duration(milliseconds: 600));
+    
+    // Geçici Mock Data: Backend'den gelmiş gibi in-memory set atıyoruz. Local kaydetmiyoruz.
+    if (_userName.isEmpty) { // Sadece on-boarding vs sonrası üstüne yazmasın diye basit kontrol
+      _userName = "Yapay Zeka (Mock)";
+      _age = 26;
+      _height = 180.0;
+      _weight = 75.0;
+      _targetWeight = 70.0;
+      _gender = "male";
+      _goal = "lose";
+      _activityLevel = "active";
+      _dietType = "standard";
+    }
+
+    notifyListeners();
+    debugPrint('[BackendSync] Senkronizasyon tamamlandı, in-memory mock data setlendi.');
+  }
+
 
   /// Loads the last 30 days of aggregated nutrition data and calculates insights.
   Future<void> loadMonthlyStats() async {

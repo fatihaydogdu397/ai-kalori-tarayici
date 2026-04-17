@@ -49,6 +49,9 @@ dependencies:
   flutter_screenutil: ^5.9.3
   path_provider: ^2.1.5
 
+  # Backend API
+  flutter_secure_storage: ^9.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
