@@ -44,10 +44,10 @@ class _FoodItem {
   }
 }
 
-/// EAT-120 tamamlanana kadar kategori chip'leri sadece UI'da duruyor;
-/// seçim BE'ye filtre olarak gitmiyor (USDA kategori adlandırması FE
-/// etiketleriyle birebir eşleşmiyor).
-const _categories = ['All'];
+/// "All" sentinel + BE'den dinamik gelen USDA kategorileri. Kategoriler
+/// `foodCategories` query ile yüklenir; chip tıklanınca `foods(category: ...)`
+/// parametresiyle BE filtrelenir (EAT-120).
+const _kAllCategory = 'All';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -62,14 +62,16 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   final _searchCtrl = TextEditingController();
   final NutritionService _nutritionService = NutritionService.instance;
   String _query = '';
-  String _category = 'All';
+  String _category = _kAllCategory;
   Timer? _debounce;
   bool _loading = false;
   List<_FoodItem> _items = const [];
+  List<String> _categories = const [_kAllCategory];
 
   @override
   void initState() {
     super.initState();
+    _loadCategories();
     _loadFoods();
   }
 
@@ -86,11 +88,30 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     _debounce = Timer(const Duration(milliseconds: 350), _loadFoods);
   }
 
+  void _onCategorySelected(String cat) {
+    if (cat == _category) return;
+    setState(() => _category = cat);
+    _loadFoods();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final remote = await _nutritionService.foodCategories();
+      if (!mounted || remote.isEmpty) return;
+      setState(() {
+        _categories = [_kAllCategory, ...remote];
+      });
+    } catch (_) {
+      // BE'den kategori gelmezse sadece "All" gösterilmeye devam eder.
+    }
+  }
+
   Future<void> _loadFoods() async {
     setState(() => _loading = true);
     try {
       final rows = await _nutritionService.foods(
         search: _query.trim().isEmpty ? null : _query.trim(),
+        category: _category == _kAllCategory ? null : _category,
         limit: 50,
       );
       if (!mounted) return;
@@ -108,18 +129,10 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   }
 
   String _translateCategory(String cat, AppLocalizations l) {
-    switch (cat) {
-      case 'All': return l.categoryAll;
-      case 'Protein': return l.protein;
-      case 'Dairy': return l.categoryDairy;
-      case 'Carbs': return l.carbs;
-      case 'Fruit': return l.categoryFruit;
-      case 'Fats': return l.categoryFats;
-      case 'Vegetables': return l.categoryVegetables;
-      case 'Fast Food': return l.categoryFastFood;
-      case 'Snacks': return l.categorySnacks;
-      default: return cat;
-    }
+    if (cat == _kAllCategory) return l.categoryAll;
+    // BE kategorileri USDA FDC string'leridir (örn. "Poultry Products").
+    // L10n eşlemesi henüz yok; etiket ham gösterilir.
+    return cat;
   }
 
   List<_FoodItem> get _filtered {
@@ -224,7 +237,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                   final cat = _categories[i];
                   final selected = cat == _category;
                   return GestureDetector(
-                    onTap: () => setState(() => _category = cat),
+                    onTap: () => _onCategorySelected(cat),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
                       padding: EdgeInsets.symmetric(horizontal: 14.w),
