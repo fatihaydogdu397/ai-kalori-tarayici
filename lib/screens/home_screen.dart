@@ -11,13 +11,11 @@ import '../widgets/liquid_wave_progress.dart';
 import 'result_screen.dart';
 import 'progress_screen.dart';
 import 'program_screen.dart';
-import 'settings_screen.dart';
+import 'profile_screen.dart';
 import 'history_screen.dart';
-import 'manual_entry_screen.dart';
 import 'barcode_scanner_screen.dart';
 import 'paywall_screen.dart';
 import 'food_search_screen.dart';
-import 'ai_dietitian_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -38,16 +36,12 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AppProvider>().loadHistory();
       context.read<AppProvider>().loadTodayStats();
+      context.read<AppProvider>().syncBackendProfileAndSettings();
     });
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final picked = await _picker.pickImage(
-      source: source,
-      maxWidth: 1024,
-      maxHeight: 1024,
-      imageQuality: 85,
-    );
+    final picked = await _picker.pickImage(source: source, maxWidth: 1024, maxHeight: 1024, imageQuality: 85);
     if (picked == null || !mounted) return;
 
     final provider = context.read<AppProvider>();
@@ -66,23 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (result == null || !mounted) return;
 
     // AI Analizine gönder (AppProvider kendi içinde kalıcı kopyalama yapıyor)
-    await provider.analyzeImage(
-      picked.path,
-      portionAmount: result.amount,
-      isLiquid: result.isLiquid,
-      cooking: result.cooking,
-    );
+    await provider.analyzeImage(picked.path, portionAmount: result.amount, isLiquid: result.isLiquid, cooking: result.cooking);
 
     if (!mounted) return;
     if (provider.state == AnalysisState.success && provider.currentAnalysis != null) {
       final retry = await Navigator.push<bool>(
         context,
-        MaterialPageRoute(
-          builder: (_) => ResultScreen(
-            analysis: provider.currentAnalysis!,
-            allowRetry: true,
-          ),
-        ),
+        MaterialPageRoute(builder: (_) => ResultScreen(analysis: provider.currentAnalysis!, allowRetry: true)),
       );
       provider.resetState();
       if (retry == true && mounted) {
@@ -93,12 +77,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (provider.errorMessage == 'limit_reached') {
         _showPaywall();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${l.errorGeneric}: ${provider.errorMessage}'),
-            backgroundColor: AppColors.coral,
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${l.errorGeneric}: ${provider.errorMessage}'), backgroundColor: AppColors.coral));
       }
     }
   }
@@ -144,13 +125,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(width: 12),
                 _SheetButton(
-                  icon: Icons.edit_rounded,
-                  label: l.manual,
+                  icon: Icons.search_rounded,
+                  label: 'Search',
                   isDark: isDark,
-                  iconColor: isDark ? AppColors.violet : AppColors.violetDark,
+                  iconColor: isDark ? AppColors.lime : AppColors.limeDark,
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ManualEntryScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const FoodSearchScreen()));
                   },
                 ),
                 const SizedBox(width: 12),
@@ -166,35 +147,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _SheetButton(
-                  icon: Icons.search_rounded,
-                  label: 'Search',
-                  isDark: isDark,
-                  iconColor: isDark ? AppColors.lime : AppColors.limeDark,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const FoodSearchScreen()));
-                  },
-                ),
-                const SizedBox(width: 12),
-                _SheetButton(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  label: 'Dietitian',
-                  isDark: isDark,
-                  iconColor: isDark ? AppColors.violet : AppColors.violetDark,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AiDietitianScreen()));
-                  },
-                ),
-                const SizedBox(width: 12),
-                const Spacer(),
-                const Spacer(),
-              ],
-            ),
           ],
         ),
       ),
@@ -202,10 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showPaywall() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const PaywallScreen(fromLimit: true)),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
   }
 
   void _showAddWater(BuildContext context) {
@@ -274,11 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              LiquidWaveProgress(
-                progress: progress,
-                color: accent,
-                size: 140.w,
-              ),
+              LiquidWaveProgress(progress: progress, color: accent, size: 140.w),
               const SizedBox(height: 32),
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -417,7 +362,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
   void _showWaterGoalEditor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l = AppLocalizations.of(context);
@@ -494,12 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pages = [
-      _buildDashboardPage(isDark),
-      const ProgressScreen(),
-      const ProgramScreen(),
-      const SettingsScreen(),
-    ];
+    final pages = [_buildDashboardPage(isDark), const ProgressScreen(), const ProgramScreen(), const ProfileScreen()];
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
@@ -510,7 +449,17 @@ class _HomeScreenState extends State<HomeScreen> {
           if (provider.state == AnalysisState.loading && _tab == 0) {
             return _buildLoading(isDark);
           }
-          return pages[_tab];
+          final body = pages[_tab];
+          if (_tab == 0 && provider.isTodaySelected) {
+            return RefreshIndicator(
+              color: isDark ? AppColors.lime : AppColors.limeDark,
+              onRefresh: () async {
+                await provider.fetchHistoryByDate(DateTime.now());
+              },
+              child: body,
+            );
+          }
+          return body;
         },
       ),
       bottomNavigationBar: _buildNavBar(isDark),
@@ -548,13 +497,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildGroupedMeals(List<FoodAnalysis> history, bool isDark, AppLocalizations l) {
-    // Only today's meals, grouped by category in display order
-    final today = DateTime.now();
-    final todayMeals = history
-        .where((a) => a.analyzedAt.year == today.year && a.analyzedAt.month == today.month && a.analyzedAt.day == today.day)
+    // Only selected date's meals, grouped by category in display order
+    final targetDate = context.read<AppProvider>().selectedDate;
+    final isToday = context.read<AppProvider>().isTodaySelected;
+
+    final selectedMeals = history
+        .where((a) => a.analyzedAt.year == targetDate.year && a.analyzedAt.month == targetDate.month && a.analyzedAt.day == targetDate.day)
         .toList();
 
-    if (todayMeals.isEmpty) {
+    if (selectedMeals.isEmpty) {
       // Show recent meals without grouping
       return Column(
         children: history
@@ -564,8 +515,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 analysis: a,
                 isDark: isDark,
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(analysis: a))),
-                onDelete: () => context.read<AppProvider>().deleteAnalysis(a.id),
-                onFavorite: () => context.read<AppProvider>().toggleFavorite(a),
+                onDelete: isToday ? () => context.read<AppProvider>().deleteAnalysis(a.id) : null,
+                onFavorite: isToday ? () => context.read<AppProvider>().toggleFavorite(a) : null,
                 l: l,
               ),
             )
@@ -583,7 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final widgets = <Widget>[];
     for (final cat in order) {
-      final meals = todayMeals.where((a) => a.mealCategory == cat).toList();
+      final meals = selectedMeals.where((a) => a.mealCategory == cat).toList();
       if (meals.isEmpty) continue;
       final (icon, label) = labels[cat]!;
       final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
@@ -608,8 +559,8 @@ class _HomeScreenState extends State<HomeScreen> {
             analysis: a,
             isDark: isDark,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(analysis: a))),
-            onDelete: () => context.read<AppProvider>().deleteAnalysis(a.id),
-            onFavorite: () => context.read<AppProvider>().toggleFavorite(a),
+            onDelete: isToday ? () => context.read<AppProvider>().deleteAnalysis(a.id) : null,
+            onFavorite: isToday ? () => context.read<AppProvider>().toggleFavorite(a) : null,
             l: l,
           ),
         ),
@@ -719,7 +670,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         margin: const EdgeInsets.only(right: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                        decoration: BoxDecoration(color: AppColors.amber.withValues(alpha: isDark ? 0.2 : 0.15), borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(
+                          color: AppColors.amber.withValues(alpha: isDark ? 0.2 : 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -750,9 +704,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             // Weekly calendar strip
-            SliverToBoxAdapter(
-              child: _WeeklyCalendar(isDark: isDark),
-            ),
+            SliverToBoxAdapter(child: _WeeklyCalendar(isDark: isDark)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
@@ -954,31 +906,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         if (provider.healthEnabled) const SizedBox(width: 10),
-                        // Water tracking card
-                        Expanded(
-                          child: _WaterInlineCard(
-                            water: water,
-                            waterGoal: waterGoal,
-                            waterProgress: waterProgress,
-                            isDark: isDark,
-                            textPrimary: textPrimary,
-                            textMuted: textMuted,
-                            cardBg: cardBg,
-                            onTap: () => _showAddWater(context),
-                            onAdd: (liters) async {
-                              await provider.addWater(liters);
-                              if (context.mounted) {
-                                provider.syncNotification(AppLocalizations.of(context));
-                              }
-                            },
-                          ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
 
                     // Favoriler
-                    if (provider.favorites.isNotEmpty) ...[
+                    if (provider.isTodaySelected && provider.favorites.isNotEmpty) ...[
                       Row(
                         children: [
                           Icon(Icons.favorite_rounded, size: 12, color: AppColors.coral),
@@ -1128,7 +1061,7 @@ class _HomeScreenState extends State<HomeScreen> {
       (Icons.home_rounded, l.navDaily),
       (Icons.bar_chart_rounded, l.progress),
       (Icons.restaurant_menu_rounded, l.navProgram),
-      (Icons.settings_rounded, l.settings),
+      (Icons.person_rounded, l.profile),
     ];
 
     return Container(
@@ -1233,11 +1166,7 @@ class _MealRow extends StatelessWidget {
         decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(10), border: border),
         child: Row(
           children: [
-            _mealThumb(
-              imagePath: analysis.imagePath,
-              category: analysis.mealCategory,
-              isDark: isDark,
-            ),
+            _mealThumb(imagePath: analysis.imagePath, category: analysis.mealCategory, isDark: isDark),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -1306,11 +1235,7 @@ class _MealRow extends StatelessWidget {
     );
   }
 
-  Widget _mealThumb({
-    required String imagePath,
-    required MealCategory category,
-    required bool isDark,
-  }) {
+  Widget _mealThumb({required String imagePath, required MealCategory category, required bool isDark}) {
     const size = 44.0;
     const radius = 10.0;
 
@@ -1320,12 +1245,7 @@ class _MealRow extends StatelessWidget {
       if (file.existsSync()) {
         return ClipRRect(
           borderRadius: BorderRadius.circular(radius),
-          child: Image.file(
-            file,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-          ),
+          child: Image.file(file, width: size, height: size, fit: BoxFit.cover),
         );
       }
     }
@@ -1336,11 +1256,7 @@ class _MealRow extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: cfg.gradient,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        gradient: LinearGradient(colors: cfg.gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Icon(cfg.icon, color: Colors.white.withValues(alpha: 0.92), size: 22),
@@ -1350,25 +1266,13 @@ class _MealRow extends StatelessWidget {
   ({List<Color> gradient, IconData icon}) _categoryConfig(MealCategory cat, bool isDark) {
     switch (cat) {
       case MealCategory.breakfast:
-        return (
-          gradient: [const Color(0xFFF97316), const Color(0xFFFBBF24)],
-          icon: Icons.coffee_rounded,
-        );
+        return (gradient: [const Color(0xFFF97316), const Color(0xFFFBBF24)], icon: Icons.coffee_rounded);
       case MealCategory.lunch:
-        return (
-          gradient: [const Color(0xFF0EA5E9), const Color(0xFF38BDF8)],
-          icon: Icons.lunch_dining_rounded,
-        );
+        return (gradient: [const Color(0xFF0EA5E9), const Color(0xFF38BDF8)], icon: Icons.lunch_dining_rounded);
       case MealCategory.dinner:
-        return (
-          gradient: [const Color(0xFF7C3AED), const Color(0xFFA78BFA)],
-          icon: Icons.dinner_dining_rounded,
-        );
+        return (gradient: [const Color(0xFF7C3AED), const Color(0xFFA78BFA)], icon: Icons.dinner_dining_rounded);
       case MealCategory.snack:
-        return (
-          gradient: [const Color(0xFF10B981), const Color(0xFF34D399)],
-          icon: Icons.cookie_rounded,
-        );
+        return (gradient: [const Color(0xFF10B981), const Color(0xFF34D399)], icon: Icons.cookie_rounded);
     }
   }
 
@@ -1421,16 +1325,17 @@ class _WeeklyCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final provider = context.watch<AppProvider>();
     final now = DateTime.now();
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
     final accent = isDark ? AppColors.lime : AppColors.void_;
     final accentFg = isDark ? AppColors.void_ : AppColors.snow;
 
-    // Show 7 days: Mon of current week → Sun
-    final weekday = now.weekday; // 1=Mon ... 7=Sun
-    final startOfWeek = now.subtract(Duration(days: weekday - 1));
-    final dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    // Show 7 days: Today - 6 days -> Today
+    final startOfWeek = now.subtract(const Duration(days: 6));
+    final dayLabels = [l.monday, l.tuesday, l.wednesday, l.thursday, l.friday, l.saturday, l.sunday];
 
     return Container(
       color: isDark ? AppColors.darkBg : AppColors.lightBg,
@@ -1439,36 +1344,27 @@ class _WeeklyCalendar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(7, (i) {
           final day = startOfWeek.add(Duration(days: i));
-          final isToday = day.day == now.day && day.month == now.month;
+          final isSelected = day.day == provider.selectedDate.day && day.month == provider.selectedDate.month;
           return GestureDetector(
-            onTap: () {}, // future: show that day's meals
+            onTap: () {
+              provider.setSelectedDate(day);
+            },
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  dayLabels[i],
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
-                    color: isToday ? accent : textMuted,
-                  ),
+                  dayLabels[day.weekday - 1].substring(0, 3).toUpperCase(),
+                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: isSelected ? accent : textMuted),
                 ),
                 const SizedBox(height: 4),
                 Container(
                   width: 30.w,
                   height: 30.w,
-                  decoration: BoxDecoration(
-                    color: isToday ? accent : Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: isSelected ? accent : Colors.transparent, shape: BoxShape.circle),
                   child: Center(
                     child: Text(
                       '${day.day}',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: isToday ? accentFg : textPrimary,
-                      ),
+                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: isSelected ? accentFg : textPrimary),
                     ),
                   ),
                 ),
@@ -1525,10 +1421,7 @@ class _StepCounterCard extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Text(
-            steps.toString().replaceAllMapped(
-              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-              (m) => '${m[1]}.',
-            ),
+            steps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.'),
             style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: textPrimary),
           ),
           Text(
@@ -1553,125 +1446,6 @@ class _StepCounterCard extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-// ── Water Inline Card ─────────────────────────────────────────────────────────
-class _WaterInlineCard extends StatelessWidget {
-  final double water, waterGoal, waterProgress;
-  final bool isDark;
-  final Color textPrimary, textMuted, cardBg;
-  final VoidCallback onTap;
-  final Future<void> Function(double liters) onAdd;
-
-  const _WaterInlineCard({
-    required this.water,
-    required this.waterGoal,
-    required this.waterProgress,
-    required this.isDark,
-    required this.textPrimary,
-    required this.textMuted,
-    required this.cardBg,
-    required this.onTap,
-    required this.onAdd,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final accent = isDark ? AppColors.mint : AppColors.mintDark;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(14.w),
-        decoration: BoxDecoration(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(14.r),
-          border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text('💧', style: TextStyle(fontSize: 14.sp)),
-                const SizedBox(width: 4),
-                Text(
-                  AppLocalizations.of(context).waterToday,
-                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: textMuted),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              '${water.toStringAsFixed(1)} L',
-              style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: accent),
-            ),
-            Text(
-              '/ ${waterGoal.toStringAsFixed(1)} L',
-              style: TextStyle(fontSize: 10.sp, color: textMuted),
-            ),
-            SizedBox(height: 6.h),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                value: waterProgress,
-                minHeight: 4,
-                backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
-                valueColor: AlwaysStoppedAnimation<Color>(accent),
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                _WaterBtn(
-                  label: '-',
-                  accent: accent,
-                  isDark: isDark,
-                  onTap: () => onAdd(-0.25),
-                ),
-                const SizedBox(width: 8),
-                _WaterBtn(
-                  label: '+',
-                  accent: accent,
-                  isDark: isDark,
-                  onTap: () => onAdd(0.25),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WaterBtn extends StatelessWidget {
-  final String label;
-  final Color accent;
-  final bool isDark;
-  final VoidCallback onTap;
-  const _WaterBtn({required this.label, required this.accent, required this.isDark, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: accent),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -1702,25 +1476,13 @@ class _WaterActionButton extends StatelessWidget {
         width: width,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSecondary
-              ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
-              : accent.withValues(alpha: isDark ? 0.15 : 0.1),
+          color: isSecondary ? (isDark ? AppColors.darkSurface : AppColors.lightSurface) : accent.withValues(alpha: isDark ? 0.15 : 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSecondary
-                ? (isDark ? AppColors.darkSurface : AppColors.lightBorder)
-                : accent.withValues(alpha: 0.3),
+            color: isSecondary ? (isDark ? AppColors.darkSurface : AppColors.lightBorder) : accent.withValues(alpha: 0.3),
             width: 1.5,
           ),
-          boxShadow: isDark
-              ? []
-              : [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+          boxShadow: isDark ? [] : [BoxShadow(color: accent.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 4))],
         ),
         child: Center(
           child: Text(
@@ -1728,9 +1490,7 @@ class _WaterActionButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w800,
-              color: isSecondary
-                  ? (isDark ? AppColors.darkText : AppColors.lightText)
-                  : (isDark ? accent : AppColors.mintDark),
+              color: isSecondary ? (isDark ? AppColors.darkText : AppColors.lightText) : (isDark ? accent : AppColors.mintDark),
             ),
           ),
         ),
