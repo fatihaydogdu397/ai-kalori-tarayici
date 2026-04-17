@@ -1,139 +1,184 @@
-import 'dart:convert';
-
 import '../../screens/weekly_diet_plan_screen.dart';
 import 'api_client.dart';
 import 'api_exception.dart';
 
+/// Backend `diet-plan` modülünü saran servis (EAT-96).
+///
+/// BE artık tablo bazlı bir plan üretiyor: DietPlan → days[] → meals[] ile
+/// **target makrolar + completed flag** tutar. Meal adı / foods listesi BE'de
+/// yok; FE'de kategori adı ve default slot metadata (saat + emoji) ile
+/// zenginleştiriyoruz. İleride BE'ye öneri (name + foods) eklenirse burada
+/// override edilir.
 class DietPlanService {
   DietPlanService._();
   static final DietPlanService instance = DietPlanService._();
 
   final ApiClient _api = ApiClient.instance;
 
-  /// BE `generateMealPlan(planType)` — premium-only; 7 günlük plan JSON döner.
-  /// Throws [ApiException] (code: PREMIUM_REQUIRED / MEAL_PLAN_LIMIT_REACHED).
-  Future<DietPlan> generatePlan({String planType = 'weekly'}) async {
+  static const String _planFields = '''
+    id startDate endDate status guidance createdAt
+    days {
+      id dayNumber date
+      meals {
+        id mealCategory
+        targetCalories targetProtein targetCarbs targetFat
+        completed
+      }
+    }
+  ''';
+
+  /// Yeni 7 günlük plan üretir (mevcut active varsa CANCELLED yapılır).
+  Future<DietPlan> generatePlan() async {
     final data = await _api.mutate(
-      r'''
-      mutation GenerateMealPlan($planType: String!) {
-        generateMealPlan(planType: $planType)
+      '''
+      mutation GenerateDietPlan {
+        generateDietPlan { $_planFields }
       }
       ''',
-      variables: {'planType': planType},
     );
-
-    final raw = data['generateMealPlan'];
-    if (raw is! String) {
-      throw ApiException('Malformed meal plan response');
-    }
-
-    final decoded = jsonDecode(raw) as Map<String, dynamic>;
-    return _parsePlan(decoded, planType);
+    return _parse(Map<String, dynamic>.from(data['generateDietPlan'] as Map));
   }
 
-  // ── BE JSON → FE DietPlan mapping ──────────────────────────────────────────
+  /// Kullanıcının aktif planı (yoksa null).
+  Future<DietPlan?> getActivePlan() async {
+    final data = await _api.query(
+      '''
+      query MyDietPlan {
+        myDietPlan { $_planFields }
+      }
+      ''',
+    );
+    final raw = data['myDietPlan'];
+    if (raw == null) return null;
+    return _parse(Map<String, dynamic>.from(raw as Map));
+  }
 
-  static const _weekKeys = [
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'sunday',
-  ];
+  /// Tek bir günün öğünlerini yeniden üretir (dayNumber 1..7).
+  Future<DietPlan> regenerateDay(int dayNumber) async {
+    final data = await _api.mutate(
+      '''
+      mutation RegenerateDay(\$input: RegenerateDayInput!) {
+        regenerateDay(input: \$input) { $_planFields }
+      }
+      ''',
+      variables: {
+        'input': {'dayNumber': dayNumber},
+      },
+    );
+    return _parse(Map<String, dynamic>.from(data['regenerateDay'] as Map));
+  }
 
-  static const _dayLabels = {
-    'monday': 'Monday',
-    'tuesday': 'Tuesday',
-    'wednesday': 'Wednesday',
-    'thursday': 'Thursday',
-    'friday': 'Friday',
-    'saturday': 'Saturday',
-    'sunday': 'Sunday',
-    'today': 'Today',
-  };
+  /// Bir öğünü "tamamlandı" olarak işaretler (BE completed=true).
+  Future<void> completeMeal(String mealId) async {
+    await _api.mutate(
+      r'''
+      mutation CompleteMeal($mealId: ID!) {
+        completeMeal(mealId: $mealId) { id completed }
+      }
+      ''',
+      variables: {'mealId': mealId},
+    );
+  }
 
-  DietPlan _parsePlan(Map<String, dynamic> decoded, String planType) {
-    final plan = Map<String, dynamic>.from(decoded['plan'] as Map);
+  // ── BE DietPlan → FE DietPlan mapping ──────────────────────────────────────
 
-    final List<DietDay> days;
-    if (planType == 'daily') {
-      final todayRaw = plan['today'];
-      days = todayRaw == null
-          ? const []
-          : [_parseDay('today', Map<String, dynamic>.from(todayRaw as Map))];
-    } else {
-      days = _weekKeys
-          .where((k) => plan[k] != null)
-          .map((k) => _parseDay(k, Map<String, dynamic>.from(plan[k] as Map)))
-          .toList(growable: false);
-    }
+  DietPlan _parse(Map<String, dynamic> raw) {
+    final daysRaw = (raw['days'] as List?) ?? const [];
+    final sorted = daysRaw
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList()
+      ..sort((a, b) =>
+          (a['dayNumber'] as int).compareTo(b['dayNumber'] as int));
 
-    final dailyGoal = days.isNotEmpty
-        ? (days.first.totalCalories)
-        : 0;
+    final days = sorted.map(_parseDay).toList(growable: false);
 
+    final dailyTarget = days.isNotEmpty ? days.first.totalCalories : 0;
     return DietPlan(
-      dailyCalorieGoal: dailyGoal,
+      dailyCalorieGoal: dailyTarget,
       days: days,
-      generatedAt: DateTime.now(),
+      generatedAt: DateTime.tryParse((raw['createdAt'] ?? '') as String) ??
+          DateTime.now(),
     );
   }
 
-  DietDay _parseDay(String key, Map<String, dynamic> day) {
+  DietDay _parseDay(Map<String, dynamic> day) {
     final mealsRaw = (day['meals'] as List?) ?? const [];
-    final meals = <DietMeal>[];
-    for (var i = 0; i < mealsRaw.length; i++) {
-      meals.add(_parseMeal(Map<String, dynamic>.from(mealsRaw[i] as Map), i));
-    }
+    final meals = mealsRaw
+        .map((e) => _parseMeal(Map<String, dynamic>.from(e as Map)))
+        .toList(growable: false);
 
-    final total = (day['daily_total'] as Map?)?.cast<String, dynamic>();
-    final totalCals = (total?['calories'] as num?)?.toInt() ??
-        meals.fold<int>(0, (s, m) => s + m.calories);
+    final dayNumber = day['dayNumber'] as int;
+    final totalCals = meals.fold<int>(0, (s, m) => s + m.calories);
 
     return DietDay(
-      dayName: _dayLabels[key] ?? key,
+      dayName: _dayLabel(dayNumber, (day['date'] ?? '') as String),
       meals: meals,
       totalCalories: totalCals,
     );
   }
 
-  DietMeal _parseMeal(Map<String, dynamic> meal, int mealIndex) {
-    // BE meal objesi meta kategori/saat/emoji vermez — index'e göre
-    // breakfast/lunch/snack/dinner/snack düzeninde varsayalım.
-    final slot = _mealSlot(mealIndex);
+  DietMeal _parseMeal(Map<String, dynamic> meal) {
+    final categoryRaw = ((meal['mealCategory'] ?? '') as String).toLowerCase();
+    final slot = _slotFor(categoryRaw);
     return DietMeal(
-      name: (meal['name'] ?? '') as String,
-      category: slot.category,
-      calories: (meal['total_calories'] as num?)?.toInt() ?? 0,
-      protein: (meal['total_protein'] as num?)?.toInt() ?? 0,
-      carbs: (meal['total_carbs'] as num?)?.toInt() ?? 0,
-      fat: (meal['total_fat'] as num?)?.toInt() ?? 0,
+      name: slot.label,
+      category: slot.label,
+      calories: (meal['targetCalories'] as num?)?.toInt() ?? 0,
+      protein: (meal['targetProtein'] as num?)?.toInt() ?? 0,
+      carbs: (meal['targetCarbs'] as num?)?.toInt() ?? 0,
+      fat: (meal['targetFat'] as num?)?.toInt() ?? 0,
       time: slot.time,
       emoji: slot.emoji,
     );
   }
 
-  _MealSlot _mealSlot(int index) {
-    switch (index) {
-      case 0:
-        return const _MealSlot('Breakfast', '08:00', '🌅');
-      case 1:
-        return const _MealSlot('Lunch', '12:30', '☀️');
-      case 2:
-        return const _MealSlot('Dinner', '19:00', '🌙');
-      case 3:
-        return const _MealSlot('Snack', '15:30', '🍎');
+  String _dayLabel(int dayNumber, String isoDate) {
+    const names = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    final parsed = DateTime.tryParse(isoDate);
+    if (parsed != null) {
+      return names[(parsed.weekday - 1).clamp(0, 6)];
+    }
+    return names[(dayNumber - 1).clamp(0, 6)];
+  }
+
+  _Slot _slotFor(String category) {
+    switch (category) {
+      case 'breakfast':
+        return const _Slot('Breakfast', '08:00', '🌅');
+      case 'lunch':
+        return const _Slot('Lunch', '12:30', '☀️');
+      case 'dinner':
+        return const _Slot('Dinner', '19:00', '🌙');
+      case 'snack':
       default:
-        return const _MealSlot('Snack', '21:00', '🥛');
+        return const _Slot('Snack', '15:30', '🍎');
     }
   }
 }
 
-class _MealSlot {
-  final String category;
+class _Slot {
+  final String label;
   final String time;
   final String emoji;
-  const _MealSlot(this.category, this.time, this.emoji);
+  const _Slot(this.label, this.time, this.emoji);
+}
+
+/// EAT-96 BE akışı: önce aktif plan kontrol edilir; yoksa generate edilir.
+Future<DietPlan> ensureActiveDietPlan() async {
+  final svc = DietPlanService.instance;
+  try {
+    final active = await svc.getActivePlan();
+    if (active != null) return active;
+  } on ApiException {
+    // getActivePlan başarısız olursa generate'e düş.
+  }
+  return svc.generatePlan();
 }

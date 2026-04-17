@@ -110,9 +110,19 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> fetchHistoryByDate(DateTime date) async {
-    // BE'de date-filter EAT-118 beklemede. Şimdilik tüm history'yi çekip
-    // client-side filtreliyoruz.
-    await loadHistory();
+    if (!_isLoggedIn) {
+      _history = const [];
+      notifyListeners();
+      return;
+    }
+    final iso = date.toUtc().toIso8601String().substring(0, 10);
+    try {
+      final rows = await _foodService.getDailyMeals(iso);
+      _history = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
+    } on ApiException {
+      _history = const [];
+    }
+    notifyListeners();
   }
 
   double get todayCalories => _todayStats['calories'] ?? 0;
@@ -286,7 +296,10 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> toggleFavorite(FoodAnalysis analysis) async {
     try {
-      final res = await _foodService.toggleFavorite(analysis.id);
+      final res = await _foodService.toggleFavoriteMeal(
+        analysis.id,
+        !analysis.isFavorite,
+      );
       final updated = FoodAnalysis.fromBackend(res);
       final idx = _history.indexWhere((a) => a.id == analysis.id);
       if (idx != -1) _history[idx] = updated;
@@ -297,7 +310,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> deleteAnalysis(String id) async {
-    final ok = await _foodService.deleteFoodAnalysis(id);
+    final ok = await _foodService.deleteMeal(id);
     if (!ok) return;
     _history = _history.where((a) => a.id != id).toList(growable: false);
     notifyListeners();

@@ -93,6 +93,7 @@ class FoodService {
     return Map<String, dynamic>.from(data['saveFoodAnalysis'] as Map);
   }
 
+  /// Sayfalanabilir tam geçmiş (tarih filtresiz).
   Future<List<Map<String, dynamic>>> foodHistory({
     int limit = 50,
     int offset = 0,
@@ -111,27 +112,47 @@ class FoodService {
         .toList(growable: false);
   }
 
-  Future<Map<String, dynamic>> toggleFavorite(String id) async {
-    final data = await _api.mutate(
+  /// Sadece verilen UTC günün yemekleri (EAT-97).
+  /// [date] YYYY-MM-DD formatında.
+  Future<List<Map<String, dynamic>>> getDailyMeals(String date) async {
+    final data = await _api.query(
       '''
-      mutation ToggleFavorite(\$id: ID!) {
-        toggleFavorite(id: \$id) { $_analysisFields }
+      query GetDailyMeals(\$date: String!) {
+        getDailyMeals(date: \$date) { $_analysisFields }
       }
       ''',
-      variables: {'id': id},
+      variables: {'date': date},
     );
-    return Map<String, dynamic>.from(data['toggleFavorite'] as Map);
+    final list = (data['getDailyMeals'] as List?) ?? const [];
+    return list
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList(growable: false);
   }
 
-  Future<bool> deleteFoodAnalysis(String id) async {
+  /// Idempotent favorite toggle (EAT-98). Aynı değeri tekrar göndermek no-op.
+  Future<Map<String, dynamic>> toggleFavoriteMeal(
+      String mealId, bool isFavorite) async {
     final data = await _api.mutate(
-      r'''
-      mutation DeleteFoodAnalysis($id: ID!) {
-        deleteFoodAnalysis(id: $id)
+      '''
+      mutation ToggleFavoriteMeal(\$mealId: ID!, \$isFavorite: Boolean!) {
+        toggleFavoriteMeal(mealId: \$mealId, isFavorite: \$isFavorite) { $_analysisFields }
       }
       ''',
-      variables: {'id': id},
+      variables: {'mealId': mealId, 'isFavorite': isFavorite},
     );
-    return data['deleteFoodAnalysis'] == true;
+    return Map<String, dynamic>.from(data['toggleFavoriteMeal'] as Map);
+  }
+
+  /// EAT-99: sadece aynı gün içinde kaydedilen yemekler silinebilir.
+  Future<bool> deleteMeal(String mealId) async {
+    final data = await _api.mutate(
+      r'''
+      mutation DeleteMeal($mealId: ID!) {
+        deleteMeal(mealId: $mealId)
+      }
+      ''',
+      variables: {'mealId': mealId},
+    );
+    return data['deleteMeal'] == true;
   }
 }

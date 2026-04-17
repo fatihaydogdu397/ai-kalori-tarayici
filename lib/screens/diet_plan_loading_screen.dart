@@ -65,7 +65,7 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
 
   Future<void> _generatePlan() async {
     try {
-      final plan = await _dietPlanService.generatePlan(planType: 'weekly');
+      final plan = await _dietPlanService.generatePlan();
       _stepTimer?.cancel();
       if (!mounted) return;
       Navigator.pushReplacement(
