@@ -98,16 +98,45 @@ class FoodItem {
     );
   }
 
+  static String _shortName(String raw) {
+    final clean = raw.trim();
+    final words = clean.split(RegExp(r'\s+'));
+    // Max 4 kelime, max 40 karakter
+    final short = words.take(4).join(' ');
+    return short.length > 40 ? '${short.substring(0, 37)}...' : short;
+  }
+
   factory FoodItem.fromMap(Map<String, dynamic> map) {
     return FoodItem(
-      name: map['name'] ?? '',
-      nameTr: map['name_tr'] ?? map['name'] ?? '',
+      name: _shortName(map['name'] ?? ''),
+      nameTr: _shortName(map['name_tr'] ?? map['name'] ?? ''),
       portion: (map['portion'] as num?)?.toDouble() ?? 100,
       portionUnit: map['portion_unit'] ?? 'g',
       nutrients: NutrientInfo.fromMap(
           Map<String, dynamic>.from(map['nutrients'] ?? {})),
       healthScore: map['health_score'] ?? 'Orta',
       tags: List<String>.from(map['tags'] ?? []),
+    );
+  }
+
+  /// Backend GraphQL FoodItem objesinden parse et.
+  /// BE field'ları düz: calories/protein/carbs/fat/fiber/sugar + portionUnit/healthScore/tags.
+  factory FoodItem.fromBackend(Map<String, dynamic> map) {
+    return FoodItem(
+      name: _shortName((map['name'] ?? '') as String),
+      nameTr: _shortName((map['nameTr'] ?? map['name'] ?? '') as String),
+      portion: (map['portion'] as num?)?.toDouble() ?? 100,
+      portionUnit: (map['portionUnit'] ?? 'g') as String,
+      nutrients: NutrientInfo(
+        calories: (map['calories'] as num?)?.toDouble() ?? 0,
+        protein: (map['protein'] as num?)?.toDouble() ?? 0,
+        carbs: (map['carbs'] as num?)?.toDouble() ?? 0,
+        fat: (map['fat'] as num?)?.toDouble() ?? 0,
+        fiber: (map['fiber'] as num?)?.toDouble() ?? 0,
+        sugar: (map['sugar'] as num?)?.toDouble() ?? 0,
+      ),
+      healthScore: (map['healthScore'] ?? 'Orta') as String,
+      tags: List<String>.from((map['tags'] as List?) ?? const []),
     );
   }
 }
@@ -211,6 +240,37 @@ class FoodAnalysis {
       analyzedAt: DateTime.parse(map['analyzedAt']),
       mealCategory: MealCategoryX.fromString(map['mealCategory'] as String?),
       isFavorite: (map['isFavorite'] as int? ?? 0) == 1,
+    );
+  }
+
+  /// Backend GraphQL yanıtından parse et.
+  /// BE alanları: imageUrl (camelCase), isFavorite (bool), mealCategory (UPPERCASE enum),
+  /// foods (nested FoodItem listesi, her biri ayrı nutrient field'larıyla).
+  factory FoodAnalysis.fromBackend(Map<String, dynamic> map) {
+    final foodsList = (map['foods'] as List?) ?? const [];
+    final parsedFoods = foodsList
+        .map((e) => FoodItem.fromBackend(Map<String, dynamic>.from(e as Map)))
+        .toList(growable: false);
+
+    final mealCat = (map['mealCategory'] as String?)?.toLowerCase();
+
+    return FoodAnalysis(
+      id: (map['id'] ?? '') as String,
+      imagePath: (map['imageUrl'] ?? '') as String,
+      foods: parsedFoods,
+      totalNutrients: NutrientInfo(
+        calories: (map['totalCalories'] as num?)?.toDouble() ?? 0,
+        protein: (map['totalProtein'] as num?)?.toDouble() ?? 0,
+        carbs: (map['totalCarbs'] as num?)?.toDouble() ?? 0,
+        fat: (map['totalFat'] as num?)?.toDouble() ?? 0,
+        fiber: (map['totalFiber'] as num?)?.toDouble() ?? 0,
+        sugar: (map['totalSugar'] as num?)?.toDouble() ?? 0,
+      ),
+      summary: (map['summary'] ?? '') as String,
+      advice: (map['advice'] ?? '') as String,
+      analyzedAt: DateTime.parse(map['analyzedAt'] as String),
+      mealCategory: MealCategoryX.fromString(mealCat),
+      isFavorite: map['isFavorite'] == true,
     );
   }
 }

@@ -1,14 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/food_analysis.dart';
 import '../widgets/portion_picker_sheet.dart';
-import 'ai_service.dart';
-import 'database_service.dart';
 import 'health_service.dart';
 import 'widget_service.dart';
 import 'notification_service.dart';
@@ -16,8 +13,12 @@ import 'purchase_service.dart';
 import 'api/api_client.dart';
 import 'api/api_exception.dart';
 import 'api/auth_service.dart';
+import 'api/food_service.dart';
+import 'api/progress_service.dart';
 import 'api/token_storage.dart';
 import 'api/user_service.dart';
+import 'api/water_service.dart';
+import 'api/weight_service.dart';
 import '../generated/app_localizations.dart';
 
 enum AnalysisState { idle, loading, success, error }
@@ -40,9 +41,11 @@ extension UnitSystemX on UnitSystem {
 }
 
 class AppProvider extends ChangeNotifier {
-  final _claudeService = AIService();
-  final _dbService = DatabaseService();
   final _healthService = HealthService();
+  final FoodService _foodService = FoodService.instance;
+  final WaterService _waterService = WaterService.instance;
+  final WeightService _weightService = WeightService.instance;
+  final ProgressService _progressService = ProgressService.instance;
 
   ThemeMode _themeMode = ThemeMode.system;
   ThemeMode get themeMode => _themeMode;
@@ -107,8 +110,8 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> fetchHistoryByDate(DateTime date) async {
-    // TODO: Connect to GraphQL getDailyMeals(date) API
-    // As a placeholder, we load the whole local history
+    // BE'de date-filter EAT-118 beklemede. Şimdilik tüm history'yi çekip
+    // client-side filtreliyoruz.
     await loadHistory();
   }
 
@@ -134,56 +137,35 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final profile = <String, dynamic>{
-        'age': _age,
-        'gender': _gender,
-        'weight': _weight,
-        'height': _height,
-        'goal': _goal,
-      };
-
-      // Resim kalıcı kayıt — HEIC dahil her formatı JPEG'e çevirir
-      String localPath = imagePath;
-      try {
-        final srcFile = File(imagePath);
-        if (srcFile.existsSync()) {
-          final uniqueName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-          final appDir = await getApplicationDocumentsDirectory();
-          localPath = p.join(appDir.path, uniqueName);
-          final bytes = await FlutterImageCompress.compressWithFile(
-            imagePath,
-            minWidth: 1200,
-            minHeight: 1200,
-            quality: 85,
-            format: CompressFormat.jpeg,
-          );
-          if (bytes != null) {
-            await File(localPath).writeAsBytes(bytes);
-          } else {
-            await srcFile.copy(localPath);
-          }
-        }
-      } catch (e) {
-        debugPrint('[IMG] Hata: $e');
+      // Görseli 1200px/%85 jpeg'e sıkıştır ve base64 encode et. BE kendi DB'sine
+      // yazar ve R2'ye upload eder, analysis sonucunu geri döner.
+      final srcFile = File(imagePath);
+      if (!srcFile.existsSync()) {
+        throw ApiException('Seçili dosya bulunamadı', code: 'FILE_NOT_FOUND');
       }
 
-      final analysis = await _claudeService.analyzeFood(
-        localPath,
-        portionAmount: portionAmount,
-        isLiquid: isLiquid,
-        cooking: cooking,
-        userProfile: profile,
+      final compressed = await FlutterImageCompress.compressWithFile(
+        imagePath,
+        minWidth: 1200,
+        minHeight: 1200,
+        quality: 85,
+        format: CompressFormat.jpeg,
       );
-      // DB'ye sadece dosya adını kaydet — UUID değişse bile çalışır
-      final filename = p.basename(localPath);
-      final relAnalysis = analysis.copyWith(imagePath: filename);
-      await _dbService.saveAnalysis(relAnalysis);
-      // _currentAnalysis tam path tutar (anlık gösterim için)
-      _currentAnalysis = analysis.copyWith(imagePath: localPath);
-      await _incrementScanCount();
+      final bytes = compressed ?? await srcFile.readAsBytes();
+      final imageBase64 = base64Encode(bytes);
+
+      // portionAmount/isLiquid/cooking EAT-119 tamamlanana kadar BE'ye gitmiyor.
+      final res = await _foodService.analyzeFood(
+        imageBase64: imageBase64,
+        mealCategory: MealCategoryX.fromTime(DateTime.now()).key,
+      );
+      final analysis = FoodAnalysis.fromBackend(res);
+
+      _currentAnalysis = analysis;
       await _updateStreak();
       await loadHistory();
       await loadTodayStats();
+
       unawaited(
         _healthService.logMeal(
           calories: analysis.totalNutrients.calories,
@@ -203,63 +185,122 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> loadHistory() async {
-    _history = await _dbService.getAllAnalyses();
-    await loadTodayWater();
+    if (!_isLoggedIn) {
+      _history = const [];
+      notifyListeners();
+      return;
+    }
+    try {
+      final rows = await _foodService.foodHistory(limit: 100);
+      _history = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
+    } on ApiException {
+      _history = const [];
+    }
     notifyListeners();
   }
 
   Future<void> loadTodayStats() async {
-    _todayStats = await _dbService.getTodayStats();
+    if (!_isLoggedIn) {
+      _todayStats = {};
+      notifyListeners();
+      return;
+    }
+    try {
+      final stats = await _progressService.todayStats();
+      _todayStats = {
+        'calories': (stats['totalCalories'] as num?)?.toDouble() ?? 0.0,
+        'protein': (stats['totalProtein'] as num?)?.toDouble() ?? 0.0,
+        'carbs': (stats['totalCarbs'] as num?)?.toDouble() ?? 0.0,
+        'fat': (stats['totalFat'] as num?)?.toDouble() ?? 0.0,
+        'fiber': (stats['totalFiber'] as num?)?.toDouble() ?? 0.0,
+        'sugar': (stats['totalSugar'] as num?)?.toDouble() ?? 0.0,
+        'mealCount': (stats['scanCount'] as num?)?.toDouble() ?? 0.0,
+      };
+      _waterToday = (stats['waterLiters'] as num?)?.toDouble() ?? 0;
+      final goal = (stats['waterGoal'] as num?)?.toDouble();
+      if (goal != null) _waterGoal = goal;
+    } on ApiException {
+      _todayStats = {};
+    }
     notifyListeners();
     unawaited(_syncWidget());
     unawaited(loadTodaySteps());
   }
 
   Future<void> saveManualEntry(FoodAnalysis analysis) async {
-    await _dbService.saveAnalysis(analysis);
-    await loadHistory();
+    // BE ManualFoodInput tekil ürün; birden fazla food item birleştirilmiş
+    // makro değerleri tek satır olarak yazıyor.
+    final display = analysis.foods.isNotEmpty
+        ? analysis.foods.first.name
+        : (analysis.summary.isNotEmpty ? analysis.summary : 'Meal');
+    final portion = analysis.foods.isNotEmpty
+        ? analysis.foods.first.portion
+        : 100.0;
+
+    final res = await _foodService.saveFoodAnalysis(
+      name: display,
+      portion: portion,
+      calories: analysis.totalNutrients.calories,
+      protein: analysis.totalNutrients.protein,
+      carbs: analysis.totalNutrients.carbs,
+      fat: analysis.totalNutrients.fat,
+      mealCategory: analysis.mealCategory.key,
+    );
+    final saved = FoodAnalysis.fromBackend(res);
+
+    _history = [saved, ..._history];
+    notifyListeners();
     await loadTodayStats();
+
     unawaited(
       _healthService.logMeal(
-        calories: analysis.totalNutrients.calories,
-        protein: analysis.totalNutrients.protein,
-        carbs: analysis.totalNutrients.carbs,
-        fat: analysis.totalNutrients.fat,
-        time: analysis.analyzedAt,
+        calories: saved.totalNutrients.calories,
+        protein: saved.totalNutrients.protein,
+        carbs: saved.totalNutrients.carbs,
+        fat: saved.totalNutrients.fat,
+        time: saved.analyzedAt,
       ),
     );
   }
 
   Future<void> duplicateAnalysisToToday(FoodAnalysis analysis) async {
-    final newAnalysis = analysis.copyWith(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      analyzedAt: DateTime.now(),
-      mealCategory: MealCategoryX.fromTime(DateTime.now()),
+    // BE'de updateFoodAnalysis (EAT-118) beklemede — şu an duplicate da
+    // saveFoodAnalysis ile yeni kayıt olarak yazılıyor; aynı davranış.
+    await saveManualEntry(
+      analysis.copyWith(
+        analyzedAt: DateTime.now(),
+        mealCategory: MealCategoryX.fromTime(DateTime.now()),
+      ),
     );
-    await saveManualEntry(newAnalysis);
   }
 
   Future<void> updateAnalysis(FoodAnalysis analysis) async {
-    await _dbService.saveAnalysis(analysis);
-    await loadHistory();
-    await loadTodayStats();
-  }
-
-  Future<void> toggleFavorite(FoodAnalysis analysis) async {
-    final newVal = !analysis.isFavorite;
-    // TODO: Connect to GraphQL toggleFavoriteMeal(mealId, isFavorite)
-    // For now we persist it locally as a mock
-    await _dbService.setFavorite(analysis.id, newVal);
+    // BE'de updateFoodAnalysis mutation EAT-118 ile geliyor. Henüz yok;
+    // şimdilik sadece local history'yi güncelleyip UI'ı tutarlı tut.
     final idx = _history.indexWhere((a) => a.id == analysis.id);
     if (idx != -1) {
-      _history[idx] = analysis.copyWith(isFavorite: newVal);
+      _history[idx] = analysis;
       notifyListeners();
     }
   }
 
+  Future<void> toggleFavorite(FoodAnalysis analysis) async {
+    try {
+      final res = await _foodService.toggleFavorite(analysis.id);
+      final updated = FoodAnalysis.fromBackend(res);
+      final idx = _history.indexWhere((a) => a.id == analysis.id);
+      if (idx != -1) _history[idx] = updated;
+      notifyListeners();
+    } on ApiException {
+      rethrow;
+    }
+  }
+
   Future<void> deleteAnalysis(String id) async {
-    await _dbService.deleteAnalysis(id);
-    await loadHistory();
+    final ok = await _foodService.deleteFoodAnalysis(id);
+    if (!ok) return;
+    _history = _history.where((a) => a.id != id).toList(growable: false);
+    notifyListeners();
     await loadTodayStats();
   }
 
@@ -413,23 +454,38 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> loadWeightLogs() async {
-    _weightLogs = await _dbService.getWeightLogs();
+    if (!_isLoggedIn) {
+      _weightLogs = const [];
+      notifyListeners();
+      return;
+    }
+    try {
+      _weightLogs = await _weightService.weightLogs(limit: 60);
+    } on ApiException {
+      _weightLogs = const [];
+    }
     notifyListeners();
   }
 
   Future<void> logWeight(double newWeight, DateTime date) async {
-    // Profildeki güncel kiloyu da değiştir
     _weight = newWeight;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('weight', newWeight);
 
-    // DB'ye logla
-    await _dbService.saveWeight(newWeight, date);
+    if (_isLoggedIn) {
+      final iso = date.toIso8601String().substring(0, 10);
+      try {
+        await _weightService.logWeight(newWeight, date: iso);
+      } on ApiException {
+        rethrow;
+      }
+      // Profilin güncel weight'i de BE'ye yazılsın (silent).
+      unawaited(() async {
+        try {
+          await _userService.updateProfile(weight: newWeight);
+        } catch (_) {}
+      }());
+    }
 
-    // Geçmişi RAM'de tazele
     await loadWeightLogs();
-
-    // TODO: Apple Health / Google Fit aktarımı yapılabilir
     notifyListeners();
   }
 
@@ -715,48 +771,49 @@ class AppProvider extends ChangeNotifier {
   bool _isPremium = false;
   bool get isPremium => _isPremium;
 
+  /// BE `me` query'si + RevenueCat kombinasyonu. BE source of truth.
+  /// Webhook (EAT-107) satın alma sonrası user.is_premium'u günceller; FE
+  /// paywall/restore sonrası bu metotu çağırıp taze durumu alır.
   Future<void> refreshPremiumStatus() async {
-    _isPremium = await PurchaseService.checkPremium();
+    if (_isLoggedIn) {
+      try {
+        final user = await _userService.me();
+        _applyBackendUser(user);
+      } on ApiException {
+        // Ağ yoksa RevenueCat cache'ine fallback.
+        _isPremium = await PurchaseService.checkPremium();
+      }
+    } else {
+      _isPremium = await PurchaseService.checkPremium();
+    }
     notifyListeners();
   }
 
   Future<bool> restorePurchases() async {
     final restored = await PurchaseService.restore();
     if (restored) {
-      _isPremium = true;
-      notifyListeners();
+      // RevenueCat'ten onay geldiyse BE'den de güncel state'i çek.
+      await refreshPremiumStatus();
     }
     return restored;
   }
 
-  Future<int> _getTodayScanCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    final savedDate = prefs.getString('scanDate') ?? '';
-    if (savedDate != today) {
-      await prefs.setString('scanDate', today);
-      await prefs.setInt('scanCount', 0);
-      return 0;
-    }
-    return prefs.getInt('scanCount') ?? 0;
-  }
-
-  Future<void> _incrementScanCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    final count = await _getTodayScanCount();
-    await prefs.setInt('scanCount', count + 1);
-  }
-
+  /// Kalan günlük tarama sayısı. Premium ise `999` (sınırsız göstergesi).
+  /// Free kullanıcı için BE `remainingScans` tek source of truth.
   Future<int> remainingScans() async {
     if (_isPremium) return 999;
-    final count = await _getTodayScanCount();
-    return (freeDailyLimit - count).clamp(0, freeDailyLimit);
+    if (!_isLoggedIn) return freeDailyLimit;
+    try {
+      return await _progressService.remainingScans();
+    } on ApiException {
+      return 0;
+    }
   }
 
   Future<bool> canScan() async {
     if (_isPremium) return true;
-    final count = await _getTodayScanCount();
-    return count < freeDailyLimit;
+    final left = await remainingScans();
+    return left > 0;
   }
 
   // ---------------------------------------------------------------------------
@@ -824,31 +881,49 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> setWaterGoal(double liters) async {
     _waterGoal = liters;
+    notifyListeners();
+    if (_isLoggedIn) {
+      try {
+        await _userService.updateProfile(waterGoal: liters);
+      } on ApiException {
+        // Fire-and-forget; sonraki `me` senkronda güncellenir.
+      }
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('waterGoal', liters);
-    notifyListeners();
   }
 
-  /// Loads today's water total from the database.
+  /// Bugünün su değerini BE todayStats içinden loadTodayStats çekiyor; bu
+  /// metot artık ayrı bir BE call değil. Geriye dönük API korunuyor.
   Future<void> loadTodayWater() async {
-    _waterToday = await _dbService.getTodayWater();
+    // todayStats zaten waterLiters / waterGoal yüklüyor; burada ayrıca iş yok.
     notifyListeners();
-    unawaited(_syncWidget());
   }
 
-  /// Adds [liters] to today's running total and persists the new value.
+  /// Bugünün toplamına [liters] ekle ve BE'ye yaz (absolute toplam gönderilir).
   Future<void> addWater(double liters) async {
-    _waterToday += liters;
-    await _dbService.saveWater(_waterToday, DateTime.now());
+    if (!_isLoggedIn) return;
+    final newTotal = (_waterToday + liters).clamp(0.0, 3.0);
+    try {
+      final saved = await _waterService.logWater(newTotal);
+      _waterToday = saved;
+    } on ApiException {
+      rethrow;
+    }
     unawaited(_healthService.logWater(liters: liters, time: DateTime.now()));
     notifyListeners();
     unawaited(_syncWidget());
   }
 
-  /// Resets today's water to zero.
+  /// Bugünün su değerini sıfırla (BE).
   Future<void> resetWater() async {
-    _waterToday = 0.0;
-    await _dbService.saveWater(0.0, DateTime.now());
+    if (!_isLoggedIn) return;
+    try {
+      final saved = await _waterService.resetWater();
+      _waterToday = saved;
+    } on ApiException {
+      rethrow;
+    }
     notifyListeners();
     unawaited(_syncWidget());
   }
@@ -873,80 +948,79 @@ class AppProvider extends ChangeNotifier {
   Map<String, dynamic> _monthlyInsights = {};
   Map<String, dynamic> get monthlyInsights => _monthlyInsights;
 
-  /// Loads the last 7 days of aggregated nutrition data and calculates insights.
+  /// Loads the last 7 days from BE progress.weeklyStats.
   Future<void> loadWeeklyStats() async {
-    _weeklyStats = await _dbService.getWeeklyStats();
-    final topMeal = await _dbService.getTopMealCategory(7);
-    _weeklyInsights = _calculateInsights(_weeklyStats, 7, topMeal);
+    if (!_isLoggedIn) return;
+    try {
+      final period = await _progressService.weeklyStats();
+      _weeklyStats = _mapDays(period['days'] as List?);
+      _weeklyInsights = _mapInsights(period, 7);
+    } on ApiException {
+      _weeklyStats = const [];
+      _weeklyInsights = const {};
+    }
     notifyListeners();
   }
 
-  // ---------------------------------------------------------------------------
-  // Backend Sync Mock
-  // ---------------------------------------------------------------------------
+  /// Home ekranı açılışta çağırır — `me` query'sini çekip state'i tazeler.
+  /// Eskiden mock data dolduruyordu; artık gerçek BE.
   Future<void> syncBackendProfileAndSettings() async {
-    debugPrint('[BackendSync] Profil ve Settings bilgileri senkronize ediliyor...');
-    // TODO: Jira EAT-104 && EAT-105 endpoint bağlantıları yapılınca burası değişecek
-    await Future.delayed(const Duration(milliseconds: 600));
-    
-    // Geçici Mock Data: Backend'den gelmiş gibi in-memory set atıyoruz. Local kaydetmiyoruz.
-    if (_userName.isEmpty) { // Sadece on-boarding vs sonrası üstüne yazmasın diye basit kontrol
-      _userName = "Yapay Zeka (Mock)";
-      _age = 26;
-      _height = 180.0;
-      _weight = 75.0;
-      _targetWeight = 70.0;
-      _gender = "male";
-      _goal = "lose";
-      _activityLevel = "active";
-      _dietType = "standard";
+    if (!_isLoggedIn) return;
+    try {
+      final user = await _userService.me();
+      _applyBackendUser(user);
+      notifyListeners();
+    } on ApiException {
+      // Ağ yoksa sessiz geç — splash/bootstrap'ın önceden yüklediği veri durur.
     }
-
-    notifyListeners();
-    debugPrint('[BackendSync] Senkronizasyon tamamlandı, in-memory mock data setlendi.');
   }
 
 
-  /// Loads the last 30 days of aggregated nutrition data and calculates insights.
+  /// Loads the last 30 days from BE progress.monthlyStats.
   Future<void> loadMonthlyStats() async {
-    _monthlyStats = await _dbService.getMonthlyStats();
-    final topMeal = await _dbService.getTopMealCategory(30);
-    _monthlyInsights = _calculateInsights(_monthlyStats, 30, topMeal);
+    if (!_isLoggedIn) return;
+    try {
+      final period = await _progressService.monthlyStats();
+      _monthlyStats = _mapDays(period['days'] as List?);
+      _monthlyInsights = _mapInsights(period, 30);
+    } on ApiException {
+      _monthlyStats = const [];
+      _monthlyInsights = const {};
+    }
     notifyListeners();
   }
 
-  Map<String, dynamic> _calculateInsights(List<Map<String, dynamic>> stats, int days, String? topMeal) {
-    if (stats.isEmpty) return {};
+  List<Map<String, dynamic>> _mapDays(List? days) {
+    if (days == null) return const [];
+    return days.map<Map<String, dynamic>>((raw) {
+      final d = Map<String, dynamic>.from(raw as Map);
+      return {
+        'date': d['date'] as String,
+        'calories': (d['totalCalories'] as num?)?.toDouble() ?? 0.0,
+        'protein': (d['totalProtein'] as num?)?.toDouble() ?? 0.0,
+        'carbs': (d['totalCarbs'] as num?)?.toDouble() ?? 0.0,
+        'fat': (d['totalFat'] as num?)?.toDouble() ?? 0.0,
+        'water': (d['waterLiters'] as num?)?.toDouble() ?? 0.0,
+        'scanCount': (d['scanCount'] as num?)?.toInt() ?? 0,
+      };
+    }).toList(growable: false);
+  }
 
-    double totalCal = 0;
-    double totalWater = 0;
-    int goalMetDays = 0;
-    double maxCal = 0;
-    String topDay = '';
-
-    for (final day in stats) {
-      final cal = day['calories'] as double;
-      final water = day['water'] as double;
-      totalCal += cal;
-      totalWater += water;
-
-      if (cal > 0 && cal <= _dailyCalorieGoal * 1.1 && cal >= _dailyCalorieGoal * 0.9) {
-        goalMetDays++;
-      }
-
-      if (cal > maxCal) {
-        maxCal = cal;
-        topDay = day['date'];
-      }
-    }
-
+  Map<String, dynamic> _mapInsights(Map<String, dynamic> period, int days) {
+    final avgCal = (period['avgCalories'] as num?)?.toDouble() ?? 0.0;
+    final avgWater = ((period['days'] as List?) ?? const [])
+            .whereType<Map>()
+            .map((d) => (d['waterLiters'] as num?)?.toDouble() ?? 0.0)
+            .fold<double>(0, (a, b) => a + b) /
+        (days.clamp(1, days));
+    final topMealRaw = period['topMealCategory'] as String?;
     return {
-      'avgCal': totalCal / days,
-      'avgWater': totalWater / days,
-      'goalAchievement': (totalCal / (days * _dailyCalorieGoal)) * 100,
-      'consistencyScore': (goalMetDays / days) * 100,
-      'topDay': topDay,
-      'topMeal': topMeal,
+      'avgCal': avgCal,
+      'avgWater': avgWater,
+      'goalAchievement': (period['goalAchievementPercent'] as num?)?.toDouble() ?? 0.0,
+      'consistencyScore': (period['goalAchievementPercent'] as num?)?.toDouble() ?? 0.0,
+      'topMeal': topMealRaw?.toLowerCase(),
     };
   }
+
 }
