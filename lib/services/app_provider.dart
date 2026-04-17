@@ -693,13 +693,19 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> authSocialLogin(String provider) async {
-    // Native SDK entegrasyonu (Google/Apple/Facebook) EAT-109 kapsamında
-    // ayrı bir alt-task olarak eklenecek. O tamamlanınca buraya
-    // idToken geçilip AuthService.socialLogin çağrılacak.
-    throw UnimplementedError(
-      'Social login native SDK entegrasyonu henüz bağlanmadı (EAT-109)',
+  /// [provider]: "GOOGLE" | "APPLE" | "FACEBOOK"
+  /// [idToken]: OAuth id token (native SDK'dan alınır).
+  Future<void> authSocialLogin({
+    required String provider,
+    required String idToken,
+  }) async {
+    final res = await _authService.socialLogin(
+      provider: provider,
+      idToken: idToken,
     );
+    _applyBackendUser(Map<String, dynamic>.from(res['user'] as Map));
+    _isLoggedIn = true;
+    notifyListeners();
   }
 
   Future<void> authLogout() async {

@@ -52,6 +52,11 @@ dependencies:
   # Backend API
   flutter_secure_storage: ^9.2.2
 
+  # Social Sign-In (EAT-116)
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.4
+  crypto: ^3.0.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

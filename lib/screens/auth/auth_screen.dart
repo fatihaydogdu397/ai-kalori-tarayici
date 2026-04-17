@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/app_provider.dart';
+import '../../services/auth/social_sign_in.dart';
 import '../../generated/app_localizations.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
@@ -24,18 +25,40 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _handleSocialLogin(String providerName) async {
     setState(() => _isLoading = true);
     final provider = context.read<AppProvider>();
+
     try {
-      await provider.authSocialLogin(providerName);
-    } on UnimplementedError {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Social login çok yakında aktif olacak.'),
-          backgroundColor: AppColors.coral,
-        ),
+      // Native SDK'dan idToken al.
+      String? idToken;
+      switch (providerName.toUpperCase()) {
+        case 'GOOGLE':
+          idToken = await SocialSignIn.google();
+          break;
+        case 'APPLE':
+          idToken = await SocialSignIn.apple();
+          break;
+        case 'FACEBOOK':
+          if (mounted) setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Facebook sign-in will be available soon.'),
+              backgroundColor: AppColors.amber,
+            ),
+          );
+          return;
+        default:
+          throw UnsupportedError('Unknown provider: $providerName');
+      }
+
+      if (idToken == null) {
+        // Kullanıcı iptal etti — sessiz geç.
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+
+      await provider.authSocialLogin(
+        provider: providerName.toUpperCase(),
+        idToken: idToken,
       );
-      return;
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
