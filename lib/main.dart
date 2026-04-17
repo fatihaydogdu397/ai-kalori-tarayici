@@ -5,11 +5,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'generated/app_localizations.dart';
 import 'services/app_provider.dart';
-import 'services/database_service.dart';
 import 'services/purchase_service.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
-import 'dev/mock_data.dart';
 import 'services/notification_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -21,10 +19,9 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light));
 
   final provider = AppProvider();
-  await Future.wait([provider.loadTheme(), provider.loadLocale(), PurchaseService.init(), NotificationService.init()]);
+  await Future.wait([provider.loadTheme(), provider.loadLocale(), provider.loadAuthStatus(), PurchaseService.init(), NotificationService.init()]);
   await provider.refreshPremiumStatus();
 
-  await seedIfNeeded(DatabaseService());
   await provider.loadProfile();
   await provider.loadHistory();
   await provider.loadTodayStats();
@@ -42,7 +39,11 @@ class EatiqApp extends StatelessWidget {
       value: provider,
       child: Consumer<AppProvider>(
         builder: (context, provider, _) {
-          final isDark = provider.themeMode == ThemeMode.dark;
+          bool isDark = provider.themeMode == ThemeMode.dark;
+          if (provider.themeMode == ThemeMode.system) {
+            isDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+          }
+
           SystemChrome.setSystemUIOverlayStyle(
             SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark),
           );

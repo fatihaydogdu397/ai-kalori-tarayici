@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
+import '../services/api/nutrition_service.dart';
 import '../models/food_analysis.dart';
+import '../generated/app_localizations.dart';
 
-// ── Mock Food Data ────────────────────────────────────────────────────────────
-
+/// UI transfer objesi — BE foods query yanıtından doldurulur.
 class _FoodItem {
+  final String id;
   final String name;
   final String emoji;
   final double cal; // per 100g
@@ -17,6 +20,7 @@ class _FoodItem {
   final String category;
 
   const _FoodItem({
+    required this.id,
     required this.name,
     required this.emoji,
     required this.cal,
@@ -25,48 +29,25 @@ class _FoodItem {
     required this.fat,
     required this.category,
   });
+
+  factory _FoodItem.fromBackend(Map<String, dynamic> raw) {
+    return _FoodItem(
+      id: (raw['id'] ?? '') as String,
+      name: (raw['name'] ?? '') as String,
+      emoji: '🍽️',
+      cal: (raw['calories'] as num?)?.toDouble() ?? 0,
+      protein: (raw['protein'] as num?)?.toDouble() ?? 0,
+      carbs: (raw['carbs'] as num?)?.toDouble() ?? 0,
+      fat: (raw['fat'] as num?)?.toDouble() ?? 0,
+      category: (raw['category'] ?? '') as String,
+    );
+  }
 }
 
-const _mockFoods = [
-  _FoodItem(name: 'Chicken Breast', emoji: '🍗', cal: 165, protein: 31, carbs: 0, fat: 3.6, category: 'Protein'),
-  _FoodItem(name: 'Salmon', emoji: '🐟', cal: 208, protein: 20, carbs: 0, fat: 13, category: 'Protein'),
-  _FoodItem(name: 'Egg (Large)', emoji: '🥚', cal: 155, protein: 13, carbs: 1.1, fat: 11, category: 'Protein'),
-  _FoodItem(name: 'Tuna (Canned)', emoji: '🐟', cal: 116, protein: 26, carbs: 0, fat: 1, category: 'Protein'),
-  _FoodItem(name: 'Beef Sirloin', emoji: '🥩', cal: 207, protein: 26, carbs: 0, fat: 11, category: 'Protein'),
-  _FoodItem(name: 'Lentils', emoji: '🫘', cal: 116, protein: 9, carbs: 20, fat: 0.4, category: 'Protein'),
-  _FoodItem(name: 'Greek Yogurt', emoji: '🥛', cal: 59, protein: 10, carbs: 3.6, fat: 0.4, category: 'Dairy'),
-  _FoodItem(name: 'Milk (Whole)', emoji: '🥛', cal: 61, protein: 3.2, carbs: 4.8, fat: 3.3, category: 'Dairy'),
-  _FoodItem(name: 'Cheddar Cheese', emoji: '🧀', cal: 403, protein: 25, carbs: 1.3, fat: 33, category: 'Dairy'),
-  _FoodItem(name: 'Cottage Cheese', emoji: '🥛', cal: 98, protein: 11, carbs: 3.4, fat: 4.3, category: 'Dairy'),
-  _FoodItem(name: 'Brown Rice', emoji: '🍚', cal: 216, protein: 4.5, carbs: 45, fat: 1.8, category: 'Carbs'),
-  _FoodItem(name: 'White Rice', emoji: '🍚', cal: 130, protein: 2.7, carbs: 28, fat: 0.3, category: 'Carbs'),
-  _FoodItem(name: 'Oatmeal', emoji: '🥣', cal: 389, protein: 17, carbs: 66, fat: 7, category: 'Carbs'),
-  _FoodItem(name: 'Whole Wheat Bread', emoji: '🍞', cal: 247, protein: 13, carbs: 41, fat: 3.4, category: 'Carbs'),
-  _FoodItem(name: 'Sweet Potato', emoji: '🍠', cal: 86, protein: 1.6, carbs: 20, fat: 0.1, category: 'Carbs'),
-  _FoodItem(name: 'Pasta (Cooked)', emoji: '🍝', cal: 131, protein: 5, carbs: 25, fat: 1.1, category: 'Carbs'),
-  _FoodItem(name: 'Banana', emoji: '🍌', cal: 89, protein: 1.1, carbs: 23, fat: 0.3, category: 'Fruit'),
-  _FoodItem(name: 'Apple', emoji: '🍎', cal: 52, protein: 0.3, carbs: 14, fat: 0.2, category: 'Fruit'),
-  _FoodItem(name: 'Orange', emoji: '🍊', cal: 47, protein: 0.9, carbs: 12, fat: 0.1, category: 'Fruit'),
-  _FoodItem(name: 'Strawberry', emoji: '🍓', cal: 32, protein: 0.7, carbs: 7.7, fat: 0.3, category: 'Fruit'),
-  _FoodItem(name: 'Blueberry', emoji: '🫐', cal: 57, protein: 0.7, carbs: 14, fat: 0.3, category: 'Fruit'),
-  _FoodItem(name: 'Avocado', emoji: '🥑', cal: 160, protein: 2, carbs: 9, fat: 15, category: 'Fats'),
-  _FoodItem(name: 'Almonds', emoji: '🥜', cal: 579, protein: 21, carbs: 22, fat: 50, category: 'Fats'),
-  _FoodItem(name: 'Walnuts', emoji: '🥜', cal: 654, protein: 15, carbs: 14, fat: 65, category: 'Fats'),
-  _FoodItem(name: 'Peanut Butter', emoji: '🥜', cal: 588, protein: 25, carbs: 20, fat: 50, category: 'Fats'),
-  _FoodItem(name: 'Olive Oil', emoji: '🫒', cal: 884, protein: 0, carbs: 0, fat: 100, category: 'Fats'),
-  _FoodItem(name: 'Broccoli', emoji: '🥦', cal: 34, protein: 2.8, carbs: 7, fat: 0.4, category: 'Vegetables'),
-  _FoodItem(name: 'Spinach', emoji: '🥬', cal: 23, protein: 2.9, carbs: 3.6, fat: 0.4, category: 'Vegetables'),
-  _FoodItem(name: 'Tomato', emoji: '🍅', cal: 18, protein: 0.9, carbs: 3.9, fat: 0.2, category: 'Vegetables'),
-  _FoodItem(name: 'Carrot', emoji: '🥕', cal: 41, protein: 0.9, carbs: 10, fat: 0.2, category: 'Vegetables'),
-  _FoodItem(name: 'Pizza (Margherita)', emoji: '🍕', cal: 266, protein: 11, carbs: 33, fat: 10, category: 'Fast Food'),
-  _FoodItem(name: 'Burger', emoji: '🍔', cal: 295, protein: 17, carbs: 24, fat: 14, category: 'Fast Food'),
-  _FoodItem(name: 'French Fries', emoji: '🍟', cal: 312, protein: 3.4, carbs: 41, fat: 15, category: 'Fast Food'),
-  _FoodItem(name: 'Dark Chocolate', emoji: '🍫', cal: 598, protein: 7.8, carbs: 46, fat: 43, category: 'Snacks'),
-  _FoodItem(name: 'Granola Bar', emoji: '🌾', cal: 471, protein: 9, carbs: 64, fat: 20, category: 'Snacks'),
-  _FoodItem(name: 'Rice Cake', emoji: '🍘', cal: 387, protein: 8, carbs: 81, fat: 2.9, category: 'Snacks'),
-];
-
-const _categories = ['All', 'Protein', 'Dairy', 'Carbs', 'Fruit', 'Fats', 'Vegetables', 'Fast Food', 'Snacks'];
+/// EAT-120 tamamlanana kadar kategori chip'leri sadece UI'da duruyor;
+/// seçim BE'ye filtre olarak gitmiyor (USDA kategori adlandırması FE
+/// etiketleriyle birebir eşleşmiyor).
+const _categories = ['All'];
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -79,26 +60,76 @@ class FoodSearchScreen extends StatefulWidget {
 
 class _FoodSearchScreenState extends State<FoodSearchScreen> {
   final _searchCtrl = TextEditingController();
+  final NutritionService _nutritionService = NutritionService.instance;
   String _query = '';
   String _category = 'All';
+  Timer? _debounce;
+  bool _loading = false;
+  List<_FoodItem> _items = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFoods();
+  }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
 
+  void _onSearchChanged(String v) {
+    setState(() => _query = v);
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), _loadFoods);
+  }
+
+  Future<void> _loadFoods() async {
+    setState(() => _loading = true);
+    try {
+      final rows = await _nutritionService.foods(
+        search: _query.trim().isEmpty ? null : _query.trim(),
+        limit: 50,
+      );
+      if (!mounted) return;
+      setState(() {
+        _items = rows.map(_FoodItem.fromBackend).toList(growable: false);
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _items = const [];
+        _loading = false;
+      });
+    }
+  }
+
+  String _translateCategory(String cat, AppLocalizations l) {
+    switch (cat) {
+      case 'All': return l.categoryAll;
+      case 'Protein': return l.protein;
+      case 'Dairy': return l.categoryDairy;
+      case 'Carbs': return l.carbs;
+      case 'Fruit': return l.categoryFruit;
+      case 'Fats': return l.categoryFats;
+      case 'Vegetables': return l.categoryVegetables;
+      case 'Fast Food': return l.categoryFastFood;
+      case 'Snacks': return l.categorySnacks;
+      default: return cat;
+    }
+  }
+
   List<_FoodItem> get _filtered {
-    final q = _query.toLowerCase();
-    return _mockFoods.where((f) {
-      final matchCat = _category == 'All' || f.category == _category;
-      final matchQ = q.isEmpty || f.name.toLowerCase().contains(q);
-      return matchCat && matchQ;
-    }).toList();
+    // BE zaten search'ü filtreliyor; kategori chip'leri EAT-120'ye kadar no-op.
+    return _items;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
@@ -131,7 +162,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                   ),
                   SizedBox(width: 12.w),
                   Text(
-                    'Food Search',
+                    l.foodSearch,
                     style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: textPrimary),
                   ),
                 ],
@@ -153,11 +184,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                     Expanded(
                       child: TextField(
                         controller: _searchCtrl,
-                        onChanged: (v) => setState(() => _query = v),
+                        onChanged: _onSearchChanged,
                         style: TextStyle(fontSize: 15.sp, color: textPrimary, fontWeight: FontWeight.w500),
                         decoration: InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'Search foods...',
+                          hintText: l.searchFoodsHint,
                           hintStyle: TextStyle(fontSize: 15.sp, color: textMuted, fontWeight: FontWeight.w400),
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
@@ -168,7 +199,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       GestureDetector(
                         onTap: () {
                           _searchCtrl.clear();
-                          setState(() => _query = '');
+                          _onSearchChanged('');
                         },
                         child: Padding(
                           padding: EdgeInsets.all(10.w),
@@ -206,7 +237,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        cat,
+                        _translateCategory(cat, l),
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
@@ -224,14 +255,16 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
               child: Text(
-                '${results.length} foods',
+                l.foodCount(results.length),
                 style: TextStyle(fontSize: 12.sp, color: textMuted, fontWeight: FontWeight.w500),
               ),
             ),
 
             // ── Food List ─────────────────────────────────────────────────
             Expanded(
-              child: results.isEmpty
+              child: _loading
+                  ? Center(child: CircularProgressIndicator(color: accent))
+                  : results.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -239,7 +272,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                           Text('🔍', style: TextStyle(fontSize: 40.sp)),
                           SizedBox(height: 12.h),
                           Text(
-                            'No foods found',
+                            l.noFoodsFound,
                             style: TextStyle(color: textMuted, fontSize: 14.sp, fontWeight: FontWeight.w500),
                           ),
                         ],
@@ -257,7 +290,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         textMuted: textMuted,
                         accent: accent,
                         isDark: isDark,
-                        onAdd: () => _showAddSheet(context, results[i], isDark, cardBg, textPrimary, textMuted, accent),
+                        onAdd: () => _showAddSheet(context, results[i], isDark, cardBg, textPrimary, textMuted, accent, l),
                       ),
                     ),
             ),
@@ -267,7 +300,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     );
   }
 
-  void _showAddSheet(BuildContext context, _FoodItem food, bool isDark, Color cardBg, Color textPrimary, Color textMuted, Color accent) {
+  void _showAddSheet(BuildContext context, _FoodItem food, bool isDark, Color cardBg, Color textPrimary, Color textMuted, Color accent, AppLocalizations l) {
     double grams = 100;
     showModalBottomSheet(
       context: context,
@@ -330,18 +363,18 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                 // Macro row
                 Row(
                   children: [
-                    _SheetMacro(label: 'Protein', value: '${pro.toStringAsFixed(1)}g', color: AppColors.violet),
+                    _SheetMacro(label: l.protein, value: '${pro.toStringAsFixed(1)}g', color: AppColors.violet),
                     SizedBox(width: 12.w),
-                    _SheetMacro(label: 'Carbs', value: '${car.toStringAsFixed(1)}g', color: AppColors.amber),
+                    _SheetMacro(label: l.carbs, value: '${car.toStringAsFixed(1)}g', color: AppColors.amber),
                     SizedBox(width: 12.w),
-                    _SheetMacro(label: 'Fat', value: '${fat.toStringAsFixed(1)}g', color: AppColors.coral),
+                    _SheetMacro(label: l.fat, value: '${fat.toStringAsFixed(1)}g', color: AppColors.coral),
                   ],
                 ),
                 SizedBox(height: 20.h),
 
                 // Portion slider
                 Text(
-                  'Portion: ${grams.toStringAsFixed(0)} g',
+                  l.portionGrams(grams.toStringAsFixed(0)),
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
                 ),
                 Slider(
@@ -371,7 +404,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       elevation: 0,
                     ),
                     child: Text(
-                      'Add to Log',
+                      l.addToLog,
                       style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700),
                     ),
                   ),
@@ -387,30 +420,44 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   void _logFood(BuildContext context, _FoodItem food, double grams) {
     final factor = grams / 100;
     final provider = context.read<AppProvider>();
+    final l = AppLocalizations.of(context);
     final analysis = FoodAnalysis(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      foodName: food.name,
-      calories: food.cal * factor,
-      protein: food.protein * factor,
-      carbs: food.carbs * factor,
-      fat: food.fat * factor,
-      fiber: 0,
-      sugar: 0,
-      portionDescription: '${grams.toStringAsFixed(0)}g',
-      timestamp: DateTime.now(),
-      mealCategory: MealCategoryX.fromTime(DateTime.now()),
-      isFavorite: false,
-      imagePath: '',
-      foods: [],
-      totalNutrients: null,
+      imagePath: '', // Mock arama olduğu için görsel yok
+      foods: [
+        FoodItem(
+          name: food.name,
+          nameTr: food.name,
+          portion: grams,
+          portionUnit: 'g',
+          nutrients: NutrientInfo(
+            calories: food.cal * factor,
+            protein: food.protein * factor,
+            carbs: food.carbs * factor,
+            fat: food.fat * factor,
+            fiber: 0,
+            sugar: 0,
+          ),
+          healthScore: 'Orta',
+          tags: [food.category],
+        ),
+      ],
+      totalNutrients: NutrientInfo(
+        calories: food.cal * factor,
+        protein: food.protein * factor,
+        carbs: food.carbs * factor,
+        fat: food.fat * factor,
+        fiber: 0,
+        sugar: 0,
+      ),
       summary: '',
       advice: '',
-      analyzedAt: null,
+      analyzedAt: DateTime.now(),
     );
     provider.saveManualEntry(analysis);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${food.name} added to log'),
+        content: Text(l.foodAddedToLog(food.name)),
         backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : AppColors.lightText,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

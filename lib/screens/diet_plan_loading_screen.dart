@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
-import '../services/app_provider.dart';
+import '../services/api/api_exception.dart';
+import '../services/api/diet_plan_service.dart';
 import 'weekly_diet_plan_screen.dart';
+import 'paywall_screen.dart';
 
 class DietPlanLoadingScreen extends StatefulWidget {
   final Map<String, dynamic> anamnesisData;
@@ -22,6 +23,7 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
 
   int _stepIndex = 0;
   Timer? _stepTimer;
+  final DietPlanService _dietPlanService = DietPlanService.instance;
 
   static const _steps = [
     ('🧬', 'Analyzing your profile...'),
@@ -46,8 +48,8 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
   }
 
   void _startSequence() {
-    // Step through loading messages
-    const stepDuration = Duration(milliseconds: 700);
+    // Adım göstergesi: kullanıcıya BE hazırlanırken ilerleme feedback'i ver.
+    const stepDuration = Duration(milliseconds: 900);
     _stepTimer = Timer.periodic(stepDuration, (t) {
       if (!mounted) {
         t.cancel();
@@ -58,129 +60,52 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
       });
     });
 
-    // Total loading time: ~4.2s (6 steps * 700ms), then navigate
-    Future.delayed(const Duration(milliseconds: 4500), () {
+    _generatePlan();
+  }
+
+  Future<void> _generatePlan() async {
+    try {
+      final plan = await _dietPlanService.generatePlan(planType: 'weekly');
       _stepTimer?.cancel();
       if (!mounted) return;
-      _navigateToPlan();
-    });
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => WeeklyDietPlanScreen(
+            plan: plan,
+            anamnesisData: widget.anamnesisData,
+          ),
+        ),
+      );
+    } on ApiException catch (e) {
+      _stepTimer?.cancel();
+      if (!mounted) return;
+      if (e.code == 'PREMIUM_REQUIRED') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PaywallScreen()),
+        );
+        return;
+      }
+      _showError(e.message);
+    } catch (e) {
+      _stepTimer?.cancel();
+      if (!mounted) return;
+      _showError(e.toString());
+    }
   }
 
-  void _navigateToPlan() {
-    final provider = context.read<AppProvider>();
-    // Generate a mock plan based on profile + anamnesis data
-    final plan = _generateMockPlan(provider, widget.anamnesisData);
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WeeklyDietPlanScreen(plan: plan, anamnesisData: widget.anamnesisData),
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.coral,
+        behavior: SnackBarBehavior.floating,
       ),
     );
-  }
-
-  DietPlan _generateMockPlan(AppProvider provider, Map<String, dynamic> data) {
-    final dailyGoal = provider.dailyCalorieGoal.round();
-    final mealsPerDay = (data['mealsPerDay'] as int?) ?? 4;
-    final cuisines = (data['cuisines'] as List?)?.cast<String>() ?? ['no_pref'];
-
-    // Turkish cuisine defaults
-    final breakfastPool = cuisines.contains('turkish') || cuisines.contains('no_pref')
-        ? ['Menemen + Whole Grain Toast', 'Yogurt Parfait + Granola', 'Omelette + Vegetables', 'Oatmeal + Banana', 'Scrambled Eggs + Avocado']
-        : ['Oatmeal + Banana', 'Greek Yogurt + Berries', 'Scrambled Eggs + Toast', 'Smoothie Bowl', 'Avocado Toast'];
-
-    final lunchPool = cuisines.contains('turkish') || cuisines.contains('no_pref')
-        ? ['Grilled Chicken + Bulgur Pilaf', 'Lentil Soup + Bread', 'Stuffed Pepper (Biber Dolma)', 'Grilled Fish + Salad', 'Chickpea Stew + Rice']
-        : ['Chicken Salad', 'Quinoa Bowl', 'Tuna Wrap', 'Veggie Stir-fry + Rice', 'Lentil Soup'];
-
-    final dinnerPool = cuisines.contains('turkish') || cuisines.contains('no_pref')
-        ? ['Baked Salmon + Roasted Vegetables', 'Ground Beef Casserole (Musakka)', 'Grilled Chicken Kebab + Tzatziki', 'Shrimp + Cauliflower Rice', 'Turkey Meatballs + Pasta']
-        : ['Baked Salmon + Sweet Potato', 'Chicken Stir-fry', 'Ground Turkey Bowl', 'Shrimp Tacos', 'Beef & Broccoli'];
-
-    final snackPool = [
-      'Apple + Almond Butter', 'Greek Yogurt', 'Mixed Nuts (30g)', 'Rice Cake + Hummus',
-      'Protein Bar', 'Banana + Peanut Butter', 'Cottage Cheese + Cucumber', 'Hard Boiled Egg',
-    ];
-
-    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-    final dayPlans = List.generate(7, (i) {
-      final meals = <DietMeal>[];
-
-      // Breakfast (~25% of daily)
-      meals.add(DietMeal(
-        name: breakfastPool[i % breakfastPool.length],
-        category: 'Breakfast',
-        calories: (dailyGoal * 0.25).round(),
-        protein: ((dailyGoal * 0.25) * 0.25 / 4).round(),
-        carbs: ((dailyGoal * 0.25) * 0.45 / 4).round(),
-        fat: ((dailyGoal * 0.25) * 0.30 / 9).round(),
-        time: '08:00',
-        emoji: '🌅',
-      ));
-
-      // Lunch (~35% of daily)
-      meals.add(DietMeal(
-        name: lunchPool[i % lunchPool.length],
-        category: 'Lunch',
-        calories: (dailyGoal * 0.35).round(),
-        protein: ((dailyGoal * 0.35) * 0.30 / 4).round(),
-        carbs: ((dailyGoal * 0.35) * 0.40 / 4).round(),
-        fat: ((dailyGoal * 0.35) * 0.30 / 9).round(),
-        time: '12:30',
-        emoji: '☀️',
-      ));
-
-      // Dinner (~30% of daily)
-      meals.add(DietMeal(
-        name: dinnerPool[i % dinnerPool.length],
-        category: 'Dinner',
-        calories: (dailyGoal * 0.30).round(),
-        protein: ((dailyGoal * 0.30) * 0.35 / 4).round(),
-        carbs: ((dailyGoal * 0.30) * 0.35 / 4).round(),
-        fat: ((dailyGoal * 0.30) * 0.30 / 9).round(),
-        time: '19:00',
-        emoji: '🌙',
-      ));
-
-      // Snacks if needed
-      if (mealsPerDay >= 4) {
-        meals.add(DietMeal(
-          name: snackPool[(i * 2) % snackPool.length],
-          category: 'Snack',
-          calories: (dailyGoal * 0.07).round(),
-          protein: ((dailyGoal * 0.07) * 0.20 / 4).round(),
-          carbs: ((dailyGoal * 0.07) * 0.50 / 4).round(),
-          fat: ((dailyGoal * 0.07) * 0.30 / 9).round(),
-          time: '15:30',
-          emoji: '🍎',
-        ));
-      }
-      if (mealsPerDay >= 5) {
-        meals.add(DietMeal(
-          name: snackPool[(i * 2 + 1) % snackPool.length],
-          category: 'Snack',
-          calories: (dailyGoal * 0.03).round(),
-          protein: 5,
-          carbs: 8,
-          fat: 3,
-          time: '21:00',
-          emoji: '🥛',
-        ));
-      }
-
-      return DietDay(
-        dayName: days[i],
-        meals: meals,
-        totalCalories: meals.fold(0, (s, m) => s + m.calories),
-      );
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) Navigator.pop(context);
     });
-
-    return DietPlan(
-      dailyCalorieGoal: dailyGoal,
-      days: dayPlans,
-      generatedAt: DateTime.now(),
-    );
   }
 
   @override
