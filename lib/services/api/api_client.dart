@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
@@ -85,19 +87,27 @@ class ApiClient {
       if (operationName != null) 'operationName': operationName,
     });
 
+    _logRequest(operationName, document, variables);
+    final sw = Stopwatch()..start();
+
     http.Response res;
     try {
       res = await _http
           .post(_uri, headers: headers, body: body)
           .timeout(const Duration(seconds: 30));
     } on SocketException catch (e) {
+      _logError(operationName, 'SocketException: ${e.message}', sw.elapsed);
       throw ApiException('Connection failed: ${e.message}',
           code: 'NETWORK_ERROR');
     } on TimeoutException {
+      _logError(operationName, 'TimeoutException', sw.elapsed);
       throw ApiException('Request timed out', code: 'NETWORK_ERROR');
     } catch (e) {
+      _logError(operationName, 'Network error: $e', sw.elapsed);
       throw ApiException('Network error: $e', code: 'NETWORK_ERROR');
     }
+
+    _logResponse(operationName, res.statusCode, res.body, sw.elapsed);
 
     if (res.statusCode == 401 || res.statusCode == 403) {
       if (!isRetry && await _tryRefreshToken()) {
@@ -150,6 +160,50 @@ class ApiClient {
       throw ApiException('Missing data in response', statusCode: res.statusCode);
     }
     return data;
+  }
+
+  // ── Debug logging ──────────────────────────────────────────────────────────
+  // kDebugMode dışında no-op. `developer.log` Flutter DevTools Network
+  // panelinde ve Xcode/adb log'unda görünür.
+
+  static const String _tag = 'ApiClient';
+
+  String _opLabel(String? operationName, String document) {
+    if (operationName != null && operationName.isNotEmpty) return operationName;
+    // Anonymous query/mutation → first meaningful word after `query`/`mutation`.
+    final m = RegExp(r'(query|mutation)\s+(\w+)').firstMatch(document);
+    if (m != null) return m.group(2)!;
+    return 'anonymous';
+  }
+
+  void _logRequest(
+    String? operationName,
+    String document,
+    Map<String, dynamic>? variables,
+  ) {
+    if (!kDebugMode) return;
+    final op = _opLabel(operationName, document);
+    final vars = variables == null ? '' : ' vars=${jsonEncode(variables)}';
+    developer.log('→ $op$vars', name: _tag);
+  }
+
+  void _logResponse(
+    String? operationName,
+    int status,
+    String body,
+    Duration elapsed,
+  ) {
+    if (!kDebugMode) return;
+    final op = _opLabel(operationName, '');
+    final ms = elapsed.inMilliseconds;
+    final trimmed = body.length > 800 ? '${body.substring(0, 800)}…' : body;
+    developer.log('← $op [${status}] ${ms}ms $trimmed', name: _tag);
+  }
+
+  void _logError(String? operationName, String message, Duration elapsed) {
+    if (!kDebugMode) return;
+    final op = _opLabel(operationName, '');
+    developer.log('✗ $op ${elapsed.inMilliseconds}ms $message', name: _tag);
   }
 
   Future<bool> _tryRefreshToken() async {
