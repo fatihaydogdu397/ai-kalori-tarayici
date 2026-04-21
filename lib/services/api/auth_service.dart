@@ -168,8 +168,11 @@ class AuthService {
   }
 
   Future<void> logout() async {
+    // Logout token'sız da çağrılabilmeli — aksi halde 401 → onLogout → logout
+    // sonsuz döngüsüne girer. `requiresAuth: false` ile ApiClient 401 handler'ı
+    // tetikleme yolunu kapatıyoruz; BE yine de gelen Bearer'ı (varsa) görür.
     try {
-      await _api.mutate(r'mutation Logout { logout }');
+      await _api.mutate(r'mutation Logout { logout }', requiresAuth: false);
     } catch (_) {
       // Server tarafı başarısız olsa bile client oturumu temizle.
     } finally {

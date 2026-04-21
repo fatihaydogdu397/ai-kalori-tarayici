@@ -711,9 +711,14 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> authLogout() async {
-    try {
-      await _authService.logout();
-    } catch (_) {}
+    // Token yoksa BE'ye logout atmaya gerek yok; ApiClient zaten onLogout'u
+    // storage temizledikten sonra çağırıyor, o yüzden burada tekrar istek
+    // gönderirsek 401 → onLogout → authLogout döngüsüne girebiliriz.
+    if (await _tokenStorage.hasSession()) {
+      try {
+        await _authService.logout();
+      } catch (_) {}
+    }
     await _tokenStorage.clear();
     _isLoggedIn = false;
     _userName = '';

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -25,6 +24,10 @@ class ApiClient {
 
   /// AppProvider.logout()'u buraya bağlayacağız (auth bootstrap'ta).
   LogoutCallback? onLogout;
+
+  /// Re-entrancy guard: onLogout callback'i içinden yapılan istek de 401
+  /// alırsa ikinci kez tetiklenip logout→logout sonsuz döngüsüne girmesin.
+  bool _handlingAuthFailure = false;
 
   Uri get _uri {
     final url = dotenv.env['API_BASE_URL'];
@@ -110,7 +113,7 @@ class ApiClient {
     _logResponse(operationName, res.statusCode, res.body, sw.elapsed);
 
     if (res.statusCode == 401 || res.statusCode == 403) {
-      if (!isRetry && await _tryRefreshToken()) {
+      if (requiresAuth && !isRetry && await _tryRefreshToken()) {
         return _execute(
           document: document,
           variables: variables,
@@ -119,7 +122,9 @@ class ApiClient {
           isRetry: true,
         );
       }
-      await _handleAuthFailure();
+      if (requiresAuth) {
+        await _handleAuthFailure();
+      }
       throw ApiException('Authentication required',
           code: 'UNAUTHENTICATED', statusCode: res.statusCode);
     }
@@ -138,7 +143,7 @@ class ApiClient {
       final ext = first['extensions'] as Map<String, dynamic>?;
       final code = ext?['code']?.toString();
 
-      if (code == 'UNAUTHENTICATED' && !isRetry) {
+      if (code == 'UNAUTHENTICATED' && requiresAuth && !isRetry) {
         if (await _tryRefreshToken()) {
           return _execute(
             document: document,
@@ -163,17 +168,24 @@ class ApiClient {
   }
 
   // ── Debug logging ──────────────────────────────────────────────────────────
-  // kDebugMode dışında no-op. `developer.log` Flutter DevTools Network
-  // panelinde ve Xcode/adb log'unda görünür.
+  // kDebugMode dışında no-op. `debugPrint` VS Code Debug Console'da,
+  // `flutter run` terminalinde ve Xcode/adb log'unda görünür.
 
   static const String _tag = 'ApiClient';
 
   String _opLabel(String? operationName, String document) {
     if (operationName != null && operationName.isNotEmpty) return operationName;
-    // Anonymous query/mutation → first meaningful word after `query`/`mutation`.
     final m = RegExp(r'(query|mutation)\s+(\w+)').firstMatch(document);
     if (m != null) return m.group(2)!;
     return 'anonymous';
+  }
+
+  void _log(String message) {
+    if (!kDebugMode) return;
+    for (var i = 0; i < message.length; i += 900) {
+      final end = (i + 900 < message.length) ? i + 900 : message.length;
+      debugPrint('[$_tag] ${message.substring(i, end)}');
+    }
   }
 
   void _logRequest(
@@ -181,10 +193,9 @@ class ApiClient {
     String document,
     Map<String, dynamic>? variables,
   ) {
-    if (!kDebugMode) return;
     final op = _opLabel(operationName, document);
     final vars = variables == null ? '' : ' vars=${jsonEncode(variables)}';
-    developer.log('→ $op$vars', name: _tag);
+    _log('→ $op$vars');
   }
 
   void _logResponse(
@@ -193,17 +204,13 @@ class ApiClient {
     String body,
     Duration elapsed,
   ) {
-    if (!kDebugMode) return;
     final op = _opLabel(operationName, '');
-    final ms = elapsed.inMilliseconds;
-    final trimmed = body.length > 800 ? '${body.substring(0, 800)}…' : body;
-    developer.log('← $op [${status}] ${ms}ms $trimmed', name: _tag);
+    _log('← $op [$status] ${elapsed.inMilliseconds}ms $body');
   }
 
   void _logError(String? operationName, String message, Duration elapsed) {
-    if (!kDebugMode) return;
     final op = _opLabel(operationName, '');
-    developer.log('✗ $op ${elapsed.inMilliseconds}ms $message', name: _tag);
+    _log('✗ $op ${elapsed.inMilliseconds}ms $message');
   }
 
   Future<bool> _tryRefreshToken() async {
@@ -247,10 +254,16 @@ class ApiClient {
   }
 
   Future<void> _handleAuthFailure() async {
-    await _storage.clear();
-    final cb = onLogout;
-    if (cb != null) {
-      await cb();
+    if (_handlingAuthFailure) return;
+    _handlingAuthFailure = true;
+    try {
+      await _storage.clear();
+      final cb = onLogout;
+      if (cb != null) {
+        await cb();
+      }
+    } finally {
+      _handlingAuthFailure = false;
     }
   }
 
