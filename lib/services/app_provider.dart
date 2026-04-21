@@ -455,12 +455,14 @@ class AppProvider extends ChangeNotifier {
     _dietBudget = budget;
     _dietNotes = notes;
 
-    // Backend'de şu an sadece mealsPerDay + allergens (restrictions) saklanıyor.
-    // Geri kalan anamnesis alanları EAT-117 ile backend'e eklenecek.
     try {
       final res = await _userService.updateProfile(
         mealsPerDay: mealsPerDay,
         allergens: restrictions,
+        cuisinePreferences: cuisines,
+        dietCookingTime: _mapCookingTimeToBackend(cookingTime),
+        dietBudget: budget, // BE enum: LOW/MEDIUM/HIGH — UserService uppercase'liyor.
+        dietNotes: notes,
       );
       _applyBackendUser(res);
     } on ApiException {
@@ -468,6 +470,21 @@ class AppProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  /// FE picker değerlerini (`quick/medium/relaxed`) BE `DietCookingTime`
+  /// enum'una (`FAST/MEDIUM/SLOW`) çevirir. UserService tarafı uppercase'leme
+  /// yaptığı için burada lowercase dönüyoruz.
+  String? _mapCookingTimeToBackend(String fe) {
+    switch (fe) {
+      case 'quick':
+        return 'fast';
+      case 'relaxed':
+        return 'slow';
+      case 'medium':
+        return 'medium';
+    }
+    return null;
   }
 
   Future<void> loadWeightLogs() async {
@@ -786,6 +803,30 @@ class AppProvider extends ChangeNotifier {
     if (diet != null && diet.isNotEmpty) _dietType = diet;
     final mealsPerDay = (user['mealsPerDay'] as num?)?.toInt();
     if (mealsPerDay != null) _dietMealsPerDay = mealsPerDay;
+
+    final allergens = user['allergens'];
+    if (allergens is List) {
+      _dietRestrictions = allergens.map((e) => e.toString()).toList();
+    }
+    final cuisines = user['cuisinePreferences'];
+    if (cuisines is List) {
+      _dietCuisines = cuisines.map((e) => e.toString()).toList();
+    }
+    final beCookingTime = (user['dietCookingTime'] as String?)?.toLowerCase();
+    if (beCookingTime != null && beCookingTime.isNotEmpty) {
+      // BE enum (fast/medium/slow) → FE picker (quick/medium/relaxed).
+      _dietCookingTime = switch (beCookingTime) {
+        'fast' => 'quick',
+        'slow' => 'relaxed',
+        _ => 'medium',
+      };
+    }
+    final beBudget = (user['dietBudget'] as String?)?.toLowerCase();
+    if (beBudget != null && beBudget.isNotEmpty) {
+      _dietBudget = beBudget;
+    }
+    final beNotes = user['dietNotes'] as String?;
+    if (beNotes != null) _dietNotes = beNotes;
 
     final waterGoal = (user['waterGoal'] as num?)?.toDouble();
     if (waterGoal != null) _waterGoal = waterGoal;

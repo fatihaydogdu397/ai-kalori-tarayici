@@ -13,7 +13,9 @@ class AuthService {
   static const String _userFields = '''
     id email name surname avatarUrl
     age height weight gender goal activityLevel
-    dietType allergens mealsPerDay
+    dietType allergens cuisinePreferences
+    dietCookingTime dietBudget dietNotes
+    mealsPerDay
     dailyCalorieGoal dailyProteinGoal dailyCarbsGoal dailyFatGoal
     waterGoal unitSystem locale isPremium streak
     createdAt updatedAt

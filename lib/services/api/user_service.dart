@@ -12,7 +12,9 @@ class UserService {
   static const String _userFields = '''
     id email name surname avatarUrl
     age height weight gender goal activityLevel
-    dietType allergens mealsPerDay
+    dietType allergens cuisinePreferences
+    dietCookingTime dietBudget dietNotes
+    mealsPerDay
     dailyCalorieGoal dailyProteinGoal dailyCarbsGoal dailyFatGoal
     waterGoal unitSystem locale isPremium streak
     createdAt updatedAt
@@ -33,6 +35,10 @@ class UserService {
     String? activityLevel,
     String? dietType,
     List<String>? allergens,
+    List<String>? cuisinePreferences,
+    String? dietCookingTime,
+    String? dietBudget,
+    String? dietNotes,
     int? mealsPerDay,
     double? dailyProteinGoal,
     double? dailyCarbsGoal,
@@ -57,6 +63,16 @@ class UserService {
       input['dietType'] = dietType.toUpperCase();
     }
     if (allergens != null) input['allergens'] = allergens;
+    if (cuisinePreferences != null) {
+      input['cuisinePreferences'] = cuisinePreferences;
+    }
+    if (dietCookingTime != null && dietCookingTime.isNotEmpty) {
+      input['dietCookingTime'] = dietCookingTime.toUpperCase();
+    }
+    if (dietBudget != null && dietBudget.isNotEmpty) {
+      input['dietBudget'] = dietBudget.toUpperCase();
+    }
+    if (dietNotes != null) input['dietNotes'] = dietNotes;
     if (mealsPerDay != null && mealsPerDay > 0) {
       input['mealsPerDay'] = mealsPerDay;
     }
