@@ -1,11 +1,17 @@
+import 'dart:ui' as ui;
+import 'dart:math' as math;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
 import '../generated/app_localizations.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
+import 'auth/auth_screen.dart';
+import 'paywall_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,332 +20,432 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  late final AnimationController _enterController;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkOnboarding());
+    _enterController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1400));
+    _fadeAnimation = CurvedAnimation(parent: _enterController, curve: Curves.easeOut);
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _enterController, curve: Curves.easeOutCubic));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _enterController.forward();
+      _checkOnboarding();
+    });
+  }
+
+  @override
+  void dispose() {
+    _enterController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkOnboarding() async {
     final provider = context.read<AppProvider>();
+    final isLoggedIn = provider.isLoggedIn;
     final done = await provider.isOnboardingDone();
     if (!mounted) return;
-    if (done) {
-      provider.loadHistory();
-      provider.loadTodayStats();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+
+    if (isLoggedIn) {
+      if (done) {
+        if (!provider.isPremium) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
+        } else {
+          provider.loadHistory();
+          provider.loadTodayStats();
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+        }
+      } else {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const isDark = true; // Always force dark mode on Splash Screen
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
-    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
     final btnBg = isDark ? AppColors.lime : AppColors.void_;
     final btnText = isDark ? AppColors.void_ : AppColors.snow;
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
 
     return Scaffold(
       backgroundColor: bg,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 28.w),
-          child: Column(
-            children: [
-              const Spacer(),
-              // Phone mockup
-              _PhoneMockup(isDark: isDark),
-              const Spacer(),
-              // Title
-              Text(
-                l.splashTitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 26.sp,
-                  fontWeight: FontWeight.w800,
-                  color: textPrimary,
-                  height: 1.2,
-                ),
-              ),
-              SizedBox(height: 32.h),
-              // CTA button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: btnBg,
-                    foregroundColor: btnText,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    l.getStarted,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w800,
-                      color: btnText,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.h),
-              // Already have account
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    l.alreadyHaveAccount,
-                    style: TextStyle(fontSize: 13.sp, color: textMuted),
-                  ),
-                  const SizedBox(width: 4),
-                  GestureDetector(
-                    onTap: () {
-                      // Future: navigate to login screen
-                    },
-                    child: Text(
-                      l.signIn,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w700,
-                        color: textPrimary,
-                        decoration: TextDecoration.underline,
+      body: Stack(
+        children: [
+          // 1. Fluid Ambient Background
+          Positioned.fill(child: _FluidBackground(isDark: isDark)),
+
+          // 2. Main Content
+          SafeArea(
+            child: Stack(
+              children: [
+                // Language Dropdown
+                // Positioned(
+                //   top: 10.h,
+                //   right: 28.w,
+                //   child: FadeTransition(
+                //     opacity: _fadeAnimation,
+                //     child: _LanguageDropdown(isDark: isDark),
+                //   ),
+                // ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 28.w),
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Column(
+                        children: [
+                          const Spacer(flex: 1),
+                          // Top indicator / logo
+                          SvgPicture.asset(isDark ? 'assets/icons/wordmark_dark.svg' : 'assets/icons/wordmark_light.svg', height: 28.h),
+                          const Spacer(flex: 2),
+
+                          // Central Scanner Visual
+                          const _CentralVisual(),
+
+                          const Spacer(flex: 2),
+
+                          // Title Text
+                          Text(
+                            l.splashTitle,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 32.sp, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -1, height: 1.1),
+                          ),
+                          SizedBox(height: 32.h),
+
+                          // CTA Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AuthScreen()));
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: btnBg,
+                                foregroundColor: btnText,
+                                shadowColor: isDark ? AppColors.lime.withOpacity(0.3) : AppColors.void_.withOpacity(0.2),
+                                elevation: 8,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100.r), // pill shape looks modern
+                                ),
+                                padding: EdgeInsets.symmetric(vertical: 18.h),
+                              ),
+                              child: Text(
+                                l.getStarted,
+                                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, letterSpacing: 0.5, color: btnText),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 32.h),
+                        ],
                       ),
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FluidBackground extends StatefulWidget {
+  final bool isDark;
+  const _FluidBackground({required this.isDark});
+
+  @override
+  State<_FluidBackground> createState() => _FluidBackgroundState();
+}
+
+class _FluidBackgroundState extends State<_FluidBackground> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 12))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final t = _controller.value * 2 * math.pi;
+        final isDark = widget.isDark;
+
+        final orb1Color = isDark ? AppColors.lime.withOpacity(0.15) : AppColors.lime.withOpacity(0.35);
+        final orb2Color = isDark ? AppColors.violet.withOpacity(0.15) : AppColors.violet.withOpacity(0.3);
+        final orb3Color = isDark ? AppColors.amber.withOpacity(0.1) : AppColors.amber.withOpacity(0.25);
+
+        return Stack(
+          children: [
+            Positioned(
+              left: MediaQuery.of(context).size.width * 0.5 + 100 * math.cos(t) - 150,
+              top: MediaQuery.of(context).size.height * 0.3 + 100 * math.sin(t) - 150,
+              child: _buildOrb(orb1Color, 300),
+            ),
+            Positioned(
+              right: MediaQuery.of(context).size.width * 0.5 + 120 * math.cos(t + math.pi) - 150,
+              bottom: MediaQuery.of(context).size.height * 0.3 + 120 * math.sin(t + math.pi) - 150,
+              child: _buildOrb(orb2Color, 300),
+            ),
+            Positioned(
+              left: MediaQuery.of(context).size.width * 0.5 + 80 * math.cos(t + math.pi / 2) - 100,
+              top: MediaQuery.of(context).size.height * 0.5 + 80 * math.sin(t + math.pi / 2) - 100,
+              child: _buildOrb(orb3Color, 200),
+            ),
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+                child: Container(color: Colors.transparent),
               ),
-              SizedBox(height: 24.h),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildOrb(Color color, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+    );
+  }
+}
+
+class _CentralVisual extends StatefulWidget {
+  const _CentralVisual();
+
+  @override
+  State<_CentralVisual> createState() => _CentralVisualState();
+}
+
+class _CentralVisualState extends State<_CentralVisual> with SingleTickerProviderStateMixin {
+  late final AnimationController _scanController;
+  Timer? _iconTimer;
+  int _currentIconIndex = 0;
+
+  final List<IconData> _icons = [
+    Icons.restaurant_menu_rounded,
+    Icons.lunch_dining_rounded,
+    Icons.local_pizza_rounded,
+    Icons.fastfood_rounded,
+    Icons.local_cafe_rounded,
+    Icons.set_meal_rounded,
+    Icons.ramen_dining_rounded,
+    Icons.bakery_dining_rounded,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _scanController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
+
+    _iconTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (mounted) {
+        setState(() {
+          _currentIconIndex = (_currentIconIndex + 1) % _icons.length;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scanController.dispose();
+    _iconTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const isDark = true; // Always force dark mode on Splash Screen
+
+    // True glassmorphism lens
+    final glassColor = isDark ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.4);
+    final borderColor = isDark ? Colors.white.withOpacity(0.1) : Colors.white.withOpacity(0.8);
+
+    return ClipOval(
+      child: BackdropFilter(
+        filter: ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          width: 220.w,
+          height: 220.w,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: glassColor,
+            border: Border.all(color: borderColor, width: 1.5),
+            boxShadow: [
+              BoxShadow(color: isDark ? Colors.black.withOpacity(0.4) : AppColors.lime.withOpacity(0.05), blurRadius: 40, spreadRadius: -5),
+            ],
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Background icon
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 600),
+                switchInCurve: Curves.easeOutBack,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(scale: Tween<double>(begin: 0.7, end: 1.0).animate(animation), child: child),
+                  );
+                },
+                child: Icon(
+                  _icons[_currentIconIndex],
+                  key: ValueKey<int>(_currentIconIndex),
+                  size: 80.sp,
+                  color: isDark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.08),
+                ),
+              ),
+
+              // Scanning Line
+              AnimatedBuilder(
+                animation: _scanController,
+                builder: (context, child) {
+                  final yOffset = -70.0 + (_scanController.value * 140.0);
+                  return Transform.translate(
+                    offset: Offset(0, yOffset),
+                    child: Container(
+                      width: 130.w,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: AppColors.lime,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(color: AppColors.lime, blurRadius: 10, spreadRadius: 2),
+                          BoxShadow(color: AppColors.lime.withOpacity(0.6), blurRadius: 24, spreadRadius: 6),
+                          BoxShadow(color: Colors.white, blurRadius: 4, spreadRadius: 0), // Core bright laser
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              // Corner edges to make it look like a viewfinder
+              _buildCorner(Alignment.topLeft, isDark),
+              _buildCorner(Alignment.topRight, isDark),
+              _buildCorner(Alignment.bottomLeft, isDark),
+              _buildCorner(Alignment.bottomRight, isDark),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class _PhoneMockup extends StatelessWidget {
-  final bool isDark;
-  const _PhoneMockup({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenBg = isDark ? AppColors.darkBg : AppColors.lightBg;
-    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
-    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-    final frameBorder = isDark ? const Color(0xFF3A3A4A) : const Color(0xFFD0CDE8);
-    final accent = isDark ? AppColors.lime : AppColors.void_;
-
-    return Container(
-      width: 200.w,
-      height: 340.h,
-      decoration: BoxDecoration(
-        color: screenBg,
-        borderRadius: BorderRadius.circular(28.r),
-        border: Border.all(color: frameBorder, width: 3),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.4 : 0.12),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+  Widget _buildCorner(Alignment alignment, bool isDark) {
+    final edgeColor = isDark ? AppColors.lime : AppColors.void_.withOpacity(0.7);
+    return Align(
+      alignment: alignment,
+      child: Padding(
+        padding: EdgeInsets.all(36.w), // moved slightly inwards to match the circle
+        child: Container(
+          width: 24.w,
+          height: 24.w,
+          decoration: BoxDecoration(
+            border: Border(
+              top: (alignment == Alignment.topLeft || alignment == Alignment.topRight) ? BorderSide(color: edgeColor, width: 3) : BorderSide.none,
+              bottom: (alignment == Alignment.bottomLeft || alignment == Alignment.bottomRight)
+                  ? BorderSide(color: edgeColor, width: 3)
+                  : BorderSide.none,
+              left: (alignment == Alignment.topLeft || alignment == Alignment.bottomLeft) ? BorderSide(color: edgeColor, width: 3) : BorderSide.none,
+              right: (alignment == Alignment.topRight || alignment == Alignment.bottomRight)
+                  ? BorderSide(color: edgeColor, width: 3)
+                  : BorderSide.none,
+            ),
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25.r),
-        child: Column(
-          children: [
-            // Status bar + notch
-            Container(
-              color: screenBg,
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('9:41', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: textPrimary)),
-                  Container(
-                    width: 40.w,
-                    height: 14.h,
-                    decoration: BoxDecoration(
-                      color: frameBorder,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                  Icon(Icons.battery_full_rounded, size: 12.sp, color: textMuted),
-                ],
-              ),
-            ),
-            // App header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
-              child: Row(
-                children: [
-                  Icon(Icons.water_drop_rounded, size: 14.sp, color: accent),
-                  const SizedBox(width: 4),
-                  Text('eatiq', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: textPrimary)),
-                ],
-              ),
-            ),
-            // Calorie ring area
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cardBg,
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Row(
-                  children: [
-                    // Mini ring
-                    SizedBox(
-                      width: 44.w,
-                      height: 44.h,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CircularProgressIndicator(
-                            value: 0.62,
-                            strokeWidth: 5,
-                            backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
-                            valueColor: AlwaysStoppedAnimation<Color>(accent),
-                          ),
-                          Text('62%', style: TextStyle(fontSize: 7.sp, fontWeight: FontWeight.w800, color: textPrimary)),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('1877', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: textPrimary)),
-                        Text('kcal left', style: TextStyle(fontSize: 7.sp, color: textMuted)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Macro pills
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Row(
-                children: [
-                  _MacroPill(label: 'P', value: '58g', color: AppColors.violet, isDark: isDark),
-                  const SizedBox(width: 4),
-                  _MacroPill(label: 'C', value: '143g', color: AppColors.amber, isDark: isDark),
-                  const SizedBox(width: 4),
-                  _MacroPill(label: 'F', value: '33g', color: AppColors.coral, isDark: isDark),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Recent entries label
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Son Kayıtlar', style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.w700, color: textMuted)),
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Meal items
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: _MealRow(name: 'Tavuklu Pilav', cal: '300', isDark: isDark, textPrimary: textPrimary, textMuted: textMuted),
-            ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              child: _MealRow(name: 'Çoban Salatası', cal: '140', isDark: isDark, textPrimary: textPrimary, textMuted: textMuted),
-            ),
-            const Spacer(),
-            // Bottom nav bar
-            Container(
-              height: 36.h,
-              decoration: BoxDecoration(
-                color: cardBg,
-                border: Border(top: BorderSide(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, width: 0.5)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Icon(Icons.home_rounded, size: 14.sp, color: accent),
-                  Icon(Icons.bar_chart_rounded, size: 14.sp, color: textMuted),
-                  Icon(Icons.restaurant_menu_rounded, size: 14.sp, color: textMuted),
-                  Icon(Icons.settings_rounded, size: 14.sp, color: textMuted),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
   }
 }
 
-class _MacroPill extends StatelessWidget {
-  final String label, value;
-  final Color color;
+class _LanguageDropdown extends StatelessWidget {
   final bool isDark;
-  const _MacroPill({required this.label, required this.value, required this.color, required this.isDark});
+  const _LanguageDropdown({required this.isDark});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(6.r),
+    final provider = context.watch<AppProvider>();
+    final currentLocale = provider.locale ?? const Locale('en');
+
+    final bg = isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05);
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: isDark ? Colors.white24 : Colors.black12, width: 0.5),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: currentLocale.languageCode,
+          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 18.sp, color: isDark ? Colors.white70 : Colors.black87),
+          dropdownColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+          borderRadius: BorderRadius.circular(20.r), // Added beautiful popup radius
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              provider.setLocale(Locale(newValue));
+            }
+          },
+          items: [
+            _buildFlagItem('en', '🇬🇧', isDark),
+            _buildFlagItem('tr', '🇹🇷', isDark),
+            _buildFlagItem('de', '🇩🇪', isDark),
+            _buildFlagItem('fr', '🇫🇷', isDark),
+            _buildFlagItem('es', '🇪🇸', isDark),
+            _buildFlagItem('ar', '🇸🇦', isDark),
+            _buildFlagItem('ru', '🇷🇺', isDark),
+            _buildFlagItem('pt', '🇵🇹', isDark),
+          ],
         ),
+      ),
+    );
+  }
+
+  DropdownMenuItem<String> _buildFlagItem(String code, String flag, bool isDark) {
+    return DropdownMenuItem(
+      value: code,
+      child: Padding(
+        padding: EdgeInsets.only(right: 8.w),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 4, height: 4, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-            const SizedBox(width: 3),
-            Text(value, style: TextStyle(fontSize: 7.sp, fontWeight: FontWeight.w700, color: color)),
+            Text(flag, style: TextStyle(fontSize: 18.sp)),
+            SizedBox(width: 8.w),
+            Text(
+              code.toUpperCase(),
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: isDark ? Colors.white : Colors.black),
+            ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MealRow extends StatelessWidget {
-  final String name, cal;
-  final bool isDark;
-  final Color textPrimary, textMuted;
-  const _MealRow({required this.name, required this.cal, required this.isDark, required this.textPrimary, required this.textMuted});
-
-  @override
-  Widget build(BuildContext context) {
-    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(8.r)),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(name, style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.w600, color: textPrimary)),
-          Text('$cal kcal', style: TextStyle(fontSize: 7.sp, color: textMuted)),
-        ],
       ),
     );
   }
