@@ -43,7 +43,7 @@ class HistoryScreen extends StatelessWidget {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark
         ? AppColors.darkTextMuted
-        : const Color(0xFFAAAAAA);
+        : AppColors.lightTextMuted;
     final totalScans = provider.history.length;
 
     return SliverToBoxAdapter(
@@ -120,7 +120,7 @@ class HistoryScreen extends StatelessWidget {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark
         ? AppColors.darkTextMuted
-        : const Color(0xFFAAAAAA);
+        : AppColors.lightTextMuted;
     final iconBg = isDark ? AppColors.darkCard : AppColors.lightCard;
 
     return Center(
@@ -158,7 +158,7 @@ class HistoryScreen extends StatelessWidget {
   ) {
     final textMuted = isDark
         ? AppColors.darkTextMuted
-        : const Color(0xFFAAAAAA);
+        : AppColors.lightTextMuted;
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
 
     // Group by date (yyyy-MM-dd)
@@ -283,7 +283,7 @@ class HistoryScreen extends StatelessWidget {
                       builder: (_) => ResultScreen(analysis: a),
                     ),
                   ),
-                  onDelete: () => provider.deleteAnalysis(a.id),
+                  onDelete: diff == 0 ? () => provider.deleteAnalysis(a.id) : null,
                   onFavorite: () => provider.toggleFavorite(a),
                   onAddToToday: () async {
                     await provider.duplicateAnalysisToToday(a);
@@ -347,7 +347,7 @@ class _HistoryCard extends StatelessWidget {
   final FoodAnalysis analysis;
   final bool isDark;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
   final VoidCallback? onFavorite;
   final VoidCallback? onAddToToday;
 
@@ -356,7 +356,7 @@ class _HistoryCard extends StatelessWidget {
     required this.analysis,
     required this.isDark,
     required this.onTap,
-    required this.onDelete,
+    this.onDelete,
     this.onFavorite,
     this.onAddToToday,
   });
@@ -380,31 +380,13 @@ class _HistoryCard extends StatelessWidget {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark
         ? AppColors.darkTextMuted
-        : const Color(0xFFAAAAAA);
+        : AppColors.lightTextMuted;
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
     final iconBg = isDark ? AppColors.darkSurface : AppColors.lightSurface;
     final time =
         '${analysis.analyzedAt.hour.toString().padLeft(2, '0')}:${analysis.analyzedAt.minute.toString().padLeft(2, '0')}';
 
-    return Dismissible(
-      key: Key(analysis.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        margin: const EdgeInsets.only(bottom: 8),
-        decoration: BoxDecoration(
-          color: AppColors.coral.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: const Icon(
-          Icons.delete_rounded,
-          color: AppColors.coral,
-          size: 22,
-        ),
-      ),
-      onDismissed: (_) => onDelete(),
-      child: GestureDetector(
+    final card = GestureDetector(
         onTap: onTap,
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),
@@ -456,9 +438,7 @@ class _HistoryCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      analysis.foods.isNotEmpty
-                          ? analysis.foods.first.nameTr
-                          : analysis.summary,
+                      analysis.displayName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTypography.bodyLarge.copyWith(color: textPrimary),
@@ -554,7 +534,29 @@ class _HistoryCard extends StatelessWidget {
             ],
           ),
         ),
+      );
+
+    if (onDelete == null) return card;
+
+    return Dismissible(
+      key: Key(analysis.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: AppColors.coral.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: const Icon(
+          Icons.delete_rounded,
+          color: AppColors.coral,
+          size: 22,
+        ),
       ),
+      onDismissed: (_) => onDelete!(),
+      child: card,
     );
   }
 }

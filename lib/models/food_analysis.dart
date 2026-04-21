@@ -206,6 +206,26 @@ class FoodAnalysis {
 
   double get totalCalories => totalNutrients.calories;
 
+  /// UI label for lists/cards. Prefers the first food item's localized name,
+  /// then its canonical name, then a prefix-stripped summary. Strips the BE
+  /// `Manuel giriş:` / `Manual entry:` marker so duplicated favorites render
+  /// cleanly until the backend removes the prefix.
+  String get displayName {
+    if (foods.isNotEmpty) {
+      final nameTr = foods.first.nameTr.trim();
+      if (nameTr.isNotEmpty) return nameTr;
+      final name = foods.first.name.trim();
+      if (name.isNotEmpty) return name;
+    }
+    final stripped = summary
+        .replaceFirst(
+          RegExp(r'^(manuel giriş|manual entry)\s*:\s*', caseSensitive: false),
+          '',
+        )
+        .trim();
+    return stripped;
+  }
+
   Map<String, dynamic> toMap() => {
         'id': id,
         'imagePath': imagePath,

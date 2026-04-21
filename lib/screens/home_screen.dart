@@ -961,7 +961,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      fav.summary.isNotEmpty ? fav.summary : l.mealFallback,
+                                      fav.displayName.isNotEmpty ? fav.displayName : l.mealFallback,
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
@@ -1173,11 +1173,7 @@ class _MealRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    analysis.foods.isNotEmpty
-                        ? analysis.foods.first.nameTr
-                        : analysis.summary.isNotEmpty
-                        ? analysis.summary
-                        : 'Öğün',
+                    analysis.displayName.isNotEmpty ? analysis.displayName : 'Öğün',
                     maxLines: 2,
                     style: AppTypography.bodyLarge.copyWith(color: textPrimary, fontWeight: FontWeight.w700, overflow: TextOverflow.ellipsis),
                   ),
