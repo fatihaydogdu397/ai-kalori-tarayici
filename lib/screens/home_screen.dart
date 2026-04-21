@@ -154,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showPaywall() {
+    if (AppProvider.kBypassPaywall) return;
     Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
 import '../services/api/api_exception.dart';
 import '../services/api/diet_plan_service.dart';
+import '../services/app_provider.dart';
 import 'weekly_diet_plan_screen.dart';
 import 'paywall_screen.dart';
 
@@ -81,6 +82,10 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
       _stepTimer?.cancel();
       if (!mounted) return;
       if (e.code == 'PREMIUM_REQUIRED') {
+        if (AppProvider.kBypassPaywall) {
+          _showError(e.message);
+          return;
+        }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const PaywallScreen()),

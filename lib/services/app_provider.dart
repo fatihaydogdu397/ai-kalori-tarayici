@@ -826,7 +826,7 @@ class AppProvider extends ChangeNotifier {
   /// Kalan günlük tarama sayısı. Premium ise `999` (sınırsız göstergesi).
   /// Free kullanıcı için BE `remainingScans` tek source of truth.
   Future<int> remainingScans() async {
-    if (_isPremium) return 999;
+    if (isPremium) return 999;
     if (!_isLoggedIn) return freeDailyLimit;
     try {
       return await _progressService.remainingScans();
@@ -836,7 +836,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<bool> canScan() async {
-    if (_isPremium) return true;
+    if (isPremium) return true;
     final left = await remainingScans();
     return left > 0;
   }
