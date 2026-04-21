@@ -787,8 +787,12 @@ class AppProvider extends ChangeNotifier {
 
   // Freemium — günlük 5 ücretsiz tarama
   static const int freeDailyLimit = 5;
+
+  // DEV ONLY: launch öncesi false yap, paywall'ı yeniden aktive eder.
+  static const bool kBypassPaywall = true;
+
   bool _isPremium = false;
-  bool get isPremium => _isPremium;
+  bool get isPremium => kBypassPaywall || _isPremium;
 
   /// BE `me` query'si + RevenueCat kombinasyonu. BE source of truth.
   /// Webhook (EAT-107) satın alma sonrası user.is_premium'u günceller; FE
