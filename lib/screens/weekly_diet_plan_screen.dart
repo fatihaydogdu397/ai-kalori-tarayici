@@ -170,12 +170,28 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                             ),
                           ),
                           SizedBox(height: 2.h),
-                          Text(
-                            '${day.totalCalories}',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w800,
-                              color: isSelected ? accentFg : textPrimary,
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: isSelected ? accentFg : textPrimary,
+                                height: 1.0,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: '${day.totalCalories}',
+                                  style: TextStyle(fontSize: 13.sp),
+                                ),
+                                TextSpan(
+                                  text: ' kcal',
+                                  style: TextStyle(
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: (isSelected ? accentFg : textMuted),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
