@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
 import 'diet_plan_loading_screen.dart';
+import 'blood_test_upload_screen.dart';
 
 // ── Multi-select pill data ────────────────────────────────────────────────────
 class _PillOption {
@@ -105,9 +106,22 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
       'budget': _budget,
       'notes': notes,
     };
+
+    // Anamnesis sonrası kan tahlili yükleme opsiyonu. Skip edilse bile diyet
+    // planı üretimine devam edilir.
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => DietPlanLoadingScreen(anamnesisData: data)),
+      MaterialPageRoute(
+        builder: (_) => BloodTestUploadScreen(
+          isOnboarding: true,
+          onCompleted: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => DietPlanLoadingScreen(anamnesisData: data)),
+            );
+          },
+        ),
+      ),
     );
   }
 

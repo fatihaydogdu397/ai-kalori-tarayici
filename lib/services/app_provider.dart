@@ -18,6 +18,8 @@ import 'api/progress_service.dart';
 import 'api/token_storage.dart';
 import 'api/user_service.dart';
 import 'api/water_service.dart';
+import 'api/blood_test_service.dart';
+import '../models/blood_test.dart';
 import '../main.dart' show rootNavigatorKey;
 import '../screens/auth/auth_screen.dart';
 import 'api/weight_service.dart';
@@ -485,6 +487,54 @@ class AppProvider extends ChangeNotifier {
         return 'medium';
     }
     return null;
+  }
+
+  // ───── Blood tests ─────────────────────────────────────────────────────────
+  final BloodTestService _bloodTestService = BloodTestService.instance;
+  List<BloodTest> _bloodTests = const [];
+  bool _bloodTestsLoading = false;
+  List<BloodTest> get bloodTests => _bloodTests;
+  bool get bloodTestsLoading => _bloodTestsLoading;
+
+  Future<void> loadBloodTests() async {
+    if (!_isLoggedIn) {
+      _bloodTests = const [];
+      notifyListeners();
+      return;
+    }
+    _bloodTestsLoading = true;
+    notifyListeners();
+    try {
+      _bloodTests = await _bloodTestService.list(limit: 50);
+    } on ApiException {
+      _bloodTests = const [];
+    } finally {
+      _bloodTestsLoading = false;
+    }
+    notifyListeners();
+  }
+
+  Future<BloodTest> uploadBloodTest({
+    required String base64,
+    required String mimeType,
+    String? testDate,
+  }) async {
+    final created = await _bloodTestService.upload(
+      base64: base64,
+      mimeType: mimeType,
+      testDate: testDate,
+    );
+    _bloodTests = [created, ..._bloodTests];
+    notifyListeners();
+    return created;
+  }
+
+  Future<void> deleteBloodTest(String id) async {
+    final ok = await _bloodTestService.delete(id);
+    if (ok) {
+      _bloodTests = _bloodTests.where((t) => t.id != id).toList();
+      notifyListeners();
+    }
   }
 
   Future<void> loadWeightLogs() async {

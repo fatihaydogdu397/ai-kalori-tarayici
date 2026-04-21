@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
 import '../services/notification_service.dart';
 import '../generated/app_localizations.dart';
+import 'blood_tests_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -376,9 +377,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                       const SizedBox(height: 16),
 
+                      // ── Health data ───────────────────────────────────────
+                      _SectionLabel(
+                        label: Localizations.localeOf(context).languageCode == 'tr'
+                            ? 'SAĞLIK VERİLERİ'
+                            : 'HEALTH DATA',
+                        textMuted: textMuted,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(14),
+                          border: border,
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const BloodTestsScreen()),
+                            );
+                          },
+                          child: _SettingRow(
+                            icon: Icons.bloodtype_rounded,
+                            iconColor: AppColors.coral,
+                            label: Localizations.localeOf(context).languageCode == 'tr'
+                                ? 'Kan Tahlillerim'
+                                : 'My Blood Tests',
+                            trailing: Icon(Icons.chevron_right_rounded, size: 18, color: textMuted),
+                            divColor: divColor,
+                            textPrimary: textPrimary,
+                            showDivider: false,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
                       // ── Subscription & Legal ──────────────────────────────
                       _SectionLabel(
-                        label: 'Subscription & Legal',
+                        label: l.subscriptionLegal,
                         textMuted: textMuted,
                       ),
                       const SizedBox(height: 8),
@@ -396,7 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               iconColor: isDark
                                   ? AppColors.lime
                                   : AppColors.limeDark,
-                              label: 'Restore Purchases',
+                              label: l.restorePurchases,
                               trailing: Icon(
                                 Icons.chevron_right_rounded,
                                 size: 18,
@@ -415,7 +453,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               child: _SettingRow(
                                 icon: Icons.description_outlined,
                                 iconColor: textMuted,
-                                label: 'Terms of Service',
+                                label: l.termsOfService,
                                 trailing: Icon(
                                   Icons.open_in_new_rounded,
                                   size: 16,
@@ -435,7 +473,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               child: _SettingRow(
                                 icon: Icons.shield_outlined,
                                 iconColor: textMuted,
-                                label: 'Privacy Policy',
+                                label: l.privacyPolicy,
                                 trailing: Icon(
                                   Icons.open_in_new_rounded,
                                   size: 16,
