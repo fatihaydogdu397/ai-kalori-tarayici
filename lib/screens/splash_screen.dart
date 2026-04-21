@@ -53,18 +53,21 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     final done = await provider.isOnboardingDone();
     if (!mounted) return;
 
-    if (isLoggedIn) {
-      if (done) {
-        if (!provider.isPremium) {
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
-        } else {
-          provider.loadHistory();
-          provider.loadTodayStats();
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-        }
-      } else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
-      }
+    if (!isLoggedIn) return;
+
+    // Logged-in premium → direkt home (onboarding/paywall atlanır).
+    if (provider.isPremium) {
+      provider.loadHistory();
+      provider.loadTodayStats();
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+      return;
+    }
+
+    // Logged-in free → onboarding bittiyse paywall, bitmediyse onboarding.
+    if (done) {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
+    } else {
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
     }
   }
 
