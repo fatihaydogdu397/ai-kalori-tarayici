@@ -10,10 +10,15 @@ class AuthService {
   final ApiClient _api = ApiClient.instance;
   final TokenStorage _storage = TokenStorage();
 
+  // NOTE: `cuisinePreferences` geçici olarak query'den çıkarıldı. BE'de kolon
+  // non-nullable (@Field([String]) nullable:true yok) ama legacy user satırlarında
+  // DB'de NULL değerler var → GraphQL `Cannot return null for non-nullable field`
+  // atıp tüm login/me response'unu bozuyordu. Backfill (EAT-128) + mutation tarafı
+  // `updateProfile` send'i korunuyor; backfill merge olunca aşağı geri eklenecek.
   static const String _userFields = '''
     id email name surname avatarUrl
     age height weight gender goal activityLevel
-    dietType allergens cuisinePreferences
+    dietType allergens
     dietCookingTime dietBudget dietNotes
     mealsPerDay
     dailyCalorieGoal dailyProteinGoal dailyCarbsGoal dailyFatGoal

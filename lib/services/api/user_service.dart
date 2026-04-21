@@ -9,10 +9,12 @@ class UserService {
 
   final ApiClient _api = ApiClient.instance;
 
+  // NOTE: `cuisinePreferences` geçici olarak query'den çıkarıldı. Bkz.
+  // auth_service.dart aynı açıklama — backfill EAT-128 merge olunca geri ekle.
   static const String _userFields = '''
     id email name surname avatarUrl
     age height weight gender goal activityLevel
-    dietType allergens cuisinePreferences
+    dietType allergens
     dietCookingTime dietBudget dietNotes
     mealsPerDay
     dailyCalorieGoal dailyProteinGoal dailyCarbsGoal dailyFatGoal
