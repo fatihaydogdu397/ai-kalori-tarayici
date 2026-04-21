@@ -207,9 +207,9 @@ class FoodAnalysis {
   double get totalCalories => totalNutrients.calories;
 
   /// UI label for lists/cards. Prefers the first food item's localized name,
-  /// then its canonical name, then a prefix-stripped summary. Strips the BE
-  /// `Manuel giriş:` / `Manual entry:` marker so duplicated favorites render
-  /// cleanly until the backend removes the prefix.
+  /// then its canonical name, then the summary. `summary` is already cleaned
+  /// of the BE `Manuel giriş:` / `Manual entry:` prefix at parse time
+  /// (see [_stripManualPrefix]).
   String get displayName {
     if (foods.isNotEmpty) {
       final nameTr = foods.first.nameTr.trim();
@@ -217,13 +217,17 @@ class FoodAnalysis {
       final name = foods.first.name.trim();
       if (name.isNotEmpty) return name;
     }
-    final stripped = summary
-        .replaceFirst(
-          RegExp(r'^(manuel giriş|manual entry)\s*:\s*', caseSensitive: false),
-          '',
-        )
-        .trim();
-    return stripped;
+    return summary.trim();
+  }
+
+  /// Removes the BE `saveManualFood` prefix so it never leaks into any UI
+  /// surface (result screen, manual-entry text field, favorite cards, etc.).
+  /// Permanent fix tracked in EAT-125 on the backend.
+  static String _stripManualPrefix(String raw) {
+    return raw.replaceFirst(
+      RegExp(r'^(manuel giriş|manual entry)\s*:\s*', caseSensitive: false),
+      '',
+    );
   }
 
   Map<String, dynamic> toMap() => {
@@ -255,7 +259,7 @@ class FoodAnalysis {
         fiber: (map['totalFiber'] as num?)?.toDouble() ?? 0,
         sugar: (map['totalSugar'] as num?)?.toDouble() ?? 0,
       ),
-      summary: map['summary'] ?? '',
+      summary: _stripManualPrefix((map['summary'] ?? '') as String),
       advice: map['advice'] ?? '',
       analyzedAt: DateTime.parse(map['analyzedAt']),
       mealCategory: MealCategoryX.fromString(map['mealCategory'] as String?),
@@ -286,7 +290,7 @@ class FoodAnalysis {
         fiber: (map['totalFiber'] as num?)?.toDouble() ?? 0,
         sugar: (map['totalSugar'] as num?)?.toDouble() ?? 0,
       ),
-      summary: (map['summary'] ?? '') as String,
+      summary: _stripManualPrefix((map['summary'] ?? '') as String),
       advice: (map['advice'] ?? '') as String,
       analyzedAt: DateTime.parse(map['analyzedAt'] as String),
       mealCategory: MealCategoryX.fromString(mealCat),
