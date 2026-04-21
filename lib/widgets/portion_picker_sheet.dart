@@ -27,6 +27,15 @@ extension CookingMethodX on CookingMethod {
         CookingMethod.oven => 'oven-baked',
         CookingMethod.raw => 'raw/salad',
       };
+
+  /// Maps to BE `CookingMethod` GraphQL enum values (analyze-food.input.ts).
+  String get backendKey => switch (this) {
+        CookingMethod.grill => 'GRILLED',
+        CookingMethod.boil => 'BOILED',
+        CookingMethod.fry => 'FRIED',
+        CookingMethod.oven => 'BAKED',
+        CookingMethod.raw => 'RAW',
+      };
 }
 
 class PortionPickerSheet extends StatefulWidget {
@@ -37,8 +46,22 @@ class PortionPickerSheet extends StatefulWidget {
 }
 
 class _PortionPickerSheetState extends State<PortionPickerSheet> {
-  double _grams = 250;
+  bool _isLiquid = false;
+  double _amount = 250;
   CookingMethod _cooking = CookingMethod.grill;
+
+  double get _min => _isLiquid ? 50 : 50;
+  double get _max => _isLiquid ? 1000 : 800;
+  int get _divisions => _isLiquid ? 95 : 75;
+  String get _unit => _isLiquid ? 'ml' : 'g';
+
+  void _onToggle(bool liquid) {
+    setState(() {
+      _isLiquid = liquid;
+      // Reset to sensible default for each type
+      _amount = liquid ? 250 : 250;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +96,39 @@ class _PortionPickerSheetState extends State<PortionPickerSheet> {
           ),
           const SizedBox(height: 20),
 
-          // Gram slider
+          // Katı / Sıvı toggle
+          Text('Gıda Türü', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textPrimary)),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _TypeChip(
+                label: '🍽️  Katı Gıda',
+                selected: !_isLiquid,
+                accent: accent,
+                chipBg: chipBg,
+                selectedBg: selectedChipBg,
+                textMuted: textMuted,
+                onTap: () => _onToggle(false),
+              ),
+              const SizedBox(width: 10),
+              _TypeChip(
+                label: '🥤  İçecek / Sıvı',
+                selected: _isLiquid,
+                accent: accent,
+                chipBg: chipBg,
+                selectedBg: selectedChipBg,
+                textMuted: textMuted,
+                onTap: () => _onToggle(true),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Amount slider
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Ortalama Miktar', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textPrimary)),
+              Text('Miktar', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textPrimary)),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -85,7 +136,7 @@ class _PortionPickerSheetState extends State<PortionPickerSheet> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '${_grams.round()} g',
+                  '${_amount.round()} $_unit',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: accent),
                 ),
               ),
@@ -94,7 +145,7 @@ class _PortionPickerSheetState extends State<PortionPickerSheet> {
           const SizedBox(height: 4),
           Row(
             children: [
-              Text('50g', style: TextStyle(fontSize: 11, color: textMuted)),
+              Text('$_min$_unit', style: TextStyle(fontSize: 11, color: textMuted)),
               Expanded(
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
@@ -106,61 +157,64 @@ class _PortionPickerSheetState extends State<PortionPickerSheet> {
                     thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
                   ),
                   child: Slider(
-                    value: _grams,
-                    min: 50,
-                    max: 800,
-                    divisions: 75,
-                    onChanged: (v) => setState(() => _grams = v),
+                    value: _amount.clamp(_min, _max),
+                    min: _min,
+                    max: _max,
+                    divisions: _divisions,
+                    onChanged: (v) => setState(() => _amount = v),
                   ),
                 ),
               ),
-              Text('800g', style: TextStyle(fontSize: 11, color: textMuted)),
+              Text('${_max.round()}$_unit', style: TextStyle(fontSize: 11, color: textMuted)),
             ],
           ),
           _referenceHint(textMuted),
           const SizedBox(height: 20),
 
-          // Cooking method
-          Text('Pişirme Yöntemi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textPrimary)),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: CookingMethod.values.map((m) {
-              final selected = m == _cooking;
-              return GestureDetector(
-                onTap: () => setState(() => _cooking = m),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: selected ? selectedChipBg : chipBg,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: selected ? accent : Colors.transparent,
-                      width: 1.5,
+          // Cooking method — sadece katı gıdalarda göster
+          if (!_isLiquid) ...[
+            Text('Pişirme Yöntemi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: textPrimary)),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: CookingMethod.values.map((m) {
+                final selected = m == _cooking;
+                return GestureDetector(
+                  onTap: () => setState(() => _cooking = m),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected ? selectedChipBg : chipBg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: selected ? accent : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(m.emoji, style: const TextStyle(fontSize: 14)),
+                        const SizedBox(width: 5),
+                        Text(
+                          m.label(context),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                            color: selected ? accent : textMuted,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(m.emoji, style: const TextStyle(fontSize: 14)),
-                      const SizedBox(width: 5),
-                      Text(
-                        m.label(context),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                          color: selected ? accent : textMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 24),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+          ] else
+            const SizedBox(height: 4),
 
           // Analiz Et button
           SizedBox(
@@ -168,7 +222,7 @@ class _PortionPickerSheetState extends State<PortionPickerSheet> {
             child: ElevatedButton(
               onPressed: () => Navigator.pop(
                 context,
-                (grams: _grams.round(), cooking: _cooking),
+                (amount: _amount.round(), isLiquid: _isLiquid, cooking: _isLiquid ? null : _cooking),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isDark ? AppColors.lime : AppColors.void_,
@@ -186,22 +240,83 @@ class _PortionPickerSheetState extends State<PortionPickerSheet> {
   }
 
   Widget _referenceHint(Color textMuted) {
-    final g = _grams.round();
+    final a = _amount.round();
     String hint;
-    if (g <= 100) {
-      hint = '≈ avuç içi kadar';
-    } else if (g <= 200) {
-      hint = '≈ yumruk büyüklüğünde';
-    } else if (g <= 350) {
-      hint = '≈ orta tabak';
-    } else if (g <= 500) {
-      hint = '≈ büyük tabak';
+    if (_isLiquid) {
+      if (a <= 100) {
+        hint = '≈ espresso / shot';
+      } else if (a <= 200) {
+        hint = '≈ küçük bardak';
+      } else if (a <= 350) {
+        hint = '≈ standart bardak';
+      } else if (a <= 500) {
+        hint = '≈ büyük bardak / kutu';
+      } else {
+        hint = '≈ büyük şişe';
+      }
     } else {
-      hint = '≈ çok büyük porsiyon';
+      if (a <= 100) {
+        hint = '≈ avuç içi kadar';
+      } else if (a <= 200) {
+        hint = '≈ yumruk büyüklüğünde';
+      } else if (a <= 350) {
+        hint = '≈ orta tabak';
+      } else if (a <= 500) {
+        hint = '≈ büyük tabak';
+      } else {
+        hint = '≈ çok büyük porsiyon';
+      }
     }
     return Padding(
       padding: const EdgeInsets.only(left: 4, top: 2),
       child: Text(hint, style: TextStyle(fontSize: 11, color: textMuted)),
+    );
+  }
+}
+
+class _TypeChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color accent, chipBg, selectedBg, textMuted;
+  final VoidCallback onTap;
+
+  const _TypeChip({
+    required this.label,
+    required this.selected,
+    required this.accent,
+    required this.chipBg,
+    required this.selectedBg,
+    required this.textMuted,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: selected ? selectedBg : chipBg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected ? accent : Colors.transparent,
+              width: 1.5,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? accent : textMuted,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

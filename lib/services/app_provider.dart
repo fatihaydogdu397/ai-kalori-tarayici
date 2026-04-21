@@ -164,10 +164,12 @@ class AppProvider extends ChangeNotifier {
       final bytes = compressed ?? await srcFile.readAsBytes();
       final imageBase64 = base64Encode(bytes);
 
-      // portionAmount/isLiquid/cooking EAT-119 tamamlanana kadar BE'ye gitmiyor.
       final res = await _foodService.analyzeFood(
         imageBase64: imageBase64,
         mealCategory: MealCategoryX.fromTime(DateTime.now()).key,
+        portionAmount: portionAmount,
+        isLiquid: isLiquid,
+        cookingMethod: cooking?.backendKey,
       );
       final analysis = FoodAnalysis.fromBackend(res);
 

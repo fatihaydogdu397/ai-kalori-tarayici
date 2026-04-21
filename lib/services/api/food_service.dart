@@ -42,13 +42,27 @@ class FoodService {
   /// Kamera/galeri'den alınan resmi BE'ye gönder, AI analizini al.
   /// [imageBase64] dataURI prefix OLMADAN saf base64 olmalı.
   /// [mealCategory] null ise BE otomatik belirler.
+  /// [portionAmount] gram (solid) veya ml (liquid) cinsinden; 1–5000 arası.
+  /// [cookingMethod] BE `CookingMethod` enum değeri (RAW/GRILLED/... büyük harf).
   Future<Map<String, dynamic>> analyzeFood({
     required String imageBase64,
     String? mealCategory,
+    int? portionAmount,
+    bool? isLiquid,
+    String? cookingMethod,
   }) async {
     final input = <String, dynamic>{'imageBase64': imageBase64};
     if (mealCategory != null && mealCategory.isNotEmpty) {
       input['mealCategory'] = mealCategory.toUpperCase();
+    }
+    if (portionAmount != null) {
+      input['portionAmount'] = portionAmount;
+    }
+    if (isLiquid != null) {
+      input['isLiquid'] = isLiquid;
+    }
+    if (cookingMethod != null && cookingMethod.isNotEmpty) {
+      input['cookingMethod'] = cookingMethod;
     }
 
     final data = await _api.mutate(
