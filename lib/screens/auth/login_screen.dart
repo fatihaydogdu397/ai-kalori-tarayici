@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/app_provider.dart';
 import '../home_screen.dart';
-import '../onboarding_screen.dart';
 import 'forgot_password_otp_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -42,24 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       
       if (!mounted) return;
-      
-      final done = await provider.isOnboardingDone();
-      if (!mounted) return;
-      
-      if (done) {
-        provider.loadHistory();
-        provider.loadTodayStats();
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-        );
-      }
+
+      provider.loadHistory();
+      provider.loadTodayStats();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

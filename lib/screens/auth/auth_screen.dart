@@ -10,7 +10,6 @@ import '../../generated/app_localizations.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
 import '../home_screen.dart';
-import '../onboarding_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -74,23 +73,13 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    final done = await provider.isOnboardingDone();
-    if (!mounted) return;
-
-    if (done) {
-      provider.loadHistory();
-      provider.loadTodayStats();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-      );
-    }
+    provider.loadHistory();
+    provider.loadTodayStats();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false,
+    );
   }
 
   @override
