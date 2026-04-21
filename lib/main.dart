@@ -11,6 +11,10 @@ import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+/// Root navigator — AppProvider.authLogout uses this to kick the user back
+/// to AuthScreen when the refresh-token flow also fails.
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -54,6 +58,7 @@ class EatiqApp extends StatelessWidget {
             builder: (context, child) {
               return MaterialApp(
                 title: 'eatiq',
+                navigatorKey: rootNavigatorKey,
                 debugShowCheckedModeBanner: false,
                 themeMode: provider.themeMode,
                 theme: AppTheme.light,

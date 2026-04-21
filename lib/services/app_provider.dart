@@ -18,6 +18,8 @@ import 'api/progress_service.dart';
 import 'api/token_storage.dart';
 import 'api/user_service.dart';
 import 'api/water_service.dart';
+import '../main.dart' show rootNavigatorKey;
+import '../screens/auth/auth_screen.dart';
 import 'api/weight_service.dart';
 import '../generated/app_localizations.dart';
 
@@ -723,6 +725,17 @@ class AppProvider extends ChangeNotifier {
     _isLoggedIn = false;
     _userName = '';
     notifyListeners();
+
+    // Refresh de başarısız olmuşsa kullanıcıyı login ekranına yolla. Global
+    // navigator key kullanıyoruz çünkü authLogout arkaplanda ApiClient
+    // callback'inden de çağrılıyor ve context'e erişimimiz olmayabilir.
+    final nav = rootNavigatorKey.currentState;
+    if (nav != null) {
+      nav.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
+        (route) => false,
+      );
+    }
   }
 
   Future<void> sendPasswordResetOtp(String email) async {
