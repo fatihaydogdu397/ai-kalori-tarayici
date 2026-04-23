@@ -169,4 +169,37 @@ class FoodService {
     );
     return data['deleteMeal'] == true;
   }
+
+  /// EAT-118: kayıtlı bir öğünün makro alanlarını günceller.
+  /// `ManualFoodInput` aynı shape → saveFoodAnalysis ile uyumlu.
+  Future<Map<String, dynamic>> updateMeal({
+    required String mealId,
+    required String name,
+    required double portion,
+    required double calories,
+    required double protein,
+    required double carbs,
+    required double fat,
+    required String mealCategory,
+  }) async {
+    final input = {
+      'name': name,
+      'portion': portion,
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'mealCategory': mealCategory.toUpperCase(),
+    };
+
+    final data = await _api.mutate(
+      '''
+      mutation UpdateMeal(\$mealId: ID!, \$input: ManualFoodInput!) {
+        updateMeal(mealId: \$mealId, input: \$input) { $_analysisFields }
+      }
+      ''',
+      variables: {'mealId': mealId, 'input': input},
+    );
+    return Map<String, dynamic>.from(data['updateMeal'] as Map);
+  }
 }

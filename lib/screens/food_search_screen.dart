@@ -63,10 +63,27 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   final NutritionService _nutritionService = NutritionService.instance;
   String _query = '';
   String _category = _kAllCategory;
+  final Set<String> _dietTagFilter = {}; // EAT-136
   Timer? _debounce;
   bool _loading = false;
   List<_FoodItem> _items = const [];
   List<String> _categories = const [_kAllCategory];
+
+  // EAT-136 / EAT-92: dietary tag chip'leri. BE `FoodsFilterInput`'ta henüz
+  // `tags` alanı olmadığı için client-side filter; NutritionService.foods
+  // dietTagFilter parametresiyle sonuçları kesiyor.
+  static const List<({String key, String emoji})> _dietTagChips = [
+    (key: 'vegan', emoji: '🌱'),
+    (key: 'vegetarian', emoji: '🥦'),
+    (key: 'gluten_free', emoji: '🌾'),
+    (key: 'dairy_free', emoji: '🥛'),
+    (key: 'nut_free', emoji: '🥜'),
+    (key: 'pescatarian', emoji: '🐟'),
+    (key: 'halal', emoji: '☪️'),
+    (key: 'kosher', emoji: '✡️'),
+    (key: 'low_carb', emoji: '⚖️'),
+    (key: 'keto', emoji: '🥑'),
+  ];
 
   @override
   void initState() {
@@ -112,6 +129,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       final rows = await _nutritionService.foods(
         search: _query.trim().isEmpty ? null : _query.trim(),
         category: _category == _kAllCategory ? null : _category,
+        dietTagFilter: _dietTagFilter.isEmpty ? null : _dietTagFilter.toList(),
         limit: 50,
       );
       if (!mounted) return;
@@ -126,6 +144,48 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
         _loading = false;
       });
     }
+  }
+
+  void _toggleDietTag(String tag) {
+    setState(() {
+      if (_dietTagFilter.contains(tag)) {
+        _dietTagFilter.remove(tag);
+      } else {
+        _dietTagFilter.add(tag);
+      }
+    });
+    _loadFoods();
+  }
+
+  String _dietTagLabel(String key, String localeCode) {
+    if (localeCode == 'tr') {
+      switch (key) {
+        case 'vegan':
+          return 'Vegan';
+        case 'vegetarian':
+          return 'Vejetaryen';
+        case 'gluten_free':
+          return 'Glutensiz';
+        case 'dairy_free':
+          return 'Sütsüz';
+        case 'nut_free':
+          return 'Fındıksız';
+        case 'pescatarian':
+          return 'Peskateryen';
+        case 'halal':
+          return 'Helal';
+        case 'kosher':
+          return 'Koşer';
+        case 'low_carb':
+          return 'Az Karb.';
+        case 'keto':
+          return 'Keto';
+      }
+    }
+    return key
+        .split('_')
+        .map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}')
+        .join(' ');
   }
 
   String _translateCategory(String cat, AppLocalizations l) {
@@ -224,6 +284,47 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
               ),
             ),
             SizedBox(height: 10.h),
+
+            // ── Dietary tag chips (EAT-136 — client-side filter) ──────────
+            SizedBox(
+              height: 30.h,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                itemCount: _dietTagChips.length,
+                separatorBuilder: (_, __) => SizedBox(width: 6.w),
+                itemBuilder: (_, i) {
+                  final tag = _dietTagChips[i];
+                  final selected = _dietTagFilter.contains(tag.key);
+                  final localeCode = Localizations.localeOf(context).languageCode;
+                  return GestureDetector(
+                    onTap: () => _toggleDietTag(tag.key),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 160),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                      decoration: BoxDecoration(
+                        color: selected ? accent.withOpacity(isDark ? 0.18 : 0.1) : cardBg,
+                        borderRadius: BorderRadius.circular(15.r),
+                        border: Border.all(
+                          color: selected ? accent : (isDark ? AppColors.darkSurface : AppColors.lightBorder),
+                          width: selected ? 1.2 : 0.5,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${tag.emoji} ${_dietTagLabel(tag.key, localeCode)}',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          color: selected ? accent : textMuted,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 8.h),
 
             // ── Category Chips ────────────────────────────────────────────
             SizedBox(

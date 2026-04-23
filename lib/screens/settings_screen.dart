@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
 import '../services/notification_service.dart';
+import '../services/api/api_exception.dart';
 import '../generated/app_localizations.dart';
 import 'blood_tests_screen.dart';
 
@@ -488,6 +489,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
 
+                      const SizedBox(height: 16),
+
+                      // ── Account (Danger Zone, EAT-96) ─────────────────────
+                      _SectionLabel(
+                        label: Localizations.localeOf(context).languageCode == 'tr'
+                            ? 'HESAP'
+                            : 'ACCOUNT',
+                        textMuted: textMuted,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(14),
+                          border: border,
+                        ),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => _confirmDeleteAccount(
+                            context,
+                            provider,
+                            isDark,
+                            textPrimary,
+                            textMuted,
+                            accent,
+                            accentFg,
+                          ),
+                          child: _SettingRow(
+                            icon: Icons.delete_forever_rounded,
+                            iconColor: const Color(0xFFFF3B30),
+                            label: Localizations.localeOf(context).languageCode == 'tr'
+                                ? 'Hesabımı Sil'
+                                : 'Delete My Account',
+                            trailing: Icon(Icons.chevron_right_rounded, size: 18, color: textMuted),
+                            divColor: divColor,
+                            textPrimary: textPrimary,
+                            showDivider: false,
+                          ),
+                        ),
+                      ),
+
                       const SizedBox(height: 100),
                     ],
                   ),
@@ -498,6 +540,124 @@ class _SettingsScreenState extends State<SettingsScreen> {
         },
       ),
     );
+  }
+
+  /// EAT-96: iki aşamalı onay → `deleteAccount` mutation → authLogout.
+  Future<void> _confirmDeleteAccount(
+    BuildContext context,
+    AppProvider provider,
+    bool isDark,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+    Color accentFg,
+  ) async {
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    final danger = const Color(0xFFFF3B30);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: danger, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                isTr ? 'Hesabını sil?' : 'Delete your account?',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          isTr
+              ? 'Tüm yemek geçmişin, kilo takibin, diyet planın ve kan tahlillerin kalıcı olarak silinecek. Bu işlem geri alınamaz.'
+              : 'Your meal history, weight logs, diet plan, and blood tests will be permanently deleted. This cannot be undone.',
+          style: TextStyle(fontSize: 14.sp, color: textMuted, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              isTr ? 'Vazgeç' : 'Cancel',
+              style: TextStyle(color: textMuted, fontWeight: FontWeight.w600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: danger,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(
+                isTr ? 'Sil' : 'Delete',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    // Blocking loader while mutation runs.
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(accent),
+        ),
+      ),
+    );
+
+    try {
+      await provider.deleteAccount();
+      // authLogout zaten AuthScreen'e push ediyor; bu ekran stack'ten düştüğü
+      // için ayrıca pop/push yapmamıza gerek yok.
+    } on ApiException catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop(); // loader'ı kapat
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isTr
+                ? 'Hesap silinemedi: ${e.message}'
+                : 'Account deletion failed: ${e.message}',
+          ),
+          backgroundColor: danger,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isTr
+                ? 'Beklenmeyen bir hata oluştu.'
+                : 'An unexpected error occurred.',
+          ),
+          backgroundColor: danger,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _showHealthPermissionDialog(

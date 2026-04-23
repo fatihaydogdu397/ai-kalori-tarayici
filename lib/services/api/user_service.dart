@@ -38,6 +38,7 @@ class UserService {
     String? dietType,
     List<String>? allergens,
     List<String>? cuisinePreferences,
+    List<String>? dislikedFoodIds,
     String? dietCookingTime,
     String? dietBudget,
     String? dietNotes,
@@ -67,6 +68,9 @@ class UserService {
     if (allergens != null) input['allergens'] = allergens;
     if (cuisinePreferences != null) {
       input['cuisinePreferences'] = cuisinePreferences;
+    }
+    if (dislikedFoodIds != null) {
+      input['dislikedFoodIds'] = dislikedFoodIds;
     }
     if (dietCookingTime != null && dietCookingTime.isNotEmpty) {
       input['dietCookingTime'] = dietCookingTime.toUpperCase();
@@ -100,5 +104,14 @@ class UserService {
       variables: {'input': input},
     );
     return Map<String, dynamic>.from(data['updateProfile'] as Map);
+  }
+
+  /// EAT-96: kullanıcı hesabını kalıcı olarak sil (GDPR).
+  /// BE tüm user_id FK'li satırları cascade ile temizler.
+  Future<bool> deleteAccount() async {
+    final data = await _api.mutate(
+      r'mutation DeleteAccount { deleteAccount }',
+    );
+    return data['deleteAccount'] == true;
   }
 }

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/api/api_exception.dart';
 import '../services/api/diet_plan_service.dart';
 import '../services/app_provider.dart';
+import '../generated/app_localizations.dart';
 import 'weekly_diet_plan_screen.dart';
 import 'paywall_screen.dart';
 
@@ -66,7 +68,12 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
 
   Future<void> _generatePlan() async {
     try {
-      final plan = await _dietPlanService.generatePlan();
+      // EAT-132 follow-up: kullanıcının sevmediği food id'leri input'a koy.
+      final provider = context.read<AppProvider>();
+      final disliked = provider.dislikedFoodIds;
+      final plan = await _dietPlanService.generatePlan(
+        dislikedFoodIds: disliked.isEmpty ? null : disliked,
+      );
       _stepTimer?.cancel();
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -92,12 +99,117 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
         );
         return;
       }
+      // EAT-128: 7 gün içinde 3 plan limiti doldu → dedicated dialog.
+      if (e.code == 'WEEKLY_LIMIT_EXCEEDED') {
+        await _showWeeklyLimitDialog();
+        return;
+      }
       _showError(e.message);
     } catch (e) {
       _stepTimer?.cancel();
       if (!mounted) return;
       _showError(e.toString());
     }
+  }
+
+  Future<void> _showWeeklyLimitDialog() async {
+    DietPlanWeeklyLimit? quota;
+    try {
+      quota = await _dietPlanService.weeklyLimit();
+    } catch (_) {
+      // Quota query fail olursa default mesaj göster.
+    }
+
+    if (!mounted) return;
+
+    final l = AppLocalizations.of(context);
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
+    final accent = isDark ? AppColors.lime : AppColors.void_;
+    final accentFg = isDark ? AppColors.void_ : AppColors.snow;
+
+    final resetLabel = quota?.resetAt != null
+        ? _formatResetAt(quota!.resetAt!, Localizations.localeOf(context).languageCode)
+        : null;
+
+    final body = StringBuffer(
+      isTr
+          ? '7 gün içinde en fazla 3 diyet planı oluşturabilirsin.'
+          : 'You can create up to 3 diet plans per rolling 7 days.',
+    );
+    if (resetLabel != null) {
+      body.write(isTr
+          ? '\n\nYeni slot açılış: $resetLabel'
+          : '\n\nNext slot opens: $resetLabel');
+    }
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.lock_clock_rounded, color: accent, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                isTr ? 'Haftalık limit doldu' : 'Weekly limit reached',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: textPrimary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          body.toString(),
+          style: TextStyle(fontSize: 14.sp, color: textMuted, height: 1.5),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // dialog
+              if (mounted) Navigator.pop(context); // loading screen
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: accentFg,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Text(
+                isTr ? 'Tamam' : 'OK',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    // l değişkeni future extension için tutuluyor (locale-aware messages).
+    // ignore: unused_local_variable
+    final _ = l;
+  }
+
+  String _formatResetAt(DateTime resetAt, String locale) {
+    // Kullanıcı yerel saatiyle kısa formatlı tarih+saat.
+    final local = resetAt.toLocal();
+    final dd = local.day.toString().padLeft(2, '0');
+    final mm = local.month.toString().padLeft(2, '0');
+    final hh = local.hour.toString().padLeft(2, '0');
+    final mi = local.minute.toString().padLeft(2, '0');
+    return locale == 'tr'
+        ? '$dd.$mm.${local.year} $hh:$mi'
+        : '${local.year}-$mm-$dd $hh:$mi';
   }
 
   void _showError(String message) {

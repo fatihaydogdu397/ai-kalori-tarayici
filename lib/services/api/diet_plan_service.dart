@@ -28,15 +28,43 @@ class DietPlanService {
   ''';
 
   /// Yeni 7 günlük plan üretir (mevcut active varsa CANCELLED yapılır).
-  Future<DietPlan> generatePlan() async {
+  /// EAT-132: [dislikedFoodIds] verilirse BE o yemekleri planın dışında tutar.
+  Future<DietPlan> generatePlan({List<String>? dislikedFoodIds}) async {
+    final hasInput = dislikedFoodIds != null && dislikedFoodIds.isNotEmpty;
+    final variables = hasInput
+        ? {
+            'input': {'dislikedFoodIds': dislikedFoodIds},
+          }
+        : null;
     final data = await _api.mutate(
       '''
-      mutation GenerateDietPlan {
-        generateDietPlan { $_planFields }
+      mutation GenerateDietPlan(\$input: GenerateDietPlanInput) {
+        generateDietPlan(input: \$input) { $_planFields }
+      }
+      ''',
+      variables: variables,
+    );
+    return _parse(Map<String, dynamic>.from(data['generateDietPlan'] as Map));
+  }
+
+  /// EAT-128: 7 gün içindeki plan üretim kotası (limit / used / remaining / resetAt).
+  Future<DietPlanWeeklyLimit> weeklyLimit() async {
+    final data = await _api.query(
+      r'''
+      query DietPlanWeeklyLimit {
+        dietPlanWeeklyLimit { limit used remaining resetAt }
       }
       ''',
     );
-    return _parse(Map<String, dynamic>.from(data['generateDietPlan'] as Map));
+    final raw = Map<String, dynamic>.from(data['dietPlanWeeklyLimit'] as Map);
+    return DietPlanWeeklyLimit(
+      limit: (raw['limit'] as num?)?.toInt() ?? 0,
+      used: (raw['used'] as num?)?.toInt() ?? 0,
+      remaining: (raw['remaining'] as num?)?.toInt() ?? 0,
+      resetAt: raw['resetAt'] != null
+          ? DateTime.tryParse(raw['resetAt'] as String)
+          : null,
+    );
   }
 
   /// Kullanıcının aktif planı (yoksa null).
@@ -169,6 +197,22 @@ class _Slot {
   final String time;
   final String emoji;
   const _Slot(this.label, this.time, this.emoji);
+}
+
+/// EAT-128 `dietPlanWeeklyLimit` çıktı modeli.
+class DietPlanWeeklyLimit {
+  final int limit;
+  final int used;
+  final int remaining;
+  final DateTime? resetAt;
+  const DietPlanWeeklyLimit({
+    required this.limit,
+    required this.used,
+    required this.remaining,
+    required this.resetAt,
+  });
+
+  bool get isBlocked => remaining <= 0;
 }
 
 /// EAT-96 BE akışı: önce aktif plan kontrol edilir; yoksa generate edilir.

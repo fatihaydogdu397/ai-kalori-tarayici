@@ -119,7 +119,7 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    final iso = date.toUtc().toIso8601String().substring(0, 10);
+    final iso = date.toIso8601String().substring(0, 10);
     try {
       final rows = await _foodService.getDailyMeals(iso);
       _history = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
@@ -222,15 +222,31 @@ class AppProvider extends ChangeNotifier {
       return;
     }
     try {
-      final stats = await _progressService.todayStats();
+      // Backend todayStats UTC-based; lokal bugün için history'den aggregate et.
+      // Su/hedef hâlâ backend'den (backend timezone fix bekliyor, Jira).
+      final todayIso = DateTime.now().toIso8601String().substring(0, 10);
+      final mealsFuture = _foodService.getDailyMeals(todayIso);
+      final statsFuture = _progressService.todayStats();
+      final rows = await mealsFuture;
+      final stats = await statsFuture;
+      final todayMeals = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
+      double cals = 0, prot = 0, carbs = 0, fat = 0, fiber = 0, sugar = 0;
+      for (final m in todayMeals) {
+        cals += m.totalNutrients.calories;
+        prot += m.totalNutrients.protein;
+        carbs += m.totalNutrients.carbs;
+        fat += m.totalNutrients.fat;
+        fiber += m.totalNutrients.fiber;
+        sugar += m.totalNutrients.sugar;
+      }
       _todayStats = {
-        'calories': (stats['totalCalories'] as num?)?.toDouble() ?? 0.0,
-        'protein': (stats['totalProtein'] as num?)?.toDouble() ?? 0.0,
-        'carbs': (stats['totalCarbs'] as num?)?.toDouble() ?? 0.0,
-        'fat': (stats['totalFat'] as num?)?.toDouble() ?? 0.0,
-        'fiber': (stats['totalFiber'] as num?)?.toDouble() ?? 0.0,
-        'sugar': (stats['totalSugar'] as num?)?.toDouble() ?? 0.0,
-        'mealCount': (stats['scanCount'] as num?)?.toDouble() ?? 0.0,
+        'calories': cals,
+        'protein': prot,
+        'carbs': carbs,
+        'fat': fat,
+        'fiber': fiber,
+        'sugar': sugar,
+        'mealCount': todayMeals.length.toDouble(),
       };
       _waterToday = (stats['waterLiters'] as num?)?.toDouble() ?? 0;
       final goal = (stats['waterGoal'] as num?)?.toDouble();
@@ -280,8 +296,8 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> duplicateAnalysisToToday(FoodAnalysis analysis) async {
-    // BE'de updateFoodAnalysis (EAT-118) beklemede — şu an duplicate da
-    // saveFoodAnalysis ile yeni kayıt olarak yazılıyor; aynı davranış.
+    // Eski kaydın bugüne kopyası — yeni row, yeni id. `updateMeal` aynı id'yi
+    // yerinde değiştirir, kopya için doğru akış saveFoodAnalysis üzerinden.
     await saveManualEntry(
       analysis.copyWith(
         analyzedAt: DateTime.now(),
@@ -290,13 +306,34 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  /// EAT-118: kayıtlı bir öğünü `updateMeal` ile günceller.
   Future<void> updateAnalysis(FoodAnalysis analysis) async {
-    // BE'de updateFoodAnalysis mutation EAT-118 ile geliyor. Henüz yok;
-    // şimdilik sadece local history'yi güncelleyip UI'ı tutarlı tut.
-    final idx = _history.indexWhere((a) => a.id == analysis.id);
-    if (idx != -1) {
-      _history[idx] = analysis;
+    try {
+      final display = analysis.foods.isNotEmpty
+          ? analysis.foods.first.name
+          : (analysis.summary.isNotEmpty ? analysis.summary : 'Meal');
+      final portion = analysis.foods.isNotEmpty
+          ? analysis.foods.first.portion
+          : 100.0;
+      final res = await _foodService.updateMeal(
+        mealId: analysis.id,
+        name: display,
+        portion: portion,
+        calories: analysis.totalNutrients.calories,
+        protein: analysis.totalNutrients.protein,
+        carbs: analysis.totalNutrients.carbs,
+        fat: analysis.totalNutrients.fat,
+        mealCategory: analysis.mealCategory.key,
+      );
+      final updated = FoodAnalysis.fromBackend(res);
+      final idx = _history.indexWhere((a) => a.id == analysis.id);
+      if (idx != -1) {
+        _history[idx] = updated;
+      }
       notifyListeners();
+      await loadTodayStats();
+    } on ApiException {
+      rethrow;
     }
   }
 
@@ -449,6 +486,7 @@ class AppProvider extends ChangeNotifier {
     required String cookingTime,
     required String budget,
     required String notes,
+    List<String>? dislikedFoodIds,
   }) async {
     _dietRestrictions = restrictions;
     _dietCuisines = cuisines;
@@ -456,12 +494,16 @@ class AppProvider extends ChangeNotifier {
     _dietCookingTime = cookingTime;
     _dietBudget = budget;
     _dietNotes = notes;
+    if (dislikedFoodIds != null) {
+      _dislikedFoodIds = dislikedFoodIds;
+    }
 
     try {
       final res = await _userService.updateProfile(
         mealsPerDay: mealsPerDay,
         allergens: restrictions,
         cuisinePreferences: cuisines,
+        dislikedFoodIds: dislikedFoodIds,
         dietCookingTime: _mapCookingTimeToBackend(cookingTime),
         dietBudget: budget, // BE enum: LOW/MEDIUM/HIGH — UserService uppercase'liyor.
         dietNotes: notes,
@@ -472,6 +514,24 @@ class AppProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  // EAT-132 follow-up: kullanıcının sevmediği food id listesi (generateDietPlan'a iletiliyor).
+  List<String> _dislikedFoodIds = const [];
+  List<String> get dislikedFoodIds => _dislikedFoodIds;
+
+  /// EAT-96: hesabı kalıcı olarak sil + yerel state'i temizle + auth ekranına dön.
+  Future<void> deleteAccount() async {
+    if (!_isLoggedIn) return;
+    final ok = await _userService.deleteAccount();
+    if (!ok) {
+      throw ApiException('Account deletion failed', code: 'DELETE_FAILED');
+    }
+    _history = const [];
+    _weightLogs = const [];
+    _bloodTests = const [];
+    // authLogout token'ı temizler, _isLoggedIn=false yapar ve AuthScreen'e push eder.
+    await authLogout();
   }
 
   /// FE picker değerlerini (`quick/medium/relaxed`) BE `DietCookingTime`

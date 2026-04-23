@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
+import '../services/api/nutrition_service.dart';
 import 'diet_profile_edit_screen.dart';
 
 // ── Data models ───────────────────────────────────────────────────────────────
@@ -32,11 +33,7 @@ class DietDay {
   final List<DietMeal> meals;
   final int totalCalories;
 
-  const DietDay({
-    required this.dayName,
-    required this.meals,
-    required this.totalCalories,
-  });
+  const DietDay({required this.dayName, required this.meals, required this.totalCalories});
 }
 
 class DietPlan {
@@ -44,11 +41,7 @@ class DietPlan {
   final List<DietDay> days;
   final DateTime generatedAt;
 
-  const DietPlan({
-    required this.dailyCalorieGoal,
-    required this.days,
-    required this.generatedAt,
-  });
+  const DietPlan({required this.dailyCalorieGoal, required this.days, required this.generatedAt});
 }
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -56,11 +49,7 @@ class WeeklyDietPlanScreen extends StatefulWidget {
   final DietPlan plan;
   final Map<String, dynamic> anamnesisData;
 
-  const WeeklyDietPlanScreen({
-    super.key,
-    required this.plan,
-    required this.anamnesisData,
-  });
+  const WeeklyDietPlanScreen({super.key, required this.plan, required this.anamnesisData});
 
   @override
   State<WeeklyDietPlanScreen> createState() => _WeeklyDietPlanScreenState();
@@ -68,6 +57,29 @@ class WeeklyDietPlanScreen extends StatefulWidget {
 
 class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
   int _selectedDay = 0;
+
+  // EAT-138: swap sonrası lokal mutable state (session-only).
+  late List<DietDay> _days;
+
+  @override
+  void initState() {
+    super.initState();
+    _days = widget.plan.days.toList();
+  }
+
+  void _applySwap(int dayIndex, int mealIndex, DietMeal newMeal) {
+    setState(() {
+      final day = _days[dayIndex];
+      final newMeals = List<DietMeal>.from(day.meals);
+      newMeals[mealIndex] = newMeal;
+      final total = newMeals.fold<int>(0, (s, m) => s + m.calories);
+      _days[dayIndex] = DietDay(
+        dayName: day.dayName,
+        meals: newMeals,
+        totalCalories: total,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +90,7 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
     final accent = isDark ? AppColors.lime : AppColors.void_;
     final accentFg = isDark ? AppColors.void_ : AppColors.snow;
 
-    final selectedDayPlan = widget.plan.days[_selectedDay];
+    final selectedDayPlan = _days[_selectedDay];
 
     return Scaffold(
       backgroundColor: bg,
@@ -108,8 +120,14 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Your 7-Day Plan', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textPrimary)),
-                        Text('${widget.plan.dailyCalorieGoal} kcal/day target', style: TextStyle(fontSize: 12.sp, color: textMuted)),
+                        Text(
+                          'Your 7-Day Plan',
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textPrimary),
+                        ),
+                        Text(
+                          '${widget.plan.dailyCalorieGoal} kcal/day target',
+                          style: TextStyle(fontSize: 12.sp, color: textMuted),
+                        ),
                       ],
                     ),
                   ),
@@ -138,9 +156,9 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
-                itemCount: widget.plan.days.length,
+                itemCount: _days.length,
                 itemBuilder: (context, i) {
-                  final day = widget.plan.days[i];
+                  final day = _days[i];
                   final isSelected = _selectedDay == i;
                   return GestureDetector(
                     onTap: () {
@@ -154,30 +172,20 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                       decoration: BoxDecoration(
                         color: isSelected ? accent : (isDark ? AppColors.darkCard : AppColors.lightCard),
                         borderRadius: BorderRadius.circular(14.r),
-                        border: isSelected
-                            ? null
-                            : Border.all(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, width: 0.5),
+                        border: isSelected ? null : Border.all(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, width: 0.5),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             day.dayName.substring(0, 3),
-                            style: TextStyle(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected ? accentFg : textMuted,
-                            ),
+                            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: isSelected ? accentFg : textMuted),
                           ),
                           SizedBox(height: 2.h),
                           RichText(
                             textAlign: TextAlign.center,
                             text: TextSpan(
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                color: isSelected ? accentFg : textPrimary,
-                                height: 1.0,
-                              ),
+                              style: TextStyle(fontWeight: FontWeight.w800, color: isSelected ? accentFg : textPrimary, height: 1.0),
                               children: [
                                 TextSpan(
                                   text: '${day.totalCalories}',
@@ -185,11 +193,7 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                                 ),
                                 TextSpan(
                                   text: ' kcal',
-                                  style: TextStyle(
-                                    fontSize: 9.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: (isSelected ? accentFg : textMuted),
-                                  ),
+                                  style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w600, color: (isSelected ? accentFg : textMuted)),
                                 ),
                               ],
                             ),
@@ -218,7 +222,15 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                     meal: meal,
                     isDark: isDark,
                     accent: accent,
-                    onTap: () => _showMealDetail(context, meal, isDark, accent, accentFg),
+                    onTap: () => _showMealDetail(
+                      context,
+                      meal,
+                      _selectedDay,
+                      i,
+                      isDark,
+                      accent,
+                      accentFg,
+                    ),
                   );
                 },
               ),
@@ -229,7 +241,7 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
     );
   }
 
-  void _showMealDetail(BuildContext context, DietMeal meal, bool isDark, Color accent, Color accentFg) {
+  void _showMealDetail(BuildContext context, DietMeal meal, int dayIndex, int mealIndex, bool isDark, Color accent, Color accentFg) {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
 
@@ -251,10 +263,7 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               child: Container(
                 width: 36,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, borderRadius: BorderRadius.circular(2)),
               ),
             ),
             SizedBox(height: 20.h),
@@ -267,14 +276,19 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                     color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
                     borderRadius: BorderRadius.circular(16.r),
                   ),
-                  child: Center(child: Text(meal.emoji, style: TextStyle(fontSize: 28.sp))),
+                  child: Center(
+                    child: Text(meal.emoji, style: TextStyle(fontSize: 28.sp)),
+                  ),
                 ),
                 SizedBox(width: 14.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(meal.name, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: textPrimary)),
+                      Text(
+                        meal.name,
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: textPrimary),
+                      ),
                       SizedBox(height: 4.h),
                       Row(
                         children: [
@@ -304,7 +318,10 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                       '${meal.calories}',
                       style: TextStyle(fontSize: 36.sp, fontWeight: FontWeight.w800, color: accent),
                     ),
-                    Text('kcal', style: TextStyle(fontSize: 13.sp, color: textMuted)),
+                    Text(
+                      'kcal',
+                      style: TextStyle(fontSize: 13.sp, color: textMuted),
+                    ),
                   ],
                 ),
               ),
@@ -321,23 +338,305 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               ],
             ),
             SizedBox(height: 24.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: accentFg,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
-                  elevation: 0,
+            Row(
+              children: [
+                // EAT-138: swap meal
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showSwapSheet(context, meal, dayIndex, mealIndex, isDark, accent, accentFg);
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: accent,
+                      side: BorderSide(color: accent, width: 1.3),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                    ),
+                    icon: Icon(Icons.swap_horiz_rounded, size: 18.sp),
+                    label: Text(
+                      Localizations.localeOf(context).languageCode == 'tr' ? 'Değiştir' : 'Swap',
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                    ),
+                  ),
                 ),
-                child: Text('Got it', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800)),
-              ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: accent,
+                      foregroundColor: accentFg,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      Localizations.localeOf(context).languageCode == 'tr' ? 'Tamam' : 'Got it',
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// EAT-138: `nutrition.recommendMeal` ile alternatif öneri al ve lokalde swap et.
+  /// Persistence out-of-scope (follow-up ticket: backend `replaceMeal` mutation).
+  Future<void> _showSwapSheet(
+    BuildContext context,
+    DietMeal currentMeal,
+    int dayIndex,
+    int mealIndex,
+    bool isDark,
+    Color accent,
+    Color accentFg,
+  ) async {
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
+    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
+
+    // Loading sheet.
+    RecommendedMeal? rec;
+    String? errorMsg;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (ctx, setS) {
+            // Lazy trigger only once.
+            if (rec == null && errorMsg == null) {
+              Future<void>(() async {
+                try {
+                  final r = await NutritionService.instance
+                      .recommendMeal(currentMeal.category);
+                  if (!sheetCtx.mounted) return;
+                  setS(() => rec = r);
+                } catch (e) {
+                  if (!sheetCtx.mounted) return;
+                  setS(() => errorMsg = e.toString());
+                }
+              });
+            }
+
+            final content = rec != null
+                ? _buildSwapAlternativeBody(
+                    context,
+                    rec!,
+                    currentMeal,
+                    isDark,
+                    accent,
+                    accentFg,
+                    textPrimary,
+                    textMuted,
+                    cardBg,
+                    isTr,
+                    onAccept: () {
+                      _applySwap(
+                        dayIndex,
+                        mealIndex,
+                        DietMeal(
+                          name: rec!.items.isNotEmpty
+                              ? rec!.items.map((i) => i.name).take(3).join(' + ')
+                              : currentMeal.name,
+                          category: currentMeal.category,
+                          calories: rec!.actualCalories.round(),
+                          protein: rec!.actualProtein.round(),
+                          carbs: rec!.actualCarbs.round(),
+                          fat: rec!.actualFat.round(),
+                          time: currentMeal.time,
+                          emoji: currentMeal.emoji,
+                        ),
+                      );
+                      Navigator.pop(sheetCtx);
+                    },
+                  )
+                : errorMsg != null
+                    ? _buildSwapErrorBody(isTr, textPrimary, textMuted)
+                    : _buildSwapLoadingBody(accent, textMuted, isTr);
+
+            return Container(
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+              ),
+              padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 32.h),
+              child: content,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSwapLoadingBody(Color accent, Color textMuted, bool isTr) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(height: 20.h),
+        CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(accent)),
+        SizedBox(height: 16.h),
+        Text(
+          isTr ? 'Alternatif hazırlanıyor…' : 'Finding an alternative…',
+          style: TextStyle(fontSize: 13.sp, color: textMuted),
+        ),
+        SizedBox(height: 24.h),
+      ],
+    );
+  }
+
+  Widget _buildSwapErrorBody(bool isTr, Color textPrimary, Color textMuted) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(height: 20.h),
+        Icon(Icons.error_outline_rounded, size: 40.sp, color: Colors.orange),
+        SizedBox(height: 12.h),
+        Text(
+          isTr ? 'Alternatif bulunamadı' : 'No alternative found',
+          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: textPrimary),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          isTr
+              ? 'Daha sonra tekrar dene veya günün tamamını yeniden oluştur.'
+              : 'Try again later or regenerate the whole day.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 13.sp, color: textMuted, height: 1.4),
+        ),
+        SizedBox(height: 20.h),
+      ],
+    );
+  }
+
+  Widget _buildSwapAlternativeBody(
+    BuildContext sheetContext,
+    RecommendedMeal rec,
+    DietMeal current,
+    bool isDark,
+    Color accent,
+    Color accentFg,
+    Color textPrimary,
+    Color textMuted,
+    Color cardBg,
+    bool isTr, {
+    required VoidCallback onAccept,
+  }) {
+    final items = rec.items;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+        SizedBox(height: 20.h),
+        Text(
+          isTr ? 'Alternatif öneri' : 'Alternative suggestion',
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textPrimary),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          '${rec.actualCalories.round()} kcal · ${rec.actualProtein.round()}g P · ${rec.actualCarbs.round()}g C · ${rec.actualFat.round()}g F',
+          style: TextStyle(fontSize: 12.sp, color: textMuted),
+        ),
+        SizedBox(height: 16.h),
+        if (items.isNotEmpty)
+          ...items.take(5).map(
+                (item) => Container(
+                  margin: EdgeInsets.only(bottom: 8.h),
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: accent.withOpacity(isDark ? 0.08 : 0.06),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textPrimary),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              '${item.portionGrams.toStringAsFixed(0)}g · ${item.calories.round()} kcal',
+                              style: TextStyle(fontSize: 11.sp, color: textMuted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (item.role.isNotEmpty)
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: accent.withOpacity(0.18),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Text(
+                            item.role,
+                            style: TextStyle(fontSize: 10.sp, color: accent, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+        SizedBox(height: 16.h),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(sheetContext),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: textMuted,
+                  side: BorderSide(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                ),
+                child: Text(
+                  isTr ? 'Vazgeç' : 'Cancel',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+            SizedBox(width: 10.w),
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: onAccept,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: accentFg,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  elevation: 0,
+                ),
+                child: Text(
+                  isTr ? 'Bunu kullan' : 'Use this',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -386,10 +685,7 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               isDark: isDark,
               onTap: () {
                 Navigator.pop(context); // close sheet
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DietProfileEditScreen()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const DietProfileEditScreen()));
               },
             ),
           ],
@@ -433,7 +729,9 @@ class _MealCard extends StatelessWidget {
                 color: accent.withValues(alpha: isDark ? 0.12 : 0.08),
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Center(child: Text(meal.emoji, style: TextStyle(fontSize: 22.sp))),
+              child: Center(
+                child: Text(meal.emoji, style: TextStyle(fontSize: 22.sp)),
+              ),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -453,7 +751,10 @@ class _MealCard extends StatelessWidget {
                         meal.category,
                         style: TextStyle(fontSize: 10.sp, color: textMuted),
                       ),
-                      Text(' · ', style: TextStyle(fontSize: 10.sp, color: textMuted)),
+                      Text(
+                        ' · ',
+                        style: TextStyle(fontSize: 10.sp, color: textMuted),
+                      ),
                       Text(
                         meal.time,
                         style: TextStyle(fontSize: 10.sp, color: textMuted),
@@ -471,7 +772,10 @@ class _MealCard extends StatelessWidget {
                   '${meal.calories}',
                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: accent),
                 ),
-                Text('kcal', style: TextStyle(fontSize: 10.sp, color: textMuted)),
+                Text(
+                  'kcal',
+                  style: TextStyle(fontSize: 10.sp, color: textMuted),
+                ),
               ],
             ),
             SizedBox(width: 6.w),
@@ -526,7 +830,10 @@ class _DaySummaryCard extends StatelessWidget {
                     '${day.totalCalories}',
                     style: TextStyle(fontSize: 32.sp, fontWeight: FontWeight.w800, color: accent),
                   ),
-                  Text('kcal total', style: TextStyle(fontSize: 11.sp, color: textMuted)),
+                  Text(
+                    'kcal total',
+                    style: TextStyle(fontSize: 11.sp, color: textMuted),
+                  ),
                 ],
               ),
               const Spacer(),
@@ -548,9 +855,18 @@ class _DaySummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('P ${totalProtein}g', style: TextStyle(fontSize: 10.sp, color: isDark ? AppColors.violet : AppColors.violetDark)),
-              Text('C ${totalCarbs}g', style: TextStyle(fontSize: 10.sp, color: isDark ? AppColors.amber : AppColors.amberDark)),
-              Text('F ${totalFat}g', style: TextStyle(fontSize: 10.sp, color: isDark ? AppColors.coral : AppColors.coralDark)),
+              Text(
+                'P ${totalProtein}g',
+                style: TextStyle(fontSize: 10.sp, color: isDark ? AppColors.violet : AppColors.violetDark),
+              ),
+              Text(
+                'C ${totalCarbs}g',
+                style: TextStyle(fontSize: 10.sp, color: isDark ? AppColors.amber : AppColors.amberDark),
+              ),
+              Text(
+                'F ${totalFat}g',
+                style: TextStyle(fontSize: 10.sp, color: isDark ? AppColors.coral : AppColors.coralDark),
+              ),
             ],
           ),
         ],
@@ -578,9 +894,18 @@ class _MacroBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(4),
       child: Row(
         children: [
-          Flexible(flex: (pFrac * 100).round(), child: Container(height: 6, color: isDark ? AppColors.violet : AppColors.violetDark)),
-          Flexible(flex: (cFrac * 100).round(), child: Container(height: 6, color: isDark ? AppColors.amber : AppColors.amberDark)),
-          Flexible(flex: (fFrac * 100).round(), child: Container(height: 6, color: isDark ? AppColors.coral : AppColors.coralDark)),
+          Flexible(
+            flex: (pFrac * 100).round(),
+            child: Container(height: 6, color: isDark ? AppColors.violet : AppColors.violetDark),
+          ),
+          Flexible(
+            flex: (cFrac * 100).round(),
+            child: Container(height: 6, color: isDark ? AppColors.amber : AppColors.amberDark),
+          ),
+          Flexible(
+            flex: (fFrac * 100).round(),
+            child: Container(height: 6, color: isDark ? AppColors.coral : AppColors.coralDark),
+          ),
         ],
       ),
     );
@@ -597,9 +922,16 @@ class _SummaryMacro extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        ),
         const SizedBox(width: 6),
-        Text('$label  $value', style: TextStyle(fontSize: 11.sp, color: color, fontWeight: FontWeight.w600)),
+        Text(
+          '$label  $value',
+          style: TextStyle(fontSize: 11.sp, color: color, fontWeight: FontWeight.w600),
+        ),
       ],
     );
   }
@@ -616,10 +948,7 @@ class _TagPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(6.r),
-      ),
+      decoration: BoxDecoration(color: isDark ? AppColors.darkSurface : AppColors.lightSurface, borderRadius: BorderRadius.circular(6.r)),
       child: Text(
         label,
         style: TextStyle(fontSize: 10.sp, color: isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary, fontWeight: FontWeight.w600),
@@ -647,9 +976,15 @@ class _MacroBox extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(value, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: color)),
+            Text(
+              value,
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: color),
+            ),
             SizedBox(height: 2.h),
-            Text(label, style: TextStyle(fontSize: 10.sp, color: color.withValues(alpha: 0.7))),
+            Text(
+              label,
+              style: TextStyle(fontSize: 10.sp, color: color.withValues(alpha: 0.7)),
+            ),
           ],
         ),
       ),
@@ -680,10 +1015,7 @@ class _BottomSheetOption extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(bottom: 10.h),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkBg : AppColors.lightBg,
-          borderRadius: BorderRadius.circular(14.r),
-        ),
+        decoration: BoxDecoration(color: isDark ? AppColors.darkBg : AppColors.lightBg, borderRadius: BorderRadius.circular(14.r)),
         child: Row(
           children: [
             Container(
@@ -693,7 +1025,10 @@ class _BottomSheetOption extends StatelessWidget {
               child: Icon(icon, color: color, size: 18.sp),
             ),
             SizedBox(width: 14.w),
-            Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textColor)),
+            Text(
+              label,
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textColor),
+            ),
           ],
         ),
       ),

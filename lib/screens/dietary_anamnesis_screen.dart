@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
+import '../services/api/nutrition_service.dart';
 import 'diet_plan_loading_screen.dart';
 import 'blood_test_upload_screen.dart';
 
@@ -47,7 +50,7 @@ class DietaryAnamnesisScreen extends StatefulWidget {
 
 class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
   int _page = 0;
-  static const int _totalPages = 5;
+  static const int _totalPages = 6; // EAT-135: +1 for disliked foods step.
 
   // Form state
   final Set<String> _selectedRestrictions = {};
@@ -56,6 +59,9 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
   String _cookingTime = 'medium'; // quick / medium / relaxed
   String _budget = 'medium'; // low / medium / high
   final _notesController = TextEditingController();
+
+  // EAT-135: disliked foods (id, display name) — generateDietPlan'a iletiliyor.
+  final List<({String id, String name})> _dislikedFoods = [];
 
   @override
   void dispose() {
@@ -85,8 +91,9 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
     final restrictions = _selectedRestrictions.toList();
     final cuisines = _selectedCuisines.toList();
     final notes = _notesController.text.trim();
+    final dislikedIds = _dislikedFoods.map((f) => f.id).toList();
 
-    // Provider'a kaydet (persist)
+    // Provider'a kaydet (persist) — EAT-135: dislikedFoodIds de gidiyor.
     await context.read<AppProvider>().saveAnamnesisProfile(
       restrictions: restrictions,
       cuisines: cuisines,
@@ -94,6 +101,7 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
       cookingTime: _cookingTime,
       budget: _budget,
       notes: notes,
+      dislikedFoodIds: dislikedIds,
     );
 
     if (!mounted) return;
@@ -105,6 +113,7 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
       'cookingTime': _cookingTime,
       'budget': _budget,
       'notes': notes,
+      'dislikedFoodIds': dislikedIds,
     };
 
     // Anamnesis sonrası kan tahlili yükleme opsiyonu. Skip edilse bile diyet
@@ -227,8 +236,25 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
           onBudget: (v) => setState(() => _budget = v),
         );
       case 4:
-        return _PageNotes(
+        return _PageDislikedFoods(
           key: const ValueKey(4),
+          isDark: isDark,
+          accent: accent,
+          selected: _dislikedFoods,
+          onToggle: (food) {
+            setState(() {
+              final idx = _dislikedFoods.indexWhere((f) => f.id == food.id);
+              if (idx >= 0) {
+                _dislikedFoods.removeAt(idx);
+              } else {
+                _dislikedFoods.add(food);
+              }
+            });
+          },
+        );
+      case 5:
+        return _PageNotes(
+          key: const ValueKey(5),
           isDark: isDark,
           accent: accent,
           controller: _notesController,
@@ -659,7 +685,256 @@ class _PageCookingTime extends StatelessWidget {
   }
 }
 
-// ── Page 5: Notes ─────────────────────────────────────────────────────────────
+// ── Page 5: Disliked Foods (EAT-135) ──────────────────────────────────────────
+class _PageDislikedFoods extends StatefulWidget {
+  final bool isDark;
+  final Color accent;
+  final List<({String id, String name})> selected;
+  final void Function(({String id, String name})) onToggle;
+
+  const _PageDislikedFoods({
+    super.key,
+    required this.isDark,
+    required this.accent,
+    required this.selected,
+    required this.onToggle,
+  });
+
+  @override
+  State<_PageDislikedFoods> createState() => _PageDislikedFoodsState();
+}
+
+class _PageDislikedFoodsState extends State<_PageDislikedFoods> {
+  final NutritionService _nutrition = NutritionService.instance;
+  final TextEditingController _searchCtrl = TextEditingController();
+  Timer? _debounce;
+  List<({String id, String name})> _results = const [];
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String q) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () => _search(q));
+  }
+
+  Future<void> _search(String q) async {
+    final trimmed = q.trim();
+    if (trimmed.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _results = const [];
+        _loading = false;
+      });
+      return;
+    }
+    setState(() => _loading = true);
+    try {
+      final rows = await _nutrition.foods(search: trimmed, limit: 20);
+      if (!mounted) return;
+      setState(() {
+        _results = rows
+            .map((r) => (
+                  id: (r['id'] ?? '') as String,
+                  name: (r['name'] ?? '') as String,
+                ))
+            .where((r) => r.id.isNotEmpty && r.name.isNotEmpty)
+            .toList(growable: false);
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _results = const [];
+        _loading = false;
+      });
+    }
+  }
+
+  bool _isSelected(String id) => widget.selected.any((f) => f.id == id);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final accent = widget.accent;
+    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
+    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
+    final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 32.h),
+          Text(
+            isTr ? 'Sevmediğin yiyecekler?' : 'Any foods you dislike?',
+            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: textPrimary),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            isTr
+                ? 'Bunları planlarında kullanmayacağız (opsiyonel).'
+                : 'We won\'t include these in your plans (optional).',
+            style: TextStyle(fontSize: 14.sp, color: textMuted),
+          ),
+          SizedBox(height: 20.h),
+
+          // Search field
+          Container(
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(14.r),
+              border: border,
+            ),
+            child: Row(
+              children: [
+                SizedBox(width: 12.w),
+                Icon(Icons.search_rounded, color: textMuted, size: 18.sp),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: TextField(
+                    controller: _searchCtrl,
+                    onChanged: _onSearchChanged,
+                    style: TextStyle(fontSize: 14.sp, color: textPrimary),
+                    decoration: InputDecoration(
+                      hintText: isTr
+                          ? 'Ara: brokoli, yulaf, somon…'
+                          : 'Search: broccoli, oatmeal, salmon…',
+                      hintStyle: TextStyle(fontSize: 13.sp, color: textMuted),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                    ),
+                  ),
+                ),
+                if (_loading)
+                  Padding(
+                    padding: EdgeInsets.only(right: 12.w),
+                    child: SizedBox(
+                      width: 14.w,
+                      height: 14.w,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.8,
+                        valueColor: AlwaysStoppedAnimation(accent),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Selected chips
+          if (widget.selected.isNotEmpty) ...[
+            Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: widget.selected
+                  .map(
+                    (f) => Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: accent.withOpacity(isDark ? 0.15 : 0.1),
+                        borderRadius: BorderRadius.circular(50.r),
+                        border: Border.all(color: accent.withOpacity(0.4)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            f.name,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: accent,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          GestureDetector(
+                            onTap: () => widget.onToggle(f),
+                            child: Icon(Icons.close_rounded, size: 14.sp, color: accent),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            SizedBox(height: 16.h),
+          ],
+
+          // Results
+          Expanded(
+            child: _results.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Text(
+                        _searchCtrl.text.trim().isEmpty
+                            ? (isTr
+                                ? 'Aramak istediğin yiyeceği yaz; hiçbiri yoksa bu adımı atlayabilirsin.'
+                                : 'Start typing a food name to find it. You can skip this step.')
+                            : (isTr ? 'Sonuç bulunamadı.' : 'No results.'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13.sp, color: textMuted, height: 1.4),
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: EdgeInsets.zero,
+                    itemCount: _results.length,
+                    separatorBuilder: (_, __) => Divider(
+                      height: 1,
+                      color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                    ),
+                    itemBuilder: (context, i) {
+                      final food = _results[i];
+                      final selected = _isSelected(food.id);
+                      return InkWell(
+                        onTap: () {
+                          HapticFeedback.selectionClick();
+                          widget.onToggle(food);
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  food.name,
+                                  style: TextStyle(fontSize: 14.sp, color: textPrimary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(
+                                selected
+                                    ? Icons.check_circle_rounded
+                                    : Icons.add_circle_outline_rounded,
+                                color: selected ? accent : textMuted,
+                                size: 20.sp,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Page 6: Notes ─────────────────────────────────────────────────────────────
 class _PageNotes extends StatelessWidget {
   final bool isDark;
   final Color accent;
