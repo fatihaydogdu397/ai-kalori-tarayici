@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
+import '../services/api/nutrition_service.dart';
 import '../services/notification_service.dart';
 import '../generated/app_localizations.dart';
 import 'paywall_screen.dart';
@@ -1202,7 +1203,9 @@ class _PageActivity extends StatelessWidget {
 }
 
 // ── Page 9: Beslenme Türü ────────────────────────────────────────────────────
-class _PageDietType extends StatelessWidget {
+// EAT-117: Seçenekler BE `dietaryPreferenceOptions` query'sinden çekilir.
+// Network hatası / offline durumda hardcoded fallback kullanılır.
+class _PageDietType extends StatefulWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
   final String dietType;
@@ -1211,14 +1214,93 @@ class _PageDietType extends StatelessWidget {
   const _PageDietType({required this.isDark, required this.textPrimary, required this.textMuted, required this.dietType, required this.onDietType});
 
   @override
+  State<_PageDietType> createState() => _PageDietTypeState();
+}
+
+class _PageDietTypeState extends State<_PageDietType> {
+  // BE yanıtından DIET_TYPE kategorisindeki key'ler (writeTokens[0] kullanılır).
+  List<({String key, String defaultLabel})>? _remoteOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOptions();
+  }
+
+  Future<void> _loadOptions() async {
+    try {
+      final all = await NutritionService.instance.dietaryPreferenceOptions();
+      if (!mounted) return;
+      final dietTypes = all
+          .where((o) => o.category == 'DIET_TYPE')
+          .map((o) => (
+                key: (o.writeTokens.isNotEmpty ? o.writeTokens.first : o.key),
+                defaultLabel: o.defaultLabel,
+              ))
+          .toList(growable: false);
+      setState(() => _remoteOptions = dietTypes);
+    } catch (_) {
+      // Sessiz düş — hardcoded fallback kullanılacak.
+    }
+  }
+
+  // Key → emoji map. BE yeni key ekleyince burada emoji tanımlanır; tanımsız
+  // key için nötr fallback döner.
+  String _emojiFor(String key) {
+    switch (key) {
+      case 'standard':
+        return '🍽️';
+      case 'low_carb':
+        return '🥬';
+      case 'keto':
+        return '🥑';
+      case 'high_protein':
+        return '🥩';
+      case 'vegan':
+        return '🌱';
+      case 'vegetarian':
+        return '🥦';
+      case 'pescatarian':
+        return '🐟';
+      case 'mediterranean':
+        return '🫒';
+      case 'custom':
+        return '⚙️';
+      default:
+        return '🍴';
+    }
+  }
+
+  // Key → localized label. Mobil i18n tanımı varsa onu, yoksa BE'nin
+  // defaultLabel'ını kullan.
+  String _labelFor(String key, String defaultLabel, AppLocalizations l) {
+    switch (key) {
+      case 'standard':
+        return l.dietStandard;
+      case 'low_carb':
+        return l.dietLowCarb;
+      case 'keto':
+        return l.dietKeto;
+      case 'high_protein':
+        return l.dietHighProtein;
+      case 'custom':
+        return l.dietCustom;
+      default:
+        return defaultLabel.isEmpty ? key : defaultLabel;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final options = [
-      ('standard', '🍽️', l.dietStandard),
-      ('low_carb', '🥬', l.dietLowCarb),
-      ('keto', '🥑', l.dietKeto),
-      ('high_protein', '🥩', l.dietHighProtein),
-      ('custom', '⚙️', l.dietCustom),
+
+    // BE yanıtı geldiyse onu, gelmediyse (loading / error) statik fallback'i kullan.
+    final options = _remoteOptions ?? const [
+      (key: 'standard', defaultLabel: 'Standard'),
+      (key: 'low_carb', defaultLabel: 'Low-carb'),
+      (key: 'keto', defaultLabel: 'Keto'),
+      (key: 'high_protein', defaultLabel: 'High-protein'),
+      (key: 'custom', defaultLabel: 'Custom'),
     ];
 
     return SingleChildScrollView(
@@ -1226,14 +1308,19 @@ class _PageDietType extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingDietType, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(l.onboardingDietType, style: AppTypography.headlineLarge.copyWith(color: widget.textPrimary)),
           const SizedBox(height: 8),
-          Text(l.onboardingDietTypeSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(l.onboardingDietTypeSub, style: AppTypography.bodyMedium.copyWith(color: widget.textMuted)),
           const SizedBox(height: 32),
           ...options.map(
             (opt) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _PillButton(label: '${opt.$2}  ${opt.$3}', selected: dietType == opt.$1, isDark: isDark, onTap: () => onDietType(opt.$1)),
+              child: _PillButton(
+                label: '${_emojiFor(opt.key)}  ${_labelFor(opt.key, opt.defaultLabel, l)}',
+                selected: widget.dietType == opt.key,
+                isDark: widget.isDark,
+                onTap: () => widget.onDietType(opt.key),
+              ),
             ),
           ),
         ],
