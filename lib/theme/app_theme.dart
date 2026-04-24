@@ -32,8 +32,8 @@ class AppColors {
   static const darkCardDeep = Color(0xFF08080C);
   static const darkSurface = Color(0xFF2A2A3E);
   static const darkText = Color(0xFFF0EEF8);
-  static const darkTextMuted = Color(0xFF3A3A50);
-  static const darkTextSecondary = Color(0xFF5A5A70);
+  static const darkTextMuted = Color(0xFF9090A8); // eskisi: 0xFF3A3A50 (çok koyu)
+  static const darkTextSecondary = Color(0xFFB0B0C8); // eskisi: 0xFF5A5A70
 
   // Macro card backgrounds dark
   static const darkProteinBg = Color(0xFF1E1425);
@@ -47,8 +47,8 @@ class AppColors {
   static const lightBorder = Color(0xFFE8E6F5);
   static const lightSurface = Color(0xFFEEEDF8);
   static const lightText = Color(0xFF0F0F14);
-  static const lightTextMuted = Color(0xffaaaaabc);
-  static const lightTextSecondary = Color(0xFF9999AA);
+  static const lightTextMuted = Color(0xFF7777AA);
+  static const lightTextSecondary = Color(0xFF666688);
 
   // Macro card backgrounds light
   static const lightProteinBg = Color(0xFFEEECFC);
@@ -80,10 +80,7 @@ class AppTheme {
         onPrimary: AppColors.void_,
         onSurface: AppColors.darkText,
       ),
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).apply(
-        bodyColor: AppColors.darkText,
-        displayColor: AppColors.darkText,
-      ),
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).apply(bodyColor: AppColors.darkText, displayColor: AppColors.darkText),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.darkBg,
         elevation: 0,
@@ -119,10 +116,7 @@ class AppTheme {
         onPrimary: AppColors.lime,
         onSurface: AppColors.lightText,
       ),
-      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).apply(
-        bodyColor: AppColors.lightText,
-        displayColor: AppColors.lightText,
-      ),
+      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).apply(bodyColor: AppColors.lightText, displayColor: AppColors.lightText),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.lightBg,
         elevation: 0,
@@ -140,7 +134,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.void_,
-          foregroundColor: AppColors.lime,
+          foregroundColor: AppColors.snow,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
           padding: EdgeInsets.symmetric(vertical: 14.h),
           textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),

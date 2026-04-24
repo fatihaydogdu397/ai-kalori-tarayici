@@ -502,25 +502,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .where((a) => a.analyzedAt.year == targetDate.year && a.analyzedAt.month == targetDate.month && a.analyzedAt.day == targetDate.day)
         .toList();
 
-    if (selectedMeals.isEmpty) {
-      // Show recent meals without grouping
-      return Column(
-        children: history
-            .take(5)
-            .map(
-              (a) => _MealRow(
-                analysis: a,
-                isDark: isDark,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(analysis: a))),
-                onDelete: isToday ? () => context.read<AppProvider>().deleteAnalysis(a.id) : null,
-                onFavorite: isToday ? () => context.read<AppProvider>().toggleFavorite(a) : null,
-                l: l,
-              ),
-            )
-            .toList(),
-      );
-    }
-
     final order = [MealCategory.breakfast, MealCategory.lunch, MealCategory.dinner, MealCategory.snack];
     final labels = {
       MealCategory.breakfast: ('🌅', l.mealBreakfast),

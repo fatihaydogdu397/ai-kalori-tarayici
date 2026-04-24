@@ -4,26 +4,24 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
+import '../services/purchase_service.dart';
 import '../generated/app_localizations.dart';
+import 'home_screen.dart';
 
 class PaywallScreen extends StatefulWidget {
-  /// If true, user arrived from a hard limit (scan limit reached).
-  /// If false, user navigated here from settings / premium button.
-  final bool fromLimit;
-
-  const PaywallScreen({super.key, this.fromLimit = false});
+  const PaywallScreen({super.key});
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
 }
 
 class _PaywallScreenState extends State<PaywallScreen> {
-  bool _isYearly = true;
+  String _selectedPlan = 'yearly';
   bool _isLoading = false;
 
+  static const _weeklyPrice = '₺49';
   static const _monthlyPrice = '₺149';
   static const _yearlyPrice = '₺999';
-  static const _monthlyTotal = '₺1,788';
 
   static const _features = [
     ('🔍', 'Unlimited AI food scans', 'No daily cap, scan as much as you want'),
@@ -38,21 +36,46 @@ class _PaywallScreenState extends State<PaywallScreen> {
     setState(() => _isLoading = true);
     HapticFeedback.mediumImpact();
 
-    // TODO: Hook up RevenueCat purchase flow
-    // final provider = context.read<AppProvider>();
-    // await provider.purchaseSubscription(_isYearly ? 'yearly' : 'monthly');
-
-    await Future.delayed(const Duration(milliseconds: 1500));
+    final success = await PurchaseService.purchase(planType: _selectedPlan);
+    final provider = context.read<AppProvider>();
+    
+    if (success) {
+      await provider.refreshPremiumStatus();
+    }
 
     if (!mounted) return;
     setState(() => _isLoading = false);
-    Navigator.pop(context);
+
+    if (provider.isPremium) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      // Satın alma veya iptal sonrası hala premium değil, ekranda kalsın.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Satın alma tamamlanamadı veya iptal edildi.')),
+      );
+    }
   }
 
   Future<void> _restore() async {
+    setState(() => _isLoading = true);
     final provider = context.read<AppProvider>();
-    await provider.restorePurchases();
-    if (mounted) Navigator.pop(context);
+    final success = await provider.restorePurchases();
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+    
+    if (success && provider.isPremium) {
+       Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Geri yüklenecek abonelik bulunamadı.')),
+      );
+    }
   }
 
   @override
@@ -63,26 +86,30 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final accentFg = isDark ? AppColors.void_ : AppColors.snow;
     final l = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: bg,
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildHero(isDark, accent),
-                  SizedBox(height: 24.h),
-                  _buildFeatureList(isDark),
-                  SizedBox(height: 24.h),
-                  _buildPlanSelector(isDark, accent),
-                  SizedBox(height: 100.h),
-                ],
+    // Hard paywall, no close button. Pop scope disabled.
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        backgroundColor: bg,
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildHero(isDark, accent),
+                    SizedBox(height: 16.h),
+                    _buildFeatureList(isDark),
+                    SizedBox(height: 24.h),
+                    _buildPlanSelector(isDark, accent),
+                    SizedBox(height: 100.h),
+                  ],
+                ),
               ),
             ),
-          ),
-          _buildBottomCTA(isDark, accent, accentFg, l),
-        ],
+            _buildBottomCTA(isDark, accent, accentFg, l),
+          ],
+        ),
       ),
     );
   }
@@ -92,7 +119,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       children: [
         // Gradient background
         Container(
-          height: 300.h,
+          height: 260.h,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -103,31 +130,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
             ),
           ),
         ),
-        // Back button
-        SafeArea(
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: EdgeInsets.all(16.w),
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(Icons.close_rounded, color: Colors.white, size: 18.sp),
-                ),
-              ),
-            ),
-          ),
-        ),
         // Hero content
         SafeArea(
+          bottom: false,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(32.w, 60.h, 32.w, 32.h),
+            padding: EdgeInsets.fromLTRB(32.w, 40.h, 32.w, 20.h),
             child: Column(
               children: [
                 // Logo mark
@@ -143,7 +150,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     child: Text('⚡', style: TextStyle(fontSize: 30.sp)),
                   ),
                 ),
-                SizedBox(height: 20.h),
+                SizedBox(height: 16.h),
                 Text(
                   'eatiq Pro',
                   style: TextStyle(
@@ -155,11 +162,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Unlock everything.\nEat smarter.',
+                  'Unlock everything.\nStart your 3-Day Free Trial!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 16.sp,
-                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 15.sp,
+                    color: Colors.white.withValues(alpha: 0.8),
                     height: 1.4,
                   ),
                 ),
@@ -208,17 +215,17 @@ class _PaywallScreenState extends State<PaywallScreen> {
             return Column(
               children: [
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   child: Row(
                     children: [
                       Container(
-                        width: 40.w,
-                        height: 40.w,
+                        width: 38.w,
+                        height: 38.w,
                         decoration: BoxDecoration(
                           color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
                           borderRadius: BorderRadius.circular(12.r),
                         ),
-                        child: Center(child: Text(emoji, style: TextStyle(fontSize: 20.sp))),
+                        child: Center(child: Text(emoji, style: TextStyle(fontSize: 18.sp))),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
@@ -259,38 +266,54 @@ class _PaywallScreenState extends State<PaywallScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose your plan',
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textMuted),
+            'Choose your plan (Includes 3-Day Free Trial)',
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textMuted),
           ),
           SizedBox(height: 12.h),
           // Yearly plan
           _PlanOption(
-            isSelected: _isYearly,
+            isSelected: _selectedPlan == 'yearly',
             isDark: isDark,
             accent: accent,
             badge: 'Save 44%',
             title: 'Yearly',
             price: _yearlyPrice,
-            subtitle: '${(_yearlyPrice.replaceAll('₺', '').replaceAll(',', ''))}  •  Billed annually',
-            subNote: 'vs $_monthlyTotal if paid monthly',
+            subtitle: '$_yearlyPrice / year after trial',
+            subNote: 'Best Value',
             onTap: () {
-              setState(() => _isYearly = true);
+              setState(() => _selectedPlan = 'yearly');
               HapticFeedback.selectionClick();
             },
           ),
           SizedBox(height: 10.h),
           // Monthly plan
           _PlanOption(
-            isSelected: !_isYearly,
+            isSelected: _selectedPlan == 'monthly',
             isDark: isDark,
             accent: accent,
             badge: null,
             title: 'Monthly',
             price: _monthlyPrice,
-            subtitle: '$_monthlyPrice/month  •  Billed monthly',
+            subtitle: '$_monthlyPrice / month after trial',
             subNote: null,
             onTap: () {
-              setState(() => _isYearly = false);
+              setState(() => _selectedPlan = 'monthly');
+              HapticFeedback.selectionClick();
+            },
+          ),
+          SizedBox(height: 10.h),
+          // Weekly plan
+          _PlanOption(
+            isSelected: _selectedPlan == 'weekly',
+            isDark: isDark,
+            accent: accent,
+            badge: 'Flexible',
+            title: 'Weekly',
+            price: _weeklyPrice,
+            subtitle: '$_weeklyPrice / week after trial',
+            subNote: null,
+            onTap: () {
+              setState(() => _selectedPlan = 'weekly');
               HapticFeedback.selectionClick();
             },
           ),
@@ -335,10 +358,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         ),
                       )
                     : Text(
-                        _isYearly
-                            ? 'Start with Yearly — $_yearlyPrice'
-                            : 'Start with Monthly — $_monthlyPrice',
-                        style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
+                        'Start 3-Day Free Trial',
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
                       ),
               ),
             ),
@@ -347,7 +368,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 GestureDetector(
-                  onTap: _restore,
+                  onTap: _isLoading ? null : _restore,
                   child: Text(
                     'Restore purchase',
                     style: TextStyle(fontSize: 12.sp, color: textMuted, decoration: TextDecoration.underline),

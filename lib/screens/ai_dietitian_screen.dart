@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:ai_kalori_tarayici/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
@@ -19,8 +20,6 @@ const _mockResponses = [
   "Post-workout nutrition window is real but not as narrow as once thought. Getting protein within 2 hours of training is sufficient for most people.",
 ];
 
-const _greeting = "Hi! I'm your AI Dietitian powered by eatiq. Ask me anything about nutrition, meal planning, or how to reach your health goals. 🥗";
-
 class _ChatMessage {
   final String text;
   final bool isUser;
@@ -38,10 +37,17 @@ class AiDietitianScreen extends StatefulWidget {
 }
 
 class _AiDietitianScreenState extends State<AiDietitianScreen> {
-  final _messages = <_ChatMessage>[
-    _ChatMessage(text: _greeting, isUser: false, time: DateTime.now()),
-  ];
+  final _messages = <_ChatMessage>[];
   final _ctrl = TextEditingController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_messages.isEmpty) {
+      _messages.add(_ChatMessage(text: AppLocalizations.of(context).aiGreeting, isUser: false, time: DateTime.now()));
+    }
+  }
+
   final _scroll = ScrollController();
   bool _isTyping = false;
   final _rng = Random();
@@ -69,11 +75,7 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
       if (!mounted) return;
       setState(() {
         _isTyping = false;
-        _messages.add(_ChatMessage(
-          text: _mockResponses[_rng.nextInt(_mockResponses.length)],
-          isUser: false,
-          time: DateTime.now(),
-        ));
+        _messages.add(_ChatMessage(text: _mockResponses[_rng.nextInt(_mockResponses.length)], isUser: false, time: DateTime.now()));
       });
       _scrollToBottom();
     });
@@ -82,27 +84,21 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scroll.hasClients) {
-        _scroll.animateTo(
-          _scroll.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+        _scroll.animateTo(_scroll.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
     final accent = isDark ? AppColors.lime : AppColors.limeDark;
-    final border = isDark
-        ? null
-        : Border.all(color: AppColors.lightBorder, width: 0.5);
+    final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
 
     return Scaffold(
       backgroundColor: bg,
@@ -114,14 +110,7 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
               padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
               decoration: BoxDecoration(
                 color: bg,
-                border: Border(
-                  bottom: BorderSide(
-                    color: isDark
-                        ? AppColors.darkSurface
-                        : AppColors.lightBorder,
-                    width: 0.5,
-                  ),
-                ),
+                border: Border(bottom: BorderSide(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, width: 0.5)),
               ),
               child: Row(
                 children: [
@@ -130,16 +119,8 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
                     child: Container(
                       width: 36.w,
                       height: 36.w,
-                      decoration: BoxDecoration(
-                        color: cardBg,
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: border,
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16.sp,
-                        color: textMuted,
-                      ),
+                      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(10.r), border: border),
+                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 16.sp, color: textMuted),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -160,49 +141,30 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'AI Dietitian',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w800,
-                            color: textPrimary,
-                          ),
+                          l.aiDietitian,
+                          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: textPrimary),
                         ),
                         Text(
-                          'Powered by eatiq AI',
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            color: textMuted,
-                            fontWeight: FontWeight.w400,
-                          ),
+                          l.aiPoweredBy,
+                          style: TextStyle(fontSize: 11.sp, color: textMuted, fontWeight: FontWeight.w400),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.mint.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(color: AppColors.mint.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10.r)),
                     child: Row(
                       children: [
                         Container(
                           width: 6.w,
                           height: 6.w,
-                          decoration: const BoxDecoration(
-                            color: AppColors.mint,
-                            shape: BoxShape.circle,
-                          ),
+                          decoration: const BoxDecoration(color: AppColors.mint, shape: BoxShape.circle),
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          'Online',
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            color: AppColors.mint,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          l.onlineLabel,
+                          style: TextStyle(fontSize: 11.sp, color: AppColors.mint, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -230,36 +192,20 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
                 itemCount: _messages.length + (_isTyping ? 1 : 0),
                 itemBuilder: (_, i) {
                   if (_isTyping && i == _messages.length) {
-                    return _TypingIndicator(
-                        isDark: isDark, cardBg: cardBg, accent: accent);
+                    return _TypingIndicator(isDark: isDark, cardBg: cardBg, accent: accent);
                   }
                   final msg = _messages[i];
-                  return _Bubble(
-                    message: msg,
-                    isDark: isDark,
-                    cardBg: cardBg,
-                    textPrimary: textPrimary,
-                    textMuted: textMuted,
-                    accent: accent,
-                  );
+                  return _Bubble(message: msg, isDark: isDark, cardBg: cardBg, textPrimary: textPrimary, textMuted: textMuted, accent: accent);
                 },
               ),
             ),
 
             // ── Input Bar ─────────────────────────────────────────────────
             Container(
-              padding: EdgeInsets.fromLTRB(
-                  16.w, 8.h, 16.w, MediaQuery.of(context).padding.bottom + 8.h),
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, MediaQuery.of(context).padding.bottom + 8.h),
               decoration: BoxDecoration(
                 color: bg,
-                border: Border(
-                  top: BorderSide(
-                    color: isDark
-                        ? AppColors.darkSurface
-                        : AppColors.lightBorder,
-                    width: 0.5,
-                  ),
-                ),
+                border: Border(top: BorderSide(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, width: 0.5)),
               ),
               child: Row(
                 children: [
@@ -268,27 +214,17 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
                       decoration: BoxDecoration(
                         color: cardBg,
                         borderRadius: BorderRadius.circular(22.r),
-                        border: isDark
-                            ? null
-                            : Border.all(
-                                color: AppColors.lightBorder, width: 0.5),
+                        border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
                       ),
                       child: TextField(
                         controller: _ctrl,
                         onSubmitted: (_) => _send(),
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: textPrimary,
-                        ),
+                        style: TextStyle(fontSize: 14.sp, color: textPrimary),
                         decoration: InputDecoration(
-                          hintText: 'Ask about nutrition...',
-                          hintStyle: TextStyle(
-                            fontSize: 14.sp,
-                            color: textMuted,
-                          ),
+                          hintText: l.askNutritionHint,
+                          hintStyle: TextStyle(fontSize: 14.sp, color: textMuted),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.w, vertical: 10.h),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                           isDense: true,
                         ),
                         maxLines: null,
@@ -302,15 +238,8 @@ class _AiDietitianScreenState extends State<AiDietitianScreen> {
                     child: Container(
                       width: 42.w,
                       height: 42.w,
-                      decoration: BoxDecoration(
-                        color: accent,
-                        borderRadius: BorderRadius.circular(21.r),
-                      ),
-                      child: Icon(
-                        Icons.send_rounded,
-                        color: isDark ? AppColors.void_ : Colors.white,
-                        size: 18.sp,
-                      ),
+                      decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(21.r)),
+                      child: Icon(Icons.send_rounded, color: isDark ? AppColors.void_ : Colors.white, size: 18.sp),
                     ),
                   ),
                 ],
@@ -330,31 +259,22 @@ class _QuickPrompts extends StatelessWidget {
   final Color accent, textMuted;
   final void Function(String) onTap;
 
-  const _QuickPrompts({
-    required this.isDark,
-    required this.accent,
-    required this.textMuted,
-    required this.onTap,
-  });
-
-  static const _prompts = [
-    'How much protein do I need?',
-    'Best foods for fat loss?',
-    'Should I count calories?',
-    'Meal prep tips?',
-  ];
+  const _QuickPrompts({required this.isDark, required this.accent, required this.textMuted, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final prompts = [l.quickPromptProtein, l.quickPromptFatLoss, l.quickPromptCalories, l.quickPromptMealPrep];
+
     return SizedBox(
       height: 36.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 16.w),
-        itemCount: _prompts.length,
+        itemCount: prompts.length,
         separatorBuilder: (_, __) => SizedBox(width: 8.w),
         itemBuilder: (_, i) => GestureDetector(
-          onTap: () => onTap(_prompts[i]),
+          onTap: () => onTap(prompts[i]),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
@@ -363,12 +283,8 @@ class _QuickPrompts extends StatelessWidget {
             ),
             alignment: Alignment.center,
             child: Text(
-              _prompts[i],
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: accent,
-                fontWeight: FontWeight.w600,
-              ),
+              prompts[i],
+              style: TextStyle(fontSize: 12.sp, color: accent, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -399,8 +315,7 @@ class _Bubble extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isUser) ...[
@@ -419,12 +334,9 @@ class _Bubble extends StatelessWidget {
           ],
           Flexible(
             child: Container(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
               decoration: BoxDecoration(
-                color: isUser
-                    ? accent
-                    : cardBg,
+                color: isUser ? accent : cardBg,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16.r),
                   topRight: Radius.circular(16.r),
@@ -436,9 +348,7 @@ class _Bubble extends StatelessWidget {
                 message.text,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: isUser
-                      ? (isDark ? AppColors.void_ : Colors.white)
-                      : textPrimary,
+                  color: isUser ? (isDark ? AppColors.void_ : Colors.white) : textPrimary,
                   height: 1.45,
                   fontWeight: FontWeight.w400,
                 ),
@@ -456,24 +366,19 @@ class _Bubble extends StatelessWidget {
 class _TypingIndicator extends StatefulWidget {
   final bool isDark;
   final Color cardBg, accent;
-  const _TypingIndicator(
-      {required this.isDark, required this.cardBg, required this.accent});
+  const _TypingIndicator({required this.isDark, required this.cardBg, required this.accent});
 
   @override
   State<_TypingIndicator> createState() => _TypingIndicatorState();
 }
 
-class _TypingIndicatorState extends State<_TypingIndicator>
-    with SingleTickerProviderStateMixin {
+class _TypingIndicatorState extends State<_TypingIndicator> with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))..repeat();
   }
 
   @override
@@ -527,10 +432,7 @@ class _TypingIndicatorState extends State<_TypingIndicator>
                         child: Container(
                           width: 7.w,
                           height: 7.w,
-                          decoration: BoxDecoration(
-                            color: widget.accent.withValues(alpha: 0.6),
-                            shape: BoxShape.circle,
-                          ),
+                          decoration: BoxDecoration(color: widget.accent.withValues(alpha: 0.6), shape: BoxShape.circle),
                         ),
                       ),
                     );

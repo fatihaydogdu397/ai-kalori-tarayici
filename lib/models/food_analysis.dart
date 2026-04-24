@@ -292,7 +292,7 @@ class FoodAnalysis {
       ),
       summary: _stripManualPrefix((map['summary'] ?? '') as String),
       advice: (map['advice'] ?? '') as String,
-      analyzedAt: DateTime.parse(map['analyzedAt'] as String),
+      analyzedAt: DateTime.parse(map['analyzedAt'] as String).toLocal(),
       mealCategory: MealCategoryX.fromString(mealCat),
       isFavorite: map['isFavorite'] == true,
     );

@@ -60,13 +60,15 @@ class _ResultScreenState extends State<ResultScreen> {
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
+    final textSecondary = isDark ? const Color(0xFFCCCCCC) : const Color(0xFF555555);
     final divider = isDark ? AppColors.darkSurface : AppColors.lightBorder;
     final btnBg = isDark ? AppColors.lime : AppColors.void_;
     final btnText = isDark ? AppColors.void_ : AppColors.lime;
     final aiBg = isDark ? AppColors.lime : AppColors.void_;
     final aiText = isDark ? AppColors.void_ : AppColors.lime;
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
+    final accent = isDark ? AppColors.lime : AppColors.limeDeep;
     final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
 
     final food = _currentAnalysis.foods.isNotEmpty ? _currentAnalysis.foods.first : null;
@@ -74,9 +76,21 @@ class _ResultScreenState extends State<ResultScreen> {
 
     final tagConfigs = [
       (AppColors.lime, isDark ? const Color(0xFF1A2010) : const Color(0xFFEEF5E0), isDark ? const Color(0xFF3A5A20) : const Color(0xFFAACE60)),
-      (isDark ? AppColors.violet : AppColors.violetDark, isDark ? const Color(0xFF1A1A30) : const Color(0xFFEEECFC), isDark ? const Color(0xFF3A3A60) : const Color(0xFFAAAADE)),
-      (isDark ? AppColors.amber : AppColors.amberDark, isDark ? const Color(0xFF1F1510) : const Color(0xFFFFF4E6), isDark ? const Color(0xFF4A3A20) : const Color(0xFFDDAA60)),
-      (isDark ? AppColors.coral : AppColors.coralDark, isDark ? const Color(0xFF200E10) : const Color(0xFFFFEEEE), isDark ? const Color(0xFF4A2020) : const Color(0xFFDDAAAA)),
+      (
+        isDark ? AppColors.violet : AppColors.violetDark,
+        isDark ? const Color(0xFF1A1A30) : const Color(0xFFEEECFC),
+        isDark ? const Color(0xFF3A3A60) : const Color(0xFFAAAADE),
+      ),
+      (
+        isDark ? AppColors.amber : AppColors.amberDark,
+        isDark ? const Color(0xFF1F1510) : const Color(0xFFFFF4E6),
+        isDark ? const Color(0xFF4A3A20) : const Color(0xFFDDAA60),
+      ),
+      (
+        isDark ? AppColors.coral : AppColors.coralDark,
+        isDark ? const Color(0xFF200E10) : const Color(0xFFFFEEEE),
+        isDark ? const Color(0xFF4A2020) : const Color(0xFFDDAAAA),
+      ),
     ];
 
     final l = AppLocalizations.of(context);
@@ -95,37 +109,44 @@ class _ResultScreenState extends State<ResultScreen> {
                     child: Icon(Icons.chevron_left_rounded, color: textMuted, size: 26),
                   ),
                   const SizedBox(width: 8),
-                  Text(l.analysisResult, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textPrimary)),
+                  Text(
+                    l.analysisResult,
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textPrimary),
+                  ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: () async {
-                      final updated = await Navigator.push<bool>(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ManualEntryScreen(existing: _currentAnalysis),
+                  if (_currentAnalysis.analyzedAt.year == DateTime.now().year &&
+                      _currentAnalysis.analyzedAt.month == DateTime.now().month &&
+                      _currentAnalysis.analyzedAt.day == DateTime.now().day)
+                    GestureDetector(
+                      onTap: () async {
+                        final updated = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(builder: (_) => ManualEntryScreen(existing: _currentAnalysis)),
+                        );
+                        if (updated == true && context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
                         ),
-                      );
-                      if (updated == true && context.mounted) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.lightSurface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.edit_rounded, size: 13, color: textMuted),
-                          const SizedBox(width: 4),
-                          Text(l.editProfile, style: TextStyle(fontSize: 12, color: textMuted, fontWeight: FontWeight.w600)),
-                        ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.edit_rounded, size: 13, color: textMuted),
+                            const SizedBox(width: 4),
+                            Text(
+                              l.editProfile,
+                              style: TextStyle(fontSize: 12, color: textMuted, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -140,19 +161,31 @@ class _ResultScreenState extends State<ResultScreen> {
                     // Food image
                     Stack(
                       children: [
-                        Hero(
-                          tag: 'food_image_${_currentAnalysis.id}',
-                          child: Container(
-                            width: double.infinity,
-                            height: 160,
-                            decoration: BoxDecoration(
-                              color: isDark ? AppColors.darkCard : AppColors.lightSurface,
-                              borderRadius: BorderRadius.circular(14),
+                        GestureDetector(
+                          onTap: File(_currentAnalysis.imagePath).existsSync()
+                              ? () => Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    opaque: false,
+                                    pageBuilder: (_, __, ___) =>
+                                        _FullscreenImagePage(imagePath: _currentAnalysis.imagePath, tag: 'food_image_${_currentAnalysis.id}'),
+                                  ),
+                                )
+                              : null,
+                          child: Hero(
+                            tag: 'food_image_${_currentAnalysis.id}',
+                            child: Container(
+                              width: double.infinity,
+                              height: 160,
+                              decoration: BoxDecoration(
+                                color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              clipBehavior: Clip.hardEdge,
+                              child: File(_currentAnalysis.imagePath).existsSync()
+                                  ? Image.file(File(_currentAnalysis.imagePath), fit: BoxFit.cover)
+                                  : Center(child: Icon(Icons.restaurant_rounded, size: 48, color: textMuted)),
                             ),
-                            clipBehavior: Clip.hardEdge,
-                            child: File(_currentAnalysis.imagePath).existsSync()
-                                ? Image.file(File(_currentAnalysis.imagePath), fit: BoxFit.cover)
-                                : Center(child: Icon(Icons.restaurant_rounded, size: 48, color: textMuted)),
                           ),
                         ),
                         Positioned(
@@ -161,7 +194,10 @@ class _ResultScreenState extends State<ResultScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(color: aiBg, borderRadius: BorderRadius.circular(6)),
-                            child: Text('AI', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: aiText)),
+                            child: Text(
+                              'AI',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: aiText),
+                            ),
                           ),
                         ),
                       ],
@@ -182,7 +218,15 @@ class _ResultScreenState extends State<ResultScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      food?.nameTr ?? _currentAnalysis.summary,
+                                      () {
+                                        final name = food?.nameTr ?? '';
+                                        if (name.isNotEmpty) return name;
+                                        // summary'nin ilk 3 kelimesini fallback yap
+                                        final words = _currentAnalysis.summary.trim().split(RegExp(r'\s+'));
+                                        return words.take(3).join(' ');
+                                      }(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textPrimary),
                                     ),
                                     const SizedBox(height: 3),
@@ -214,10 +258,16 @@ class _ResultScreenState extends State<ResultScreen> {
                           ),
                           const SizedBox(height: 12),
                           // PORTION SLIDER
-                          if (food != null) ...[
+                          if (food != null &&
+                              _currentAnalysis.analyzedAt.year == DateTime.now().year &&
+                              _currentAnalysis.analyzedAt.month == DateTime.now().month &&
+                              _currentAnalysis.analyzedAt.day == DateTime.now().day) ...[
                             Row(
                               children: [
-                                Text('${_currentPortion.toStringAsFixed(0)}${food.portionUnit}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: btnBg)),
+                                Text(
+                                  '${_currentPortion.toStringAsFixed(0)}${food.portionUnit}',
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: btnBg),
+                                ),
                                 Expanded(
                                   child: SliderTheme(
                                     data: SliderTheme.of(context).copyWith(
@@ -245,11 +295,23 @@ class _ResultScreenState extends State<ResultScreen> {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              _MacroCell(value: '${total.protein.toStringAsFixed(0)}g', label: l.protein, color: isDark ? AppColors.violet : AppColors.violetDark),
+                              _MacroCell(
+                                value: '${total.protein.toStringAsFixed(0)}g',
+                                label: l.protein,
+                                color: isDark ? AppColors.violet : AppColors.violetDark,
+                              ),
                               VerticalDivider(color: divider, width: 1),
-                              _MacroCell(value: '${total.carbs.toStringAsFixed(0)}g', label: l.carbs, color: isDark ? AppColors.amber : AppColors.amberDark),
+                              _MacroCell(
+                                value: '${total.carbs.toStringAsFixed(0)}g',
+                                label: l.carbs,
+                                color: isDark ? AppColors.amber : AppColors.amberDark,
+                              ),
                               VerticalDivider(color: divider, width: 1),
-                              _MacroCell(value: '${total.fat.toStringAsFixed(0)}g', label: l.fat, color: isDark ? AppColors.coral : AppColors.coralDark),
+                              _MacroCell(
+                                value: '${total.fat.toStringAsFixed(0)}g',
+                                label: l.fat,
+                                color: isDark ? AppColors.coral : AppColors.coralDark,
+                              ),
                             ],
                           ),
                         ],
@@ -289,12 +351,36 @@ class _ResultScreenState extends State<ResultScreen> {
                       const SizedBox(height: 10),
                     ],
 
+                    // AI Notu (summary) — kısa açıklama bölümü
+                    if (_currentAnalysis.summary.isNotEmpty) ...[
+                      _ExpandableNote(
+                        label: 'AI Notu',
+                        text: _currentAnalysis.summary,
+                        cardBg: cardBg,
+                        border: border,
+                        textMuted: textMuted,
+                        textBody: textSecondary,
+                        accent: accent,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+
                     // Advice
                     if (_currentAnalysis.advice.isNotEmpty)
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
-                        child: Text(_currentAnalysis.advice, style: TextStyle(fontSize: 12, color: textMuted, height: 1.5)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Öneri',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textMuted),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(_currentAnalysis.advice, style: TextStyle(fontSize: 13, color: textSecondary, height: 1.55)),
+                          ],
+                        ),
                       ),
 
                     const SizedBox(height: 24),
@@ -331,7 +417,10 @@ class _ResultScreenState extends State<ResultScreen> {
                         children: [
                           Icon(_portionChanged ? Icons.save_rounded : Icons.check_circle_outline_rounded, size: 20),
                           const SizedBox(width: 8),
-                          Text(_portionChanged ? l.save : l.backToHome, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText)),
+                          Text(
+                            _portionChanged ? l.save : l.backToHome,
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText),
+                          ),
                         ],
                       ),
                     ),
@@ -351,7 +440,10 @@ class _ResultScreenState extends State<ResultScreen> {
                           children: [
                             Icon(Icons.camera_alt_rounded, size: 16, color: textMuted),
                             const SizedBox(width: 6),
-                            Text('Tekrar Analiz Et', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textMuted)),
+                            Text(
+                              'Tekrar Analiz Et',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textMuted),
+                            ),
                           ],
                         ),
                       ),
@@ -374,14 +466,89 @@ class _MacroCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textMuted = Theme.of(context).brightness == Brightness.dark ? AppColors.darkTextMuted : const Color(0xFFAAAAAA);
+    final textMuted = Theme.of(context).brightness == Brightness.dark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
     return Expanded(
       child: Column(
         children: [
-          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: color)),
+          Text(
+            value,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: color),
+          ),
           const SizedBox(height: 2),
           Text(label, style: TextStyle(fontSize: 10, color: textMuted)),
         ],
+      ),
+    );
+  }
+}
+
+// Açılıp kapanan AI Notu bölümü
+class _ExpandableNote extends StatefulWidget {
+  final String label;
+  final String text;
+  final Color cardBg, textMuted, textBody, accent;
+  final BoxBorder? border;
+
+  const _ExpandableNote({
+    required this.label,
+    required this.text,
+    required this.cardBg,
+    required this.textMuted,
+    required this.textBody,
+    required this.accent,
+    this.border,
+  });
+
+  @override
+  State<_ExpandableNote> createState() => _ExpandableNoteState();
+}
+
+class _ExpandableNoteState extends State<_ExpandableNote> {
+  bool _expanded = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => setState(() => _expanded = !_expanded),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(color: widget.cardBg, borderRadius: BorderRadius.circular(14), border: widget.border),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(widget.label, style: TextStyle(fontSize: 11, color: widget.textMuted)),
+                const Spacer(),
+                Icon(_expanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 16, color: widget.textMuted),
+              ],
+            ),
+            if (_expanded) ...[const SizedBox(height: 8), Text(widget.text, style: TextStyle(fontSize: 13, color: widget.textBody, height: 1.55))],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FullscreenImagePage extends StatelessWidget {
+  final String imagePath;
+  final String tag;
+
+  const _FullscreenImagePage({required this.imagePath, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Center(
+          child: Hero(
+            tag: tag,
+            child: InteractiveViewer(minScale: 0.5, maxScale: 4.0, child: Image.file(File(imagePath), fit: BoxFit.contain)),
+          ),
+        ),
       ),
     );
   }

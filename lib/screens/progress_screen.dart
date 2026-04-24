@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
+import '../generated/app_localizations.dart';
 import '../services/app_provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -27,6 +28,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
@@ -54,7 +56,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 elevation: 0,
                 toolbarHeight: 56,
                 title: Text(
-                  'Progress',
+                  l.progress,
                   style: TextStyle(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.w800,
@@ -87,11 +89,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       // Pill tab bar (full-width)
                       _PillTabBar(
                         selectedIndex: _tabIndex,
-                        labels: const [
-                          'Today',
-                          'This Week',
-                          '30 Days',
-                          'Weight',
+                        labels: [
+                          l.today,
+                          l.thisWeek,
+                          l.thirtyDays,
+                          l.weight,
                         ],
                         accent: accent,
                         cardBg: cardBg,
@@ -140,20 +142,21 @@ class _ProgressScreenState extends State<ProgressScreen> {
     switch (_tabIndex) {
       case 0:
         return _buildTodayHero(
-            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       case 1:
         return _buildWeekHero(
-            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       case 2:
         return _buildMonthHero(
-            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       default:
         return _buildWeightHero(
-            provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
     }
   }
 
   Widget _buildTodayHero(
+    BuildContext context,
     AppProvider provider,
     Color cardBg,
     Color textPrimary,
@@ -168,6 +171,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final car = (tStats['carbs'] as num? ?? 0).toDouble();
     final fat = (tStats['fat'] as num? ?? 0).toDouble();
     final goal = provider.dailyCalorieGoal;
+    final l = AppLocalizations.of(context);
     final calProgress = goal > 0 ? (cal / goal).clamp(0.0, 1.0) : 0.0;
     final remaining = (goal - cal).clamp(0.0, double.infinity);
 
@@ -185,7 +189,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           Row(
             children: [
               Text(
-                'Today',
+                l.today,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -235,8 +239,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     SizedBox(height: 4.h),
                     Text(
                       goal > 0
-                          ? '${remaining.toStringAsFixed(0)} kcal remaining · goal ${goal.toStringAsFixed(0)}'
-                          : 'No goal set',
+                          ? l.kcalRemainingGoal(remaining.toStringAsFixed(0), goal.toStringAsFixed(0))
+                          : l.noGoalSet,
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: textMuted,
@@ -333,6 +337,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _buildWeekHero(
+    BuildContext context,
     AppProvider provider,
     Color cardBg,
     Color textPrimary,
@@ -355,19 +360,20 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final achievement = insights.isNotEmpty
         ? (insights['goalAchievement'] as double)
         : 0.0;
+    final l = AppLocalizations.of(context);
 
     return _HeroStatRow(
-      label: 'This Week',
+      label: l.thisWeekLabel,
       leftValue: avgCal.toStringAsFixed(0),
       leftUnit: 'kcal',
-      leftSub: 'avg / day',
+      leftSub: l.avgPerDay,
       leftColor: accent,
       rightValue: totalMeals.toString(),
       rightUnit: '',
-      rightSub: 'meals logged',
+      rightSub: l.mealsLoggedLabel,
       rightColor: AppColors.violet,
       badgeLabel: achievement > 0
-          ? 'Goal ${achievement.toStringAsFixed(0)}% hit'
+          ? l.goalHitBadge(achievement.toStringAsFixed(0))
           : null,
       badgeColor: accent,
       cardBg: cardBg,
@@ -379,6 +385,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _buildMonthHero(
+    BuildContext context,
     AppProvider provider,
     Color cardBg,
     Color textPrimary,
@@ -401,19 +408,20 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final consistency = insights.isNotEmpty
         ? (insights['consistencyScore'] as double)
         : 0.0;
+    final l = AppLocalizations.of(context);
 
     return _HeroStatRow(
-      label: '30 Days',
+      label: l.thirtyDays,
       leftValue: avgCal.toStringAsFixed(0),
       leftUnit: 'kcal',
-      leftSub: 'avg / day',
+      leftSub: l.avgPerDay,
       leftColor: accent,
       rightValue: totalMeals.toString(),
       rightUnit: '',
-      rightSub: 'meals logged',
+      rightSub: l.mealsLoggedLabel,
       rightColor: AppColors.violet,
       badgeLabel: consistency > 0
-          ? '${consistency.toStringAsFixed(0)}% consistent'
+          ? l.consistencyBadge(consistency.toStringAsFixed(0))
           : null,
       badgeColor: AppColors.amber,
       cardBg: cardBg,
@@ -425,6 +433,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Widget _buildWeightHero(
+    BuildContext context,
     AppProvider provider,
     Color cardBg,
     Color textPrimary,
@@ -445,31 +454,32 @@ class _ProgressScreenState extends State<ProgressScreen> {
         : lastWeight;
     final delta = lastWeight - startWeight;
     final hasDelta = logs.length > 1;
+    final l = AppLocalizations.of(context);
 
     String deltaBadge = '';
     Color deltaColor = textMuted;
     if (hasDelta) {
       if (delta < 0) {
-        deltaBadge = '↓ ${delta.abs().toStringAsFixed(1)} $unit lost';
+        deltaBadge = l.weightLostLabel(delta.abs().toStringAsFixed(1), unit);
         deltaColor = AppColors.mint;
       } else if (delta > 0) {
-        deltaBadge = '↑ ${delta.toStringAsFixed(1)} $unit gained';
+        deltaBadge = l.weightGainedLabel(delta.abs().toStringAsFixed(1), unit);
         deltaColor = AppColors.coral;
       } else {
-        deltaBadge = 'Stable weight';
+        deltaBadge = l.weightStable;
         deltaColor = textMuted;
       }
     }
 
     return _HeroStatRow(
-      label: 'Weight',
+      label: l.weight,
       leftValue: lastWeight.toStringAsFixed(1),
       leftUnit: unit,
-      leftSub: 'current',
+      leftSub: l.currentLabel,
       leftColor: AppColors.violet,
       rightValue: targetWeight > 0 ? targetWeight.toStringAsFixed(1) : '—',
       rightUnit: targetWeight > 0 ? unit : '',
-      rightSub: 'target',
+      rightSub: l.targetLabel,
       rightColor: accent,
       badgeLabel: hasDelta ? deltaBadge : null,
       badgeColor: deltaColor,

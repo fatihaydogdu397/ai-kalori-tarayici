@@ -73,7 +73,7 @@ class ProfileScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                   Text(
+                                  Text(
                                     name,
                                     style: AppTypography.titleMedium.copyWith(color: textPrimary, fontWeight: FontWeight.w800),
                                   ),
@@ -98,55 +98,18 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
 
-                      // 2. Premium banner
-                      if (!provider.isPremium) ...[
-                        GestureDetector(
-                          onTap: () => _showPaywall(context, l, isDark),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: isDark
-                                    ? [const Color(0xFF1A2A0A), const Color(0xFF0F1A08)]
-                                    : [const Color(0xFFD4F06A), const Color(0xFFC8F135)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Row(
-                              children: [
-                                const Text('⚡', style: TextStyle(fontSize: 24)),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        l.premium,
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w700,
-                                          color: isDark ? AppColors.lime : AppColors.void_,
-                                        ),
-                                      ),
-                                      Text(
-                                        l.premiumSub,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: isDark ? AppColors.lime.withOpacity(0.7) : AppColors.void_.withOpacity(0.6),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(Icons.arrow_forward_ios_rounded, size: 14, color: isDark ? AppColors.lime : AppColors.void_),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                      // 2. Premium Widget & Upgrades
+                      FutureBuilder<String?>(
+                        future: PurchaseService.getActivePlan(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          // Since they are here, they should have an active plan or it's a mock delay
+                          final plan = snapshot.data ?? 'yearly'; // Fallback for dev
+                          return _buildSubscriptionWidget(context, plan, isDark, l);
+                        },
+                      ),
 
                       // 3. Vücut Analizi
                       if (provider.weight > 0)
@@ -172,15 +135,95 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showPaywall(BuildContext context, AppLocalizations l, bool isDark) {
-    final accent = isDark ? AppColors.lime : AppColors.void_;
-    final accentFg = isDark ? AppColors.void_ : AppColors.lime;
+  Widget _buildSubscriptionWidget(BuildContext context, String plan, bool isDark, AppLocalizations l) {
+    if (plan == 'yearly') {
+      return _buildUpgradeCard(context, isDark, l, 'Yearly Plan Active', 'You are on the best value plan.', null);
+    } else if (plan == 'monthly') {
+      return _buildUpgradeCard(context, isDark, l, 'Monthly Plan Active', 'Upgrade to Yearly and save 44%', 'yearly');
+    } else if (plan == 'weekly') {
+      return _buildUpgradeCard(context, isDark, l, 'Weekly Plan Active', 'Upgrade to Monthly or Yearly to save more', 'upgrade');
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildUpgradeCard(BuildContext context, bool isDark, AppLocalizations l, String title, String subtitle, String? upgradeTarget) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkCard : AppColors.lightCard,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: isDark ? AppColors.lime.withOpacity(0.3) : AppColors.void_.withOpacity(0.3), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('💎', style: TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: isDark ? AppColors.lime : AppColors.void_),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 12.sp, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (upgradeTarget != null) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (upgradeTarget == 'upgrade') {
+                    _showUpgradeOptions(context, isDark, l);
+                  } else {
+                    _upgradeTo(context, upgradeTarget);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isDark ? AppColors.lime : AppColors.void_,
+                  foregroundColor: isDark ? AppColors.void_ : AppColors.snow,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Upgrade Plan',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.sp),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _upgradeTo(BuildContext context, String target) async {
+    final success = await PurchaseService.purchase(planType: target);
+    if (success && context.mounted) {
+      await context.read<AppProvider>().refreshPremiumStatus();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Plan upgraded successfully!')));
+    }
+  }
+
+  void _showUpgradeOptions(BuildContext context, bool isDark, AppLocalizations l) {
     showModalBottomSheet(
       context: context,
       backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (_) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -190,71 +233,31 @@ class ProfileScreen extends StatelessWidget {
               decoration: BoxDecoration(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 24),
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(color: accent, borderRadius: BorderRadius.circular(16)),
-              child: const Center(child: Text('⚡', style: TextStyle(fontSize: 28))),
-            ),
-            const SizedBox(height: 16),
             Text(
-              l.limitReached,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: isDark ? AppColors.darkText : AppColors.lightText),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l.limitReachedSub,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.sp, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary, height: 1.5),
-            ),
-            const SizedBox(height: 24),
-            ...[l.unlimitedScans, l.unlimitedHistory, l.weeklyReport, l.turkishDB].map(
-              (f) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle_rounded, color: accent, size: 18),
-                    const SizedBox(width: 10),
-                    Text(
-                      f,
-                      style: TextStyle(fontSize: 14.sp, color: isDark ? AppColors.darkText : AppColors.lightText),
-                    ),
-                  ],
-                ),
-              ),
+              'Upgrade Your Plan',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: isDark ? AppColors.darkText : AppColors.lightText),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(context);
-                  final success = await PurchaseService.purchase(yearly: true);
-                  if (success && context.mounted) {
-                    await context.read<AppProvider>().refreshPremiumStatus();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: accentFg,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  l.goProBtn,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
-                ),
-              ),
+            ListTile(
+              title: Text('Monthly Plan', style: TextStyle(color: isDark ? AppColors.darkText : AppColors.lightText)),
+              subtitle: Text('₺149 / month', style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
+              trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: isDark ? AppColors.lime : AppColors.void_),
+              onTap: () {
+                Navigator.pop(context);
+                _upgradeTo(context, 'monthly');
+              },
             ),
-            const SizedBox(height: 10),
-            Text(
-              l.yearlyDiscount,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary,
-              ),
+            Divider(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
+            ListTile(
+              title: Text('Yearly Plan', style: TextStyle(color: isDark ? AppColors.darkText : AppColors.lightText)),
+              subtitle: Text('₺999 / year (Save 44%)', style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
+              trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: isDark ? AppColors.lime : AppColors.void_),
+              onTap: () {
+                Navigator.pop(context);
+                _upgradeTo(context, 'yearly');
+              },
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -481,10 +484,7 @@ class _BodyStatsCard extends StatelessWidget {
                           style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w800, color: textPrimary),
                         ),
                         const SizedBox(height: 2),
-                        Text(
-                          label,
-                          style: AppTypography.bodySmall.copyWith(color: textMuted),
-                        ),
+                        Text(label, style: AppTypography.bodySmall.copyWith(color: textMuted)),
                       ],
                     ),
                   );
@@ -928,10 +928,7 @@ class _MetabolicStat extends StatelessWidget {
           style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w800, color: textPrimary),
         ),
         const SizedBox(height: 2),
-        Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(color: textMuted),
-        ),
+        Text(label, style: AppTypography.bodySmall.copyWith(color: textMuted)),
         Text(
           sublabel,
           style: TextStyle(fontSize: 9.sp, color: textMuted.withOpacity(0.6), fontWeight: FontWeight.w700, letterSpacing: 0.5),
