@@ -787,4 +787,279 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get caloriesBurned => 'burned';
+
+  @override
+  String get thirtyDays => '30 Days';
+
+  @override
+  String get avgPerDay => 'avg / day';
+
+  @override
+  String get mealsLoggedLabel => 'meals logged';
+
+  @override
+  String get caloriesChartTitle => 'Calories';
+
+  @override
+  String get noDataYet => 'No data yet';
+
+  @override
+  String get recentLogs => 'Recent Logs';
+
+  @override
+  String get currentLabel => 'current';
+
+  @override
+  String get targetLabel => 'target';
+
+  @override
+  String get noGoalSet => 'No goal set';
+
+  @override
+  String kcalRemainingGoal(String remaining, String goal) {
+    return '$remaining kcal remaining · goal $goal';
+  }
+
+  @override
+  String weightLostLabel(String amount, String unit) {
+    return '↓ $amount $unit lost';
+  }
+
+  @override
+  String weightGainedLabel(String amount, String unit) {
+    return '↑ $amount $unit gained';
+  }
+
+  @override
+  String get weightStable => 'Stable weight';
+
+  @override
+  String get foodSearch => 'Food Search';
+
+  @override
+  String get searchFoodsHint => 'Search foods...';
+
+  @override
+  String get noFoodsFound => 'No foods found';
+
+  @override
+  String get addToLog => 'Add to Log';
+
+  @override
+  String foodAddedToLog(String name) {
+    return '$name added to log';
+  }
+
+  @override
+  String portionGrams(String grams) {
+    return 'Portion: $grams g';
+  }
+
+  @override
+  String foodCount(int count) {
+    return '$count foods';
+  }
+
+  @override
+  String get categoryAll => 'All';
+
+  @override
+  String get categoryDairy => 'Dairy';
+
+  @override
+  String get categoryFruit => 'Fruit';
+
+  @override
+  String get categoryFats => 'Fats';
+
+  @override
+  String get categoryVegetables => 'Vegetables';
+
+  @override
+  String get categoryFastFood => 'Fast Food';
+
+  @override
+  String get categorySnacks => 'Snacks';
+
+  @override
+  String get aiDietitian => 'AI Dietitian';
+
+  @override
+  String get aiPoweredBy => 'Powered by eatiq AI';
+
+  @override
+  String get onlineLabel => 'Online';
+
+  @override
+  String get askNutritionHint => 'Ask about nutrition...';
+
+  @override
+  String get quickPromptProtein => 'How much protein do I need?';
+
+  @override
+  String get quickPromptFatLoss => 'Best foods for fat loss?';
+
+  @override
+  String get quickPromptCalories => 'Should I count calories?';
+
+  @override
+  String get quickPromptMealPrep => 'Meal prep tips?';
+
+  @override
+  String get aiGreeting =>
+      'Hi! I\'m your AI Dietitian powered by eatiq. Ask me anything about nutrition, meal planning, or how to reach your health goals. 🥗';
+
+  @override
+  String get signInToEatiq => 'Sign in to eatiq';
+
+  @override
+  String get signInSubtitle =>
+      'Sync your progress across devices and unlock personalised nutrition insights.';
+
+  @override
+  String get continueWithApple => 'Continue with Apple';
+
+  @override
+  String get continueWithGoogle => 'Continue with Google';
+
+  @override
+  String get continueWithoutSignIn => 'Continue without signing in';
+
+  @override
+  String get legalAgreementNote =>
+      'By continuing, you agree to our Terms of Service and Privacy Policy.';
+
+  @override
+  String get subscriptionLegal => 'Subscription & Legal';
+
+  @override
+  String get restorePurchases => 'Restore Purchases';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get searchLabel => 'Search';
+
+  @override
+  String get dietitianLabel => 'Dietitian';
+
+  @override
+  String get targetWeight => 'Target Weight';
+
+  @override
+  String goalHitBadge(String pct) {
+    return 'Goal $pct% hit';
+  }
+
+  @override
+  String consistencyBadge(String pct) {
+    return '$pct% consistent';
+  }
+
+  @override
+  String get waterAdd250 => '+250 ml';
+
+  @override
+  String get waterAdd500 => '+500 ml';
+
+  @override
+  String get waterAdd700 => '+700 ml';
+
+  @override
+  String get aiNote => 'AI Note';
+
+  @override
+  String get additionalNotes => 'Additional Notes';
+
+  @override
+  String get avgWaterLabel => 'Avg Water';
+
+  @override
+  String get caloriesLabel => 'Calories';
+
+  @override
+  String get carbsLabel => 'Carbs';
+
+  @override
+  String get consistencyLabel => 'Consistency';
+
+  @override
+  String get cookingTime => 'Cooking Time';
+
+  @override
+  String get cuisinePreferences => 'Cuisine Preferences';
+
+  @override
+  String get dietitianNav => 'Dietitian';
+
+  @override
+  String get editPreferences => 'Edit Preferences';
+
+  @override
+  String get fatLabel => 'Fat';
+
+  @override
+  String get foodRestrictions => 'Food Restrictions';
+
+  @override
+  String get foodDislikesHint =>
+      'Food dislikes, allergies, or special requests...';
+
+  @override
+  String get goalAchievementLabel => 'Goal Achievement';
+
+  @override
+  String get groceryBudget => 'Grocery Budget';
+
+  @override
+  String get mealsPerDay => 'Meals Per Day';
+
+  @override
+  String get monthlyLabel => 'Monthly';
+
+  @override
+  String get proteinLabel => 'Protein';
+
+  @override
+  String get regeneratePlan => 'Regenerate Plan';
+
+  @override
+  String get sharePlan => 'Share Plan';
+
+  @override
+  String get thisWeekLabel => 'This Week';
+
+  @override
+  String get topMealLabel => 'Top Meal';
+
+  @override
+  String get waterLabel => 'Water';
+
+  @override
+  String get weightLabel => 'Weight';
+
+  @override
+  String get yearlyLabel => 'Yearly';
+
+  @override
+  String get solidFood => '🍽️  Solid Food';
+
+  @override
+  String get askNutritionHint2 => 'Ask about nutrition...';
+
+  @override
+  String get continueWithApple2 => 'Continue with Apple';
+
+  @override
+  String get continueWithGoogle2 => 'Continue with Google';
+
+  @override
+  String get searchLabel2 => 'Search';
+
+  @override
+  String get searchFoodsHint2 => 'Search foods...';
 }

@@ -291,8 +291,7 @@
   "onboardingHeightWeightSub": "مطلوب لتحديد مؤشر كتلة الجسم والسعرات.",
   "waterToday": "ماء اليوم",
   "reset": "إعادة ضبط",
-  "confirmDelete": "سيتم إعادة ضبط جميع البيانات. هل أنت متأكد؟"
-,
+  "confirmDelete": "سيتم إعادة ضبط جميع البيانات. هل أنت متأكد؟",
   "splashTitle": "Calorie tracking made easy",
   "onboardingBirthDate": "Date of Birth",
   "onboardingBirthDateSub": "We will calculate your metabolic rate based on your age",
@@ -313,5 +312,194 @@
   "notifWaterReminder": "Water intake reminders",
   "notifGoalReminder": "Goal achievement notifications",
   "enableNotifications": "Enable Notifications",
-  "skipForNow": "Skip for now"
+  "skipForNow": "Skip for now",
+  "waterAdd250": "+250 مل",
+  "waterAdd500": "+500 مل",
+  "waterAdd700": "+700 مل",
+  "thirtyDays": "30 يوماً",
+  "aiNote": "ملاحظة الذكاء الاصطناعي",
+  "additionalNotes": "ملاحظات إضافية",
+  "avgWaterLabel": "متوسط الماء",
+  "caloriesLabel": "سعرات حرارية",
+  "carbsLabel": "كربوهيدرات",
+  "consistencyLabel": "الاتساق",
+  "cookingTime": "وقت الطهي",
+  "cuisinePreferences": "تفضيلات المطبخ",
+  "dietitianNav": "أخصائي تغذية",
+  "editPreferences": "تعديل التفضيلات",
+  "fatLabel": "دهون",
+  "foodRestrictions": "القيود الغذائية",
+  "foodDislikesHint": "الأطعمة غير المرغوبة أو الحساسية أو طلبات خاصة...",
+  "goalAchievementLabel": "تحقيق الهدف",
+  "groceryBudget": "ميزانية البقالة",
+  "mealsPerDay": "وجبات في اليوم",
+  "monthlyLabel": "شهري",
+  "proteinLabel": "بروتين",
+  "regeneratePlan": "إعادة إنشاء الخطة",
+  "sharePlan": "مشاركة الخطة",
+  "thisWeekLabel": "هذا الأسبوع",
+  "topMealLabel": "أبرز وجبة",
+  "waterLabel": "ماء",
+  "weightLabel": "الوزن",
+  "yearlyLabel": "سنوي",
+  "solidFood": "🍽️  طعام صلب",
+  "noGoalSet": "لم يتم تحديد هدف",
+  "kcalRemainingGoal": "متبقي {remaining} سعرة · الهدف {goal}",
+  "avgPerDay": "متوسط / يوم",
+  "mealsLoggedLabel": "وجبات مسجلة",
+  "weightLostLabel": "↓ {amount} {unit} خسرت",
+  "weightGainedLabel": "↑ {amount} {unit} زدت",
+  "weightStable": "وزن ثابت",
+  "currentLabel": "الحالي",
+  "targetLabel": "الهدف",
+  "foodSearch": "البحث عن طعام",
+  "portionGrams": "الحصة: {grams} جرام",
+  "addToLog": "أضف إلى السجل",
+  "foodAddedToLog": "تمت إضافة {name} إلى السجل",
+  "noFoodsFound": "لا توجد أطعمة",
+  "foodCount": "{count} أطعمة",
+  "searchFoodsHint": "البحث عن طعام...",
+  "continueWithApple": "المتابعة مع Apple",
+  "continueWithGoogle": "المتابعة مع Google",
+  "signInToEatiq": "تسجيل الدخول إلى eatiq",
+  "signInSubtitle": "زامن تقدمك عبر الأجهزة واحصل على رؤى غذائية مخصصة.",
+  "continueWithoutSignIn": "المتابعة بدون تسجيل دخول",
+  "legalAgreementNote": "بالمتابعة، توافق على شروط الخدمة وسياسة الخصوصية.",
+  "subscriptionLegal": "الاشتراك والقانوني",
+  "restorePurchases": "استعادة المشتريات",
+  "termsOfService": "شروط الخدمة",
+  "privacyPolicy": "سياسة الخصوصية",
+  "goalHitBadge": "تحقيق الهدف {pct}٪",
+  "consistencyBadge": "{pct}٪ اتساق",
+  "aiDietitian": "أخصائي تغذية ذكي",
+  "aiPoweredBy": "مدعوم بذكاء eatiq",
+  "onlineLabel": "متصل",
+  "aiGreeting": "مرحباً! أنا خبير التغذية الذكي المدعوم من eatiq. اسألني عن أي شيء يتعلق بالتغذية أو تخطيط الوجبات أو كيفية تحقيق أهدافك الصحية. 🥗",
+  "quickPromptProtein": "كم البروتين الذي أحتاجه؟",
+  "quickPromptFatLoss": "أفضل الأطعمة لحرق الدهون؟",
+  "quickPromptCalories": "هل يجب أن أحسب السعرات؟",
+  "quickPromptMealPrep": "نصائح لتحضير الوجبات؟",
+  "searchLabel": "بحث",
+  "dietitianLabel": "أخصائي تغذية",
+  "@kcalRemainingGoal": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightLostLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightGainedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@portionGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodAddedToLog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@goalHitBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "@consistencyBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "dailySummaryTitle": "ملخص اليوم 📊",
+  "dailySummaryBody": "اليوم استهلكت {cal}/{goal} سعرة و{water}ل ماء. رائع!",
+  "@dailySummaryBody": {
+    "placeholders": {
+      "cal": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      },
+      "water": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAchievement": "تحقيق الهدف",
+  "consistency": "الاتساق",
+  "topDay": "أفضل يوم",
+  "avgWater": "متوسط الماء",
+  "weeklyInsight": "تحليل أسبوعي",
+  "monthlyInsight": "تحليل شهري",
+  "mostConsumedMeal": "الوجبة الأكثر استهلاكاً",
+  "navDaily": "يومي",
+  "navProgram": "البرنامج",
+  "stepsToday": "خطوات",
+  "stepsGoal": "{steps} / {goal}",
+  "@stepsGoal": {
+    "placeholders": {
+      "steps": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "caloriesBurned": "محروقة",
+  "caloriesChartTitle": "سعرات حرارية",
+  "noDataYet": "لا توجد بيانات بعد",
+  "recentLogs": "السجلات الأخيرة",
+  "noWeightData": "لا توجد بيانات وزن بعد.",
+  "noWeightDataHint": "أدخل وزنك من قسم الملف الشخصي.",
+  "categoryAll": "الكل",
+  "categoryDairy": "منتجات الألبان",
+  "categoryFruit": "فواكه",
+  "categoryFats": "دهون",
+  "categoryVegetables": "خضروات",
+  "categoryFastFood": "وجبات سريعة",
+  "categorySnacks": "وجبات خفيفة",
+  "askNutritionHint": "اسأل عن التغذية...",
+  "targetWeight": "الوزن المستهدف",
+  "askNutritionHint2": "اسأل عن التغذية...",
+  "continueWithApple2": "المتابعة مع Apple",
+  "continueWithGoogle2": "المتابعة مع Google",
+  "searchLabel2": "بحث",
+  "searchFoodsHint2": "البحث عن طعام..."
 }

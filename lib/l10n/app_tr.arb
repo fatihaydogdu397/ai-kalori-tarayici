@@ -298,9 +298,15 @@
   "dailySummaryBody": "Bugün {cal}/{goal} kcal ve {water}L su tükettin. Harika gidiyorsun!",
   "@dailySummaryBody": {
     "placeholders": {
-      "cal": { "type": "String" },
-      "goal": { "type": "String" },
-      "water": { "type": "String" }
+      "cal": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      },
+      "water": {
+        "type": "String"
+      }
     }
   },
   "goalAchievement": "Hedef Başarımı",
@@ -337,9 +343,163 @@
   "stepsGoal": "{steps} / {goal}",
   "@stepsGoal": {
     "placeholders": {
-      "steps": { "type": "String" },
-      "goal": { "type": "String" }
+      "steps": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
     }
   },
-  "caloriesBurned": "yakıldı"
+  "caloriesBurned": "yakıldı",
+  "thirtyDays": "30 Days",
+  "avgPerDay": "avg / day",
+  "mealsLoggedLabel": "meals logged",
+  "caloriesChartTitle": "Calories",
+  "noDataYet": "No data yet",
+  "recentLogs": "Recent Logs",
+  "currentLabel": "current",
+  "targetLabel": "target",
+  "noGoalSet": "No goal set",
+  "kcalRemainingGoal": "{remaining} kcal remaining · goal {goal}",
+  "@kcalRemainingGoal": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "weightLostLabel": "↓ {amount} {unit} lost",
+  "@weightLostLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "weightGainedLabel": "↑ {amount} {unit} gained",
+  "@weightGainedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "weightStable": "Stable weight",
+  "foodSearch": "Food Search",
+  "searchFoodsHint": "Search foods...",
+  "noFoodsFound": "No foods found",
+  "addToLog": "Add to Log",
+  "foodAddedToLog": "{name} added to log",
+  "@foodAddedToLog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "portionGrams": "Portion: {grams} g",
+  "@portionGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "foodCount": "{count} foods",
+  "@foodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryAll": "All",
+  "categoryDairy": "Dairy",
+  "categoryFruit": "Fruit",
+  "categoryFats": "Fats",
+  "categoryVegetables": "Vegetables",
+  "categoryFastFood": "Fast Food",
+  "categorySnacks": "Snacks",
+  "aiDietitian": "AI Dietitian",
+  "aiPoweredBy": "Powered by eatiq AI",
+  "onlineLabel": "Online",
+  "askNutritionHint": "Ask about nutrition...",
+  "quickPromptProtein": "How much protein do I need?",
+  "quickPromptFatLoss": "Best foods for fat loss?",
+  "quickPromptCalories": "Should I count calories?",
+  "quickPromptMealPrep": "Meal prep tips?",
+  "aiGreeting": "Hi! I'm your AI Dietitian powered by eatiq. Ask me anything about nutrition, meal planning, or how to reach your health goals. 🥗",
+  "signInToEatiq": "Sign in to eatiq",
+  "signInSubtitle": "Sync your progress across devices and unlock personalised nutrition insights.",
+  "continueWithApple": "Continue with Apple",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithoutSignIn": "Continue without signing in",
+  "legalAgreementNote": "By continuing, you agree to our Terms of Service and Privacy Policy.",
+  "subscriptionLegal": "Subscription & Legal",
+  "restorePurchases": "Restore Purchases",
+  "termsOfService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy",
+  "searchLabel": "Search",
+  "dietitianLabel": "Dietitian",
+  "targetWeight": "Target Weight",
+  "goalHitBadge": "Goal {pct}% hit",
+  "@goalHitBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "consistencyBadge": "{pct}% consistent",
+  "@consistencyBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "waterAdd250": "+250 ml",
+  "waterAdd500": "+500 ml",
+  "waterAdd700": "+700 ml",
+  "aiNote": "AI Notu",
+  "additionalNotes": "Ek Notlar",
+  "avgWaterLabel": "Ort. Su",
+  "caloriesLabel": "Kalori",
+  "carbsLabel": "Karb",
+  "consistencyLabel": "İstikrar",
+  "cookingTime": "Pişirme Süresi",
+  "cuisinePreferences": "Mutfak Tercihleri",
+  "dietitianNav": "Diyetisyen",
+  "editPreferences": "Tercihleri Düzenle",
+  "fatLabel": "Yağ",
+  "foodRestrictions": "Yemek Kısıtlamaları",
+  "foodDislikesHint": "Sevmediğin yiyecekler, alerjiler veya özel istekler...",
+  "goalAchievementLabel": "Hedef Başarımı",
+  "groceryBudget": "Market Bütçesi",
+  "mealsPerDay": "Günlük Öğün Sayısı",
+  "monthlyLabel": "Aylık",
+  "proteinLabel": "Protein",
+  "regeneratePlan": "Planı Yenile",
+  "sharePlan": "Planı Paylaş",
+  "thisWeekLabel": "Bu Hafta",
+  "topMealLabel": "En Yoğun Öğün",
+  "waterLabel": "Su",
+  "weightLabel": "Kilo",
+  "yearlyLabel": "Yıllık",
+  "solidFood": "🍽️  Katı Gıda",
+  "askNutritionHint2": "Beslenme hakkında sor...",
+  "continueWithApple2": "Apple ile Devam Et",
+  "continueWithGoogle2": "Google ile Devam Et",
+  "searchLabel2": "Ara",
+  "searchFoodsHint2": "Yiyecek ara..."
 }

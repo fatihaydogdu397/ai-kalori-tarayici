@@ -291,8 +291,7 @@
   "onboardingHeightWeightSub": "საჭიროა BMI და კალორიებისთვის.",
   "waterToday": "დღევანდელი წყალი",
   "reset": "გასუფთავება",
-  "confirmDelete": "ყველა მონაცემი წაიშლება. დარწმუნებული ხართ?"
-,
+  "confirmDelete": "ყველა მონაცემი წაიშლება. დარწმუნებული ხართ?",
   "splashTitle": "Calorie tracking made easy",
   "onboardingBirthDate": "Date of Birth",
   "onboardingBirthDateSub": "We will calculate your metabolic rate based on your age",
@@ -313,5 +312,194 @@
   "notifWaterReminder": "Water intake reminders",
   "notifGoalReminder": "Goal achievement notifications",
   "enableNotifications": "Enable Notifications",
-  "skipForNow": "Skip for now"
+  "skipForNow": "Skip for now",
+  "waterAdd250": "+250 მლ",
+  "waterAdd500": "+500 მლ",
+  "waterAdd700": "+700 მლ",
+  "thirtyDays": "30 დღე",
+  "aiNote": "AI შენიშვნა",
+  "additionalNotes": "დამატებითი შენიშვნები",
+  "avgWaterLabel": "საშ. წყალი",
+  "caloriesLabel": "კალორია",
+  "carbsLabel": "ნახშირწყლები",
+  "consistencyLabel": "თანმიმდევრულობა",
+  "cookingTime": "მომზადების დრო",
+  "cuisinePreferences": "სამზარეულოს პრეფერენციები",
+  "dietitianNav": "დიეტოლოგი",
+  "editPreferences": "პარამეტრების რედაქტირება",
+  "fatLabel": "ცხიმი",
+  "foodRestrictions": "კვებითი შეზღუდვები",
+  "foodDislikesHint": "არასასურველი საკვები, ალერგია ან სპეციალური მოთხოვნები...",
+  "goalAchievementLabel": "მიზნის მიღწევა",
+  "groceryBudget": "კვებითი ბიუჯეტი",
+  "mealsPerDay": "კვება დღეში",
+  "monthlyLabel": "თვიური",
+  "proteinLabel": "პროტეინი",
+  "regeneratePlan": "გეგმის განახლება",
+  "sharePlan": "გეგმის გაზიარება",
+  "thisWeekLabel": "ამ კვირაში",
+  "topMealLabel": "მთავარი კვება",
+  "waterLabel": "წყალი",
+  "weightLabel": "წონა",
+  "yearlyLabel": "წლიური",
+  "solidFood": "🍽️  მყარი საკვები",
+  "noGoalSet": "მიზანი დაყენებული არ არის",
+  "kcalRemainingGoal": "დარჩა {remaining} კკალ · მიზანი {goal}",
+  "avgPerDay": "საშ. / დღე",
+  "mealsLoggedLabel": "ჩაწერილი კვება",
+  "weightLostLabel": "↓ {amount} {unit} მოიკლო",
+  "weightGainedLabel": "↑ {amount} {unit} მოემატა",
+  "weightStable": "სტაბილური წონა",
+  "currentLabel": "მიმდინარე",
+  "targetLabel": "სამიზნე",
+  "foodSearch": "კვების ძებნა",
+  "portionGrams": "პორცია: {grams} გ",
+  "addToLog": "დღიურში დამატება",
+  "foodAddedToLog": "{name} დღიურში დაემატა",
+  "noFoodsFound": "საკვები ვერ მოიძებნა",
+  "foodCount": "{count} კვება",
+  "searchFoodsHint": "კვების ძებნა...",
+  "continueWithApple": "Apple-ით გაგრძელება",
+  "continueWithGoogle": "Google-ით გაგრძელება",
+  "signInToEatiq": "eatiq-ში შესვლა",
+  "signInSubtitle": "სინქრონიზაცია ყველა მოწყობილობაზე და პერსონალიზებული კვებითი რჩევები.",
+  "continueWithoutSignIn": "გაგრძელება შესვლის გარეშე",
+  "legalAgreementNote": "გაგრძელებით ეთანხმებით ჩვენს მომსახურების პირობებსა და კონფიდენციალურობის პოლიტიკას.",
+  "subscriptionLegal": "გამოწერა და სამართლებრივი",
+  "restorePurchases": "შესყიდვების აღდგენა",
+  "termsOfService": "მომსახურების პირობები",
+  "privacyPolicy": "კონფიდენციალურობის პოლიტიკა",
+  "goalHitBadge": "მიზანი {pct}%-ით მიღწეულია",
+  "consistencyBadge": "{pct}% თანმიმდევრული",
+  "aiDietitian": "AI დიეტოლოგი",
+  "aiPoweredBy": "eatiq AI-ით უზრუნველყოფილია",
+  "onlineLabel": "ონლაინ",
+  "aiGreeting": "გამარჯობა! მე ვარ თქვენი AI დიეტოლოგი eatiq-ის მიერ. დამისვით ნებისმიერი კითხვა კვების, კვების გეგმის ან ჯანმრთელობის მიზნების შესახებ. 🥗",
+  "quickPromptProtein": "რამდენი პროტეინი მჭირდება?",
+  "quickPromptFatLoss": "საუკეთესო საკვები ცხიმის დასაწვავად?",
+  "quickPromptCalories": "კალორიების დათვლა საჭიროა?",
+  "quickPromptMealPrep": "კვების მოსამზადებლად რჩევები?",
+  "searchLabel": "ძებნა",
+  "dietitianLabel": "დიეტოლოგი",
+  "@kcalRemainingGoal": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightLostLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightGainedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@portionGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodAddedToLog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@goalHitBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "@consistencyBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "dailySummaryTitle": "დღის შეჯამება 📊",
+  "dailySummaryBody": "დღეს მიირთვი {cal}/{goal} კკალ და {water}ლ წყალი. შესანიშნავია!",
+  "@dailySummaryBody": {
+    "placeholders": {
+      "cal": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      },
+      "water": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAchievement": "მიზნის მიღწევა",
+  "consistency": "თანმიმდევრულობა",
+  "topDay": "საუკეთესო დღე",
+  "avgWater": "საშ. წყალი",
+  "weeklyInsight": "კვირის ანალიზი",
+  "monthlyInsight": "თვის ანალიზი",
+  "mostConsumedMeal": "ყველაზე ხშირი კვება",
+  "navDaily": "ყოველდღიური",
+  "navProgram": "პროგრამა",
+  "stepsToday": "ნაბიჯი",
+  "stepsGoal": "{steps} / {goal}",
+  "@stepsGoal": {
+    "placeholders": {
+      "steps": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "caloriesBurned": "დამწვარი",
+  "caloriesChartTitle": "კალორია",
+  "noDataYet": "მონაცემები ჯერ არ არის",
+  "recentLogs": "ბოლო ჩანაწერები",
+  "noWeightData": "წონის მონაცემები ჯერ არ არის.",
+  "noWeightDataHint": "შეიყვანეთ წონა პროფილის განყოფილებაში.",
+  "categoryAll": "ყველა",
+  "categoryDairy": "რძის პროდუქტები",
+  "categoryFruit": "ხილი",
+  "categoryFats": "ცხიმები",
+  "categoryVegetables": "ბოსტნეული",
+  "categoryFastFood": "ფასტ ფუდი",
+  "categorySnacks": "სნეკები",
+  "askNutritionHint": "დასვი კითხვა კვების შესახებ...",
+  "targetWeight": "სამიზნე წონა",
+  "askNutritionHint2": "დასვი კითხვა კვების შესახებ...",
+  "continueWithApple2": "Apple-ით გაგრძელება",
+  "continueWithGoogle2": "Google-ით გაგრძელება",
+  "searchLabel2": "ძებნა",
+  "searchFoodsHint2": "კვების ძებნა..."
 }

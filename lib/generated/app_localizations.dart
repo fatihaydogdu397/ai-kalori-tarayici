@@ -1607,6 +1607,516 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'yakıldı'**
   String get caloriesBurned;
+
+  /// No description provided for @thirtyDays.
+  ///
+  /// In tr, this message translates to:
+  /// **'30 Days'**
+  String get thirtyDays;
+
+  /// No description provided for @avgPerDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'avg / day'**
+  String get avgPerDay;
+
+  /// No description provided for @mealsLoggedLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'meals logged'**
+  String get mealsLoggedLabel;
+
+  /// No description provided for @caloriesChartTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Calories'**
+  String get caloriesChartTitle;
+
+  /// No description provided for @noDataYet.
+  ///
+  /// In tr, this message translates to:
+  /// **'No data yet'**
+  String get noDataYet;
+
+  /// No description provided for @recentLogs.
+  ///
+  /// In tr, this message translates to:
+  /// **'Recent Logs'**
+  String get recentLogs;
+
+  /// No description provided for @currentLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'current'**
+  String get currentLabel;
+
+  /// No description provided for @targetLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'target'**
+  String get targetLabel;
+
+  /// No description provided for @noGoalSet.
+  ///
+  /// In tr, this message translates to:
+  /// **'No goal set'**
+  String get noGoalSet;
+
+  /// No description provided for @kcalRemainingGoal.
+  ///
+  /// In tr, this message translates to:
+  /// **'{remaining} kcal remaining · goal {goal}'**
+  String kcalRemainingGoal(String remaining, String goal);
+
+  /// No description provided for @weightLostLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'↓ {amount} {unit} lost'**
+  String weightLostLabel(String amount, String unit);
+
+  /// No description provided for @weightGainedLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'↑ {amount} {unit} gained'**
+  String weightGainedLabel(String amount, String unit);
+
+  /// No description provided for @weightStable.
+  ///
+  /// In tr, this message translates to:
+  /// **'Stable weight'**
+  String get weightStable;
+
+  /// No description provided for @foodSearch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Food Search'**
+  String get foodSearch;
+
+  /// No description provided for @searchFoodsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Search foods...'**
+  String get searchFoodsHint;
+
+  /// No description provided for @noFoodsFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'No foods found'**
+  String get noFoodsFound;
+
+  /// No description provided for @addToLog.
+  ///
+  /// In tr, this message translates to:
+  /// **'Add to Log'**
+  String get addToLog;
+
+  /// No description provided for @foodAddedToLog.
+  ///
+  /// In tr, this message translates to:
+  /// **'{name} added to log'**
+  String foodAddedToLog(String name);
+
+  /// No description provided for @portionGrams.
+  ///
+  /// In tr, this message translates to:
+  /// **'Portion: {grams} g'**
+  String portionGrams(String grams);
+
+  /// No description provided for @foodCount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{count} foods'**
+  String foodCount(int count);
+
+  /// No description provided for @categoryAll.
+  ///
+  /// In tr, this message translates to:
+  /// **'All'**
+  String get categoryAll;
+
+  /// No description provided for @categoryDairy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dairy'**
+  String get categoryDairy;
+
+  /// No description provided for @categoryFruit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fruit'**
+  String get categoryFruit;
+
+  /// No description provided for @categoryFats.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fats'**
+  String get categoryFats;
+
+  /// No description provided for @categoryVegetables.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vegetables'**
+  String get categoryVegetables;
+
+  /// No description provided for @categoryFastFood.
+  ///
+  /// In tr, this message translates to:
+  /// **'Fast Food'**
+  String get categoryFastFood;
+
+  /// No description provided for @categorySnacks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Snacks'**
+  String get categorySnacks;
+
+  /// No description provided for @aiDietitian.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI Dietitian'**
+  String get aiDietitian;
+
+  /// No description provided for @aiPoweredBy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Powered by eatiq AI'**
+  String get aiPoweredBy;
+
+  /// No description provided for @onlineLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Online'**
+  String get onlineLabel;
+
+  /// No description provided for @askNutritionHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ask about nutrition...'**
+  String get askNutritionHint;
+
+  /// No description provided for @quickPromptProtein.
+  ///
+  /// In tr, this message translates to:
+  /// **'How much protein do I need?'**
+  String get quickPromptProtein;
+
+  /// No description provided for @quickPromptFatLoss.
+  ///
+  /// In tr, this message translates to:
+  /// **'Best foods for fat loss?'**
+  String get quickPromptFatLoss;
+
+  /// No description provided for @quickPromptCalories.
+  ///
+  /// In tr, this message translates to:
+  /// **'Should I count calories?'**
+  String get quickPromptCalories;
+
+  /// No description provided for @quickPromptMealPrep.
+  ///
+  /// In tr, this message translates to:
+  /// **'Meal prep tips?'**
+  String get quickPromptMealPrep;
+
+  /// No description provided for @aiGreeting.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hi! I\'m your AI Dietitian powered by eatiq. Ask me anything about nutrition, meal planning, or how to reach your health goals. 🥗'**
+  String get aiGreeting;
+
+  /// No description provided for @signInToEatiq.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sign in to eatiq'**
+  String get signInToEatiq;
+
+  /// No description provided for @signInSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sync your progress across devices and unlock personalised nutrition insights.'**
+  String get signInSubtitle;
+
+  /// No description provided for @continueWithApple.
+  ///
+  /// In tr, this message translates to:
+  /// **'Continue with Apple'**
+  String get continueWithApple;
+
+  /// No description provided for @continueWithGoogle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Continue with Google'**
+  String get continueWithGoogle;
+
+  /// No description provided for @continueWithoutSignIn.
+  ///
+  /// In tr, this message translates to:
+  /// **'Continue without signing in'**
+  String get continueWithoutSignIn;
+
+  /// No description provided for @legalAgreementNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'By continuing, you agree to our Terms of Service and Privacy Policy.'**
+  String get legalAgreementNote;
+
+  /// No description provided for @subscriptionLegal.
+  ///
+  /// In tr, this message translates to:
+  /// **'Subscription & Legal'**
+  String get subscriptionLegal;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In tr, this message translates to:
+  /// **'Restore Purchases'**
+  String get restorePurchases;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In tr, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In tr, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @searchLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Search'**
+  String get searchLabel;
+
+  /// No description provided for @dietitianLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dietitian'**
+  String get dietitianLabel;
+
+  /// No description provided for @targetWeight.
+  ///
+  /// In tr, this message translates to:
+  /// **'Target Weight'**
+  String get targetWeight;
+
+  /// No description provided for @goalHitBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Goal {pct}% hit'**
+  String goalHitBadge(String pct);
+
+  /// No description provided for @consistencyBadge.
+  ///
+  /// In tr, this message translates to:
+  /// **'{pct}% consistent'**
+  String consistencyBadge(String pct);
+
+  /// No description provided for @waterAdd250.
+  ///
+  /// In tr, this message translates to:
+  /// **'+250 ml'**
+  String get waterAdd250;
+
+  /// No description provided for @waterAdd500.
+  ///
+  /// In tr, this message translates to:
+  /// **'+500 ml'**
+  String get waterAdd500;
+
+  /// No description provided for @waterAdd700.
+  ///
+  /// In tr, this message translates to:
+  /// **'+700 ml'**
+  String get waterAdd700;
+
+  /// No description provided for @aiNote.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI Notu'**
+  String get aiNote;
+
+  /// No description provided for @additionalNotes.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ek Notlar'**
+  String get additionalNotes;
+
+  /// No description provided for @avgWaterLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ort. Su'**
+  String get avgWaterLabel;
+
+  /// No description provided for @caloriesLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalori'**
+  String get caloriesLabel;
+
+  /// No description provided for @carbsLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Karb'**
+  String get carbsLabel;
+
+  /// No description provided for @consistencyLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'İstikrar'**
+  String get consistencyLabel;
+
+  /// No description provided for @cookingTime.
+  ///
+  /// In tr, this message translates to:
+  /// **'Pişirme Süresi'**
+  String get cookingTime;
+
+  /// No description provided for @cuisinePreferences.
+  ///
+  /// In tr, this message translates to:
+  /// **'Mutfak Tercihleri'**
+  String get cuisinePreferences;
+
+  /// No description provided for @dietitianNav.
+  ///
+  /// In tr, this message translates to:
+  /// **'Diyetisyen'**
+  String get dietitianNav;
+
+  /// No description provided for @editPreferences.
+  ///
+  /// In tr, this message translates to:
+  /// **'Tercihleri Düzenle'**
+  String get editPreferences;
+
+  /// No description provided for @fatLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yağ'**
+  String get fatLabel;
+
+  /// No description provided for @foodRestrictions.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yemek Kısıtlamaları'**
+  String get foodRestrictions;
+
+  /// No description provided for @foodDislikesHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sevmediğin yiyecekler, alerjiler veya özel istekler...'**
+  String get foodDislikesHint;
+
+  /// No description provided for @goalAchievementLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hedef Başarımı'**
+  String get goalAchievementLabel;
+
+  /// No description provided for @groceryBudget.
+  ///
+  /// In tr, this message translates to:
+  /// **'Market Bütçesi'**
+  String get groceryBudget;
+
+  /// No description provided for @mealsPerDay.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük Öğün Sayısı'**
+  String get mealsPerDay;
+
+  /// No description provided for @monthlyLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aylık'**
+  String get monthlyLabel;
+
+  /// No description provided for @proteinLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Protein'**
+  String get proteinLabel;
+
+  /// No description provided for @regeneratePlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Planı Yenile'**
+  String get regeneratePlan;
+
+  /// No description provided for @sharePlan.
+  ///
+  /// In tr, this message translates to:
+  /// **'Planı Paylaş'**
+  String get sharePlan;
+
+  /// No description provided for @thisWeekLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu Hafta'**
+  String get thisWeekLabel;
+
+  /// No description provided for @topMealLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'En Yoğun Öğün'**
+  String get topMealLabel;
+
+  /// No description provided for @waterLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Su'**
+  String get waterLabel;
+
+  /// No description provided for @weightLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kilo'**
+  String get weightLabel;
+
+  /// No description provided for @yearlyLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yıllık'**
+  String get yearlyLabel;
+
+  /// No description provided for @solidFood.
+  ///
+  /// In tr, this message translates to:
+  /// **'🍽️  Katı Gıda'**
+  String get solidFood;
+
+  /// No description provided for @askNutritionHint2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Beslenme hakkında sor...'**
+  String get askNutritionHint2;
+
+  /// No description provided for @continueWithApple2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Apple ile Devam Et'**
+  String get continueWithApple2;
+
+  /// No description provided for @continueWithGoogle2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Google ile Devam Et'**
+  String get continueWithGoogle2;
+
+  /// No description provided for @searchLabel2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ara'**
+  String get searchLabel2;
+
+  /// No description provided for @searchFoodsHint2.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yiyecek ara...'**
+  String get searchFoodsHint2;
 }
 
 class _AppLocalizationsDelegate

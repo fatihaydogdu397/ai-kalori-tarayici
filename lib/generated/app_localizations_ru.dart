@@ -591,11 +591,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get barcodeNotFound => 'Продукт не найден. Попробуйте ручной ввод.';
 
   @override
-  String get noWeightData => 'Henüz kilo geçmişi yok.';
+  String get noWeightData => 'Нет данных о весе.';
 
   @override
-  String get noWeightDataHint =>
-      'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
+  String get noWeightDataHint => 'Введите вес в разделе Профиль.';
 
   @override
   String streakDays(int count) {
@@ -679,33 +678,33 @@ class AppLocalizationsRu extends AppLocalizations {
   String get confirmDelete => 'Все данные будут сброшены. Вы уверены?';
 
   @override
-  String get dailySummaryTitle => 'Günün Özeti 📊';
+  String get dailySummaryTitle => 'Итоги дня 📊';
 
   @override
   String dailySummaryBody(String cal, String goal, String water) {
-    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+    return 'Сегодня вы потребили $cal/$goal ккал и $waterл воды. Так держать!';
   }
 
   @override
-  String get goalAchievement => 'Hedef Başarımı';
+  String get goalAchievement => 'Достижение цели';
 
   @override
-  String get consistency => 'İstikrar';
+  String get consistency => 'Постоянство';
 
   @override
-  String get topDay => 'Zirve Gün';
+  String get topDay => 'Лучший день';
 
   @override
-  String get avgWater => 'Ort. Su';
+  String get avgWater => 'Ср. вода';
 
   @override
-  String get weeklyInsight => 'Haftalık Analiz';
+  String get weeklyInsight => 'Анализ недели';
 
   @override
-  String get monthlyInsight => 'Aylık Analiz';
+  String get monthlyInsight => 'Анализ месяца';
 
   @override
-  String get mostConsumedMeal => 'En Yoğun Öğün';
+  String get mostConsumedMeal => 'Самый частый приём пищи';
 
   @override
   String get splashTitle => 'Calorie tracking made easy';
@@ -774,13 +773,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get skipForNow => 'Skip for now';
 
   @override
-  String get navDaily => 'Günlük';
+  String get navDaily => 'Ежедневно';
 
   @override
-  String get navProgram => 'Program';
+  String get navProgram => 'Программа';
 
   @override
-  String get stepsToday => 'Adım';
+  String get stepsToday => 'Шаги';
 
   @override
   String stepsGoal(String steps, String goal) {
@@ -788,5 +787,280 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get caloriesBurned => 'yakıldı';
+  String get caloriesBurned => 'сожжено';
+
+  @override
+  String get thirtyDays => '30 Дней';
+
+  @override
+  String get avgPerDay => 'ср. / день';
+
+  @override
+  String get mealsLoggedLabel => 'приёмов пищи';
+
+  @override
+  String get caloriesChartTitle => 'Калории';
+
+  @override
+  String get noDataYet => 'Данных пока нет';
+
+  @override
+  String get recentLogs => 'Последние записи';
+
+  @override
+  String get currentLabel => 'текущий';
+
+  @override
+  String get targetLabel => 'цель';
+
+  @override
+  String get noGoalSet => 'Цель не задана';
+
+  @override
+  String kcalRemainingGoal(String remaining, String goal) {
+    return 'Осталось $remaining ккал · цель $goal';
+  }
+
+  @override
+  String weightLostLabel(String amount, String unit) {
+    return '↓ $amount $unit потеряно';
+  }
+
+  @override
+  String weightGainedLabel(String amount, String unit) {
+    return '↑ $amount $unit набрано';
+  }
+
+  @override
+  String get weightStable => 'Стабильный вес';
+
+  @override
+  String get foodSearch => 'Поиск еды';
+
+  @override
+  String get searchFoodsHint => 'Поиск продуктов...';
+
+  @override
+  String get noFoodsFound => 'Продукты не найдены';
+
+  @override
+  String get addToLog => 'В дневник';
+
+  @override
+  String foodAddedToLog(String name) {
+    return '$name добавлено в дневник';
+  }
+
+  @override
+  String portionGrams(String grams) {
+    return 'Порция: $grams г';
+  }
+
+  @override
+  String foodCount(int count) {
+    return '$count продуктов';
+  }
+
+  @override
+  String get categoryAll => 'Все';
+
+  @override
+  String get categoryDairy => 'Молочные продукты';
+
+  @override
+  String get categoryFruit => 'Фрукты';
+
+  @override
+  String get categoryFats => 'Жиры';
+
+  @override
+  String get categoryVegetables => 'Овощи';
+
+  @override
+  String get categoryFastFood => 'Фастфуд';
+
+  @override
+  String get categorySnacks => 'Перекусы';
+
+  @override
+  String get aiDietitian => 'ИИ-диетолог';
+
+  @override
+  String get aiPoweredBy => 'На основе eatiq AI';
+
+  @override
+  String get onlineLabel => 'Онлайн';
+
+  @override
+  String get askNutritionHint => 'Спросите о питании...';
+
+  @override
+  String get quickPromptProtein => 'Сколько белка мне нужно?';
+
+  @override
+  String get quickPromptFatLoss => 'Лучшие продукты для сжигания жира?';
+
+  @override
+  String get quickPromptCalories => 'Нужно ли считать калории?';
+
+  @override
+  String get quickPromptMealPrep => 'Советы по подготовке блюд?';
+
+  @override
+  String get aiGreeting =>
+      'Привет! Я ваш ИИ-диетолог от eatiq. Спросите меня всё о питании, планировании приёмов пищи или о достижении ваших целей здоровья. 🥗';
+
+  @override
+  String get signInToEatiq => 'Войти в eatiq';
+
+  @override
+  String get signInSubtitle =>
+      'Синхронизируйте прогресс на всех устройствах и получайте персонализированные советы по питанию.';
+
+  @override
+  String get continueWithApple => 'Продолжить с Apple';
+
+  @override
+  String get continueWithGoogle => 'Продолжить с Google';
+
+  @override
+  String get continueWithoutSignIn => 'Продолжить без входа';
+
+  @override
+  String get legalAgreementNote =>
+      'Продолжая, вы соглашаетесь с нашими Условиями использования и Политикой конфиденциальности.';
+
+  @override
+  String get subscriptionLegal => 'Подписка и правовая информация';
+
+  @override
+  String get restorePurchases => 'Восстановить покупки';
+
+  @override
+  String get termsOfService => 'Условия использования';
+
+  @override
+  String get privacyPolicy => 'Политика конфиденциальности';
+
+  @override
+  String get searchLabel => 'Поиск';
+
+  @override
+  String get dietitianLabel => 'Диетолог';
+
+  @override
+  String get targetWeight => 'Целевой вес';
+
+  @override
+  String goalHitBadge(String pct) {
+    return 'Цель $pct% достигнута';
+  }
+
+  @override
+  String consistencyBadge(String pct) {
+    return '$pct% постоянства';
+  }
+
+  @override
+  String get waterAdd250 => '+250 мл';
+
+  @override
+  String get waterAdd500 => '+500 мл';
+
+  @override
+  String get waterAdd700 => '+700 мл';
+
+  @override
+  String get aiNote => 'Заметка ИИ';
+
+  @override
+  String get additionalNotes => 'Дополнительные заметки';
+
+  @override
+  String get avgWaterLabel => 'Ср. вода';
+
+  @override
+  String get caloriesLabel => 'Калории';
+
+  @override
+  String get carbsLabel => 'Углеводы';
+
+  @override
+  String get consistencyLabel => 'Постоянство';
+
+  @override
+  String get cookingTime => 'Время приготовления';
+
+  @override
+  String get cuisinePreferences => 'Кулинарные предпочтения';
+
+  @override
+  String get dietitianNav => 'Диетолог';
+
+  @override
+  String get editPreferences => 'Изменить настройки';
+
+  @override
+  String get fatLabel => 'Жиры';
+
+  @override
+  String get foodRestrictions => 'Пищевые ограничения';
+
+  @override
+  String get foodDislikesHint =>
+      'Нелюбимые продукты, аллергии или особые пожелания...';
+
+  @override
+  String get goalAchievementLabel => 'Достижение цели';
+
+  @override
+  String get groceryBudget => 'Бюджет на продукты';
+
+  @override
+  String get mealsPerDay => 'Приёмов пищи в день';
+
+  @override
+  String get monthlyLabel => 'Ежемесячно';
+
+  @override
+  String get proteinLabel => 'Белки';
+
+  @override
+  String get regeneratePlan => 'Обновить план';
+
+  @override
+  String get sharePlan => 'Поделиться планом';
+
+  @override
+  String get thisWeekLabel => 'На этой неделе';
+
+  @override
+  String get topMealLabel => 'Основной приём пищи';
+
+  @override
+  String get waterLabel => 'Вода';
+
+  @override
+  String get weightLabel => 'Вес';
+
+  @override
+  String get yearlyLabel => 'Ежегодно';
+
+  @override
+  String get solidFood => '🍽️  Твёрдая пища';
+
+  @override
+  String get askNutritionHint2 => 'Спросите о питании...';
+
+  @override
+  String get continueWithApple2 => 'Продолжить с Apple';
+
+  @override
+  String get continueWithGoogle2 => 'Продолжить с Google';
+
+  @override
+  String get searchLabel2 => 'Поиск';
+
+  @override
+  String get searchFoodsHint2 => 'Поиск продуктов...';
 }

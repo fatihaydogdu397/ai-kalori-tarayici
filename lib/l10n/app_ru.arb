@@ -291,8 +291,7 @@
   "onboardingHeightWeightSub": "Необходимо для ИМТ и дневных калорий.",
   "waterToday": "Вода сегодня",
   "reset": "Сброс",
-  "confirmDelete": "Все данные будут сброшены. Вы уверены?"
-,
+  "confirmDelete": "Все данные будут сброшены. Вы уверены?",
   "splashTitle": "Calorie tracking made easy",
   "onboardingBirthDate": "Date of Birth",
   "onboardingBirthDateSub": "We will calculate your metabolic rate based on your age",
@@ -313,5 +312,194 @@
   "notifWaterReminder": "Water intake reminders",
   "notifGoalReminder": "Goal achievement notifications",
   "enableNotifications": "Enable Notifications",
-  "skipForNow": "Skip for now"
+  "skipForNow": "Skip for now",
+  "waterAdd250": "+250 мл",
+  "waterAdd500": "+500 мл",
+  "waterAdd700": "+700 мл",
+  "thirtyDays": "30 Дней",
+  "aiNote": "Заметка ИИ",
+  "additionalNotes": "Дополнительные заметки",
+  "avgWaterLabel": "Ср. вода",
+  "caloriesLabel": "Калории",
+  "carbsLabel": "Углеводы",
+  "consistencyLabel": "Постоянство",
+  "cookingTime": "Время приготовления",
+  "cuisinePreferences": "Кулинарные предпочтения",
+  "dietitianNav": "Диетолог",
+  "editPreferences": "Изменить настройки",
+  "fatLabel": "Жиры",
+  "foodRestrictions": "Пищевые ограничения",
+  "foodDislikesHint": "Нелюбимые продукты, аллергии или особые пожелания...",
+  "goalAchievementLabel": "Достижение цели",
+  "groceryBudget": "Бюджет на продукты",
+  "mealsPerDay": "Приёмов пищи в день",
+  "monthlyLabel": "Ежемесячно",
+  "proteinLabel": "Белки",
+  "regeneratePlan": "Обновить план",
+  "sharePlan": "Поделиться планом",
+  "thisWeekLabel": "На этой неделе",
+  "topMealLabel": "Основной приём пищи",
+  "waterLabel": "Вода",
+  "weightLabel": "Вес",
+  "yearlyLabel": "Ежегодно",
+  "solidFood": "🍽️  Твёрдая пища",
+  "noGoalSet": "Цель не задана",
+  "kcalRemainingGoal": "Осталось {remaining} ккал · цель {goal}",
+  "avgPerDay": "ср. / день",
+  "mealsLoggedLabel": "приёмов пищи",
+  "weightLostLabel": "↓ {amount} {unit} потеряно",
+  "weightGainedLabel": "↑ {amount} {unit} набрано",
+  "weightStable": "Стабильный вес",
+  "currentLabel": "текущий",
+  "targetLabel": "цель",
+  "foodSearch": "Поиск еды",
+  "portionGrams": "Порция: {grams} г",
+  "addToLog": "В дневник",
+  "foodAddedToLog": "{name} добавлено в дневник",
+  "noFoodsFound": "Продукты не найдены",
+  "foodCount": "{count} продуктов",
+  "searchFoodsHint": "Поиск продуктов...",
+  "continueWithApple": "Продолжить с Apple",
+  "continueWithGoogle": "Продолжить с Google",
+  "signInToEatiq": "Войти в eatiq",
+  "signInSubtitle": "Синхронизируйте прогресс на всех устройствах и получайте персонализированные советы по питанию.",
+  "continueWithoutSignIn": "Продолжить без входа",
+  "legalAgreementNote": "Продолжая, вы соглашаетесь с нашими Условиями использования и Политикой конфиденциальности.",
+  "subscriptionLegal": "Подписка и правовая информация",
+  "restorePurchases": "Восстановить покупки",
+  "termsOfService": "Условия использования",
+  "privacyPolicy": "Политика конфиденциальности",
+  "goalHitBadge": "Цель {pct}% достигнута",
+  "consistencyBadge": "{pct}% постоянства",
+  "aiDietitian": "ИИ-диетолог",
+  "aiPoweredBy": "На основе eatiq AI",
+  "onlineLabel": "Онлайн",
+  "aiGreeting": "Привет! Я ваш ИИ-диетолог от eatiq. Спросите меня всё о питании, планировании приёмов пищи или о достижении ваших целей здоровья. 🥗",
+  "quickPromptProtein": "Сколько белка мне нужно?",
+  "quickPromptFatLoss": "Лучшие продукты для сжигания жира?",
+  "quickPromptCalories": "Нужно ли считать калории?",
+  "quickPromptMealPrep": "Советы по подготовке блюд?",
+  "searchLabel": "Поиск",
+  "dietitianLabel": "Диетолог",
+  "@kcalRemainingGoal": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightLostLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightGainedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@portionGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodAddedToLog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@goalHitBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "@consistencyBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "dailySummaryTitle": "Итоги дня 📊",
+  "dailySummaryBody": "Сегодня вы потребили {cal}/{goal} ккал и {water}л воды. Так держать!",
+  "@dailySummaryBody": {
+    "placeholders": {
+      "cal": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      },
+      "water": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAchievement": "Достижение цели",
+  "consistency": "Постоянство",
+  "topDay": "Лучший день",
+  "avgWater": "Ср. вода",
+  "weeklyInsight": "Анализ недели",
+  "monthlyInsight": "Анализ месяца",
+  "mostConsumedMeal": "Самый частый приём пищи",
+  "navDaily": "Ежедневно",
+  "navProgram": "Программа",
+  "stepsToday": "Шаги",
+  "stepsGoal": "{steps} / {goal}",
+  "@stepsGoal": {
+    "placeholders": {
+      "steps": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "caloriesBurned": "сожжено",
+  "caloriesChartTitle": "Калории",
+  "noDataYet": "Данных пока нет",
+  "recentLogs": "Последние записи",
+  "noWeightData": "Нет данных о весе.",
+  "noWeightDataHint": "Введите вес в разделе Профиль.",
+  "categoryAll": "Все",
+  "categoryDairy": "Молочные продукты",
+  "categoryFruit": "Фрукты",
+  "categoryFats": "Жиры",
+  "categoryVegetables": "Овощи",
+  "categoryFastFood": "Фастфуд",
+  "categorySnacks": "Перекусы",
+  "askNutritionHint": "Спросите о питании...",
+  "targetWeight": "Целевой вес",
+  "askNutritionHint2": "Спросите о питании...",
+  "continueWithApple2": "Продолжить с Apple",
+  "continueWithGoogle2": "Продолжить с Google",
+  "searchLabel2": "Поиск",
+  "searchFoodsHint2": "Поиск продуктов..."
 }

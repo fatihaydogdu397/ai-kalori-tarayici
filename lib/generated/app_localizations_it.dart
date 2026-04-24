@@ -592,11 +592,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Prodotto non trovato. Prova inserimento manuale.';
 
   @override
-  String get noWeightData => 'Henüz kilo geçmişi yok.';
+  String get noWeightData => 'Nessun dato di peso ancora.';
 
   @override
-  String get noWeightDataHint =>
-      'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
+  String get noWeightDataHint => 'Inserisci il peso dalla sezione Profilo.';
 
   @override
   String streakDays(int count) {
@@ -681,33 +680,33 @@ class AppLocalizationsIt extends AppLocalizations {
   String get confirmDelete => 'Tutti i dati verranno ripristinati. Sei sicuro?';
 
   @override
-  String get dailySummaryTitle => 'Günün Özeti 📊';
+  String get dailySummaryTitle => 'Riepilogo giornaliero 📊';
 
   @override
   String dailySummaryBody(String cal, String goal, String water) {
-    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+    return 'Oggi hai consumato $cal/$goal kcal e ${water}L d\'acqua. Continua così!';
   }
 
   @override
-  String get goalAchievement => 'Hedef Başarımı';
+  String get goalAchievement => 'Raggiungimento obiettivo';
 
   @override
-  String get consistency => 'İstikrar';
+  String get consistency => 'Costanza';
 
   @override
-  String get topDay => 'Zirve Gün';
+  String get topDay => 'Giorno top';
 
   @override
-  String get avgWater => 'Ort. Su';
+  String get avgWater => 'Acqua media';
 
   @override
-  String get weeklyInsight => 'Haftalık Analiz';
+  String get weeklyInsight => 'Analisi settimanale';
 
   @override
-  String get monthlyInsight => 'Aylık Analiz';
+  String get monthlyInsight => 'Analisi mensile';
 
   @override
-  String get mostConsumedMeal => 'En Yoğun Öğün';
+  String get mostConsumedMeal => 'Pasto più consumato';
 
   @override
   String get splashTitle => 'Calorie tracking made easy';
@@ -776,13 +775,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get skipForNow => 'Skip for now';
 
   @override
-  String get navDaily => 'Günlük';
+  String get navDaily => 'Giornaliero';
 
   @override
-  String get navProgram => 'Program';
+  String get navProgram => 'Programma';
 
   @override
-  String get stepsToday => 'Adım';
+  String get stepsToday => 'Passi';
 
   @override
   String stepsGoal(String steps, String goal) {
@@ -790,5 +789,280 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get caloriesBurned => 'yakıldı';
+  String get caloriesBurned => 'bruciate';
+
+  @override
+  String get thirtyDays => '30 Giorni';
+
+  @override
+  String get avgPerDay => 'media / giorno';
+
+  @override
+  String get mealsLoggedLabel => 'pasti registrati';
+
+  @override
+  String get caloriesChartTitle => 'Calorie';
+
+  @override
+  String get noDataYet => 'Nessun dato ancora';
+
+  @override
+  String get recentLogs => 'Registrazioni recenti';
+
+  @override
+  String get currentLabel => 'attuale';
+
+  @override
+  String get targetLabel => 'obiettivo';
+
+  @override
+  String get noGoalSet => 'Nessun obiettivo impostato';
+
+  @override
+  String kcalRemainingGoal(String remaining, String goal) {
+    return '$remaining kcal rimanenti · obiettivo $goal';
+  }
+
+  @override
+  String weightLostLabel(String amount, String unit) {
+    return '↓ $amount $unit persi';
+  }
+
+  @override
+  String weightGainedLabel(String amount, String unit) {
+    return '↑ $amount $unit guadagnati';
+  }
+
+  @override
+  String get weightStable => 'Peso stabile';
+
+  @override
+  String get foodSearch => 'Cerca alimenti';
+
+  @override
+  String get searchFoodsHint => 'Cerca alimenti...';
+
+  @override
+  String get noFoodsFound => 'Nessun alimento trovato';
+
+  @override
+  String get addToLog => 'Aggiungi al diario';
+
+  @override
+  String foodAddedToLog(String name) {
+    return '$name aggiunto al diario';
+  }
+
+  @override
+  String portionGrams(String grams) {
+    return 'Porzione: $grams g';
+  }
+
+  @override
+  String foodCount(int count) {
+    return '$count alimenti';
+  }
+
+  @override
+  String get categoryAll => 'Tutti';
+
+  @override
+  String get categoryDairy => 'Latticini';
+
+  @override
+  String get categoryFruit => 'Frutta';
+
+  @override
+  String get categoryFats => 'Grassi';
+
+  @override
+  String get categoryVegetables => 'Verdure';
+
+  @override
+  String get categoryFastFood => 'Fast food';
+
+  @override
+  String get categorySnacks => 'Snack';
+
+  @override
+  String get aiDietitian => 'Dietologo IA';
+
+  @override
+  String get aiPoweredBy => 'Powered by eatiq AI';
+
+  @override
+  String get onlineLabel => 'Online';
+
+  @override
+  String get askNutritionHint => 'Chiedi informazioni sulla nutrizione...';
+
+  @override
+  String get quickPromptProtein => 'Quante proteine ho bisogno?';
+
+  @override
+  String get quickPromptFatLoss => 'Migliori alimenti per perdere grasso?';
+
+  @override
+  String get quickPromptCalories => 'Devo contare le calorie?';
+
+  @override
+  String get quickPromptMealPrep => 'Consigli per preparare i pasti?';
+
+  @override
+  String get aiGreeting =>
+      'Ciao! Sono il tuo Dietologo IA powered by eatiq. Chiedimi tutto su nutrizione, pianificazione dei pasti o come raggiungere i tuoi obiettivi di salute. 🥗';
+
+  @override
+  String get signInToEatiq => 'Accedi a eatiq';
+
+  @override
+  String get signInSubtitle =>
+      'Sincronizza i tuoi progressi su tutti i dispositivi e sblocca analisi nutrizionali personalizzate.';
+
+  @override
+  String get continueWithApple => 'Continua con Apple';
+
+  @override
+  String get continueWithGoogle => 'Continua con Google';
+
+  @override
+  String get continueWithoutSignIn => 'Continua senza accedere';
+
+  @override
+  String get legalAgreementNote =>
+      'Continuando, accetti i nostri Termini di servizio e l\'Informativa sulla privacy.';
+
+  @override
+  String get subscriptionLegal => 'Abbonamento e Legale';
+
+  @override
+  String get restorePurchases => 'Ripristina acquisti';
+
+  @override
+  String get termsOfService => 'Termini di servizio';
+
+  @override
+  String get privacyPolicy => 'Informativa sulla privacy';
+
+  @override
+  String get searchLabel => 'Cerca';
+
+  @override
+  String get dietitianLabel => 'Dietologo';
+
+  @override
+  String get targetWeight => 'Peso obiettivo';
+
+  @override
+  String goalHitBadge(String pct) {
+    return 'Obiettivo $pct% raggiunto';
+  }
+
+  @override
+  String consistencyBadge(String pct) {
+    return '$pct% costante';
+  }
+
+  @override
+  String get waterAdd250 => '+250 ml';
+
+  @override
+  String get waterAdd500 => '+500 ml';
+
+  @override
+  String get waterAdd700 => '+700 ml';
+
+  @override
+  String get aiNote => 'Nota IA';
+
+  @override
+  String get additionalNotes => 'Note aggiuntive';
+
+  @override
+  String get avgWaterLabel => 'Acqua media';
+
+  @override
+  String get caloriesLabel => 'Calorie';
+
+  @override
+  String get carbsLabel => 'Carboidrati';
+
+  @override
+  String get consistencyLabel => 'Costanza';
+
+  @override
+  String get cookingTime => 'Tempo di cottura';
+
+  @override
+  String get cuisinePreferences => 'Preferenze culinarie';
+
+  @override
+  String get dietitianNav => 'Dietologo';
+
+  @override
+  String get editPreferences => 'Modifica preferenze';
+
+  @override
+  String get fatLabel => 'Grassi';
+
+  @override
+  String get foodRestrictions => 'Restrizioni alimentari';
+
+  @override
+  String get foodDislikesHint =>
+      'Avversioni alimentari, allergie o richieste speciali...';
+
+  @override
+  String get goalAchievementLabel => 'Raggiungimento obiettivo';
+
+  @override
+  String get groceryBudget => 'Budget alimentare';
+
+  @override
+  String get mealsPerDay => 'Pasti al giorno';
+
+  @override
+  String get monthlyLabel => 'Mensile';
+
+  @override
+  String get proteinLabel => 'Proteine';
+
+  @override
+  String get regeneratePlan => 'Rigenera piano';
+
+  @override
+  String get sharePlan => 'Condividi piano';
+
+  @override
+  String get thisWeekLabel => 'Questa settimana';
+
+  @override
+  String get topMealLabel => 'Pasto principale';
+
+  @override
+  String get waterLabel => 'Acqua';
+
+  @override
+  String get weightLabel => 'Peso';
+
+  @override
+  String get yearlyLabel => 'Annuale';
+
+  @override
+  String get solidFood => '🍽️  Cibo solido';
+
+  @override
+  String get askNutritionHint2 => 'Chiedi informazioni sulla nutrizione...';
+
+  @override
+  String get continueWithApple2 => 'Continua con Apple';
+
+  @override
+  String get continueWithGoogle2 => 'Continua con Google';
+
+  @override
+  String get searchLabel2 => 'Cerca';
+
+  @override
+  String get searchFoodsHint2 => 'Cerca alimenti...';
 }

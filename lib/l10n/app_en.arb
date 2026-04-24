@@ -296,9 +296,15 @@
   "dailySummaryBody": "Today you've consumed {cal}/{goal} kcal and {water}L water. Great job!",
   "@dailySummaryBody": {
     "placeholders": {
-      "cal": { "type": "String" },
-      "goal": { "type": "String" },
-      "water": { "type": "String" }
+      "cal": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      },
+      "water": {
+        "type": "String"
+      }
     }
   },
   "goalAchievement": "Goal Achievement",
@@ -335,12 +341,15 @@
   "stepsGoal": "{steps} / {goal}",
   "@stepsGoal": {
     "placeholders": {
-      "steps": { "type": "String" },
-      "goal": { "type": "String" }
+      "steps": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
     }
   },
   "caloriesBurned": "burned",
-
   "thirtyDays": "30 Days",
   "avgPerDay": "avg / day",
   "mealsLoggedLabel": "meals logged",
@@ -353,28 +362,39 @@
   "kcalRemainingGoal": "{remaining} kcal remaining · goal {goal}",
   "@kcalRemainingGoal": {
     "placeholders": {
-      "remaining": { "type": "String" },
-      "goal": { "type": "String" }
+      "remaining": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
     }
   },
-  "weightLostLabel": "↓ {delta} {unit} lost",
+  "weightLostLabel": "↓ {amount} {unit} lost",
   "@weightLostLabel": {
     "placeholders": {
-      "delta": { "type": "String" },
-      "unit": { "type": "String" }
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
     }
   },
-  "weightGainedLabel": "↑ {delta} {unit} gained",
+  "weightGainedLabel": "↑ {amount} {unit} gained",
   "@weightGainedLabel": {
     "placeholders": {
-      "delta": { "type": "String" },
-      "unit": { "type": "String" }
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
     }
   },
   "weightStable": "Stable weight",
   "noWeightData": "No weight data yet.",
   "noWeightDataHint": "Log your weight to see your progress here.",
-
   "foodSearch": "Food Search",
   "searchFoodsHint": "Search foods...",
   "noFoodsFound": "No foods found",
@@ -382,19 +402,25 @@
   "foodAddedToLog": "{name} added to log",
   "@foodAddedToLog": {
     "placeholders": {
-      "name": { "type": "String" }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "portionGrams": "Portion: {grams} g",
   "@portionGrams": {
     "placeholders": {
-      "grams": { "type": "String" }
+      "grams": {
+        "type": "String"
+      }
     }
   },
   "foodCount": "{count} foods",
   "@foodCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "categoryAll": "All",
@@ -404,7 +430,6 @@
   "categoryVegetables": "Vegetables",
   "categoryFastFood": "Fast Food",
   "categorySnacks": "Snacks",
-
   "aiDietitian": "AI Dietitian",
   "aiPoweredBy": "Powered by eatiq AI",
   "onlineLabel": "Online",
@@ -414,32 +439,67 @@
   "quickPromptCalories": "Should I count calories?",
   "quickPromptMealPrep": "Meal prep tips?",
   "aiGreeting": "Hi! I'm your AI Dietitian powered by eatiq. Ask me anything about nutrition, meal planning, or how to reach your health goals. 🥗",
-
   "signInToEatiq": "Sign in to eatiq",
   "signInSubtitle": "Sync your progress across devices and unlock personalised nutrition insights.",
   "continueWithApple": "Continue with Apple",
   "continueWithGoogle": "Continue with Google",
   "continueWithoutSignIn": "Continue without signing in",
   "legalAgreementNote": "By continuing, you agree to our Terms of Service and Privacy Policy.",
-
   "subscriptionLegal": "Subscription & Legal",
   "restorePurchases": "Restore Purchases",
   "termsOfService": "Terms of Service",
   "privacyPolicy": "Privacy Policy",
-
   "searchLabel": "Search",
   "dietitianLabel": "Dietitian",
   "targetWeight": "Target Weight",
   "goalHitBadge": "Goal {pct}% hit",
   "@goalHitBadge": {
     "placeholders": {
-      "pct": { "type": "String" }
+      "pct": {
+        "type": "String"
+      }
     }
   },
   "consistencyBadge": "{pct}% consistent",
   "@consistencyBadge": {
     "placeholders": {
-      "pct": { "type": "String" }
+      "pct": {
+        "type": "String"
+      }
     }
-  }
+  },
+  "waterAdd250": "+250 ml",
+  "waterAdd500": "+500 ml",
+  "waterAdd700": "+700 ml",
+  "aiNote": "AI Note",
+  "additionalNotes": "Additional Notes",
+  "askNutritionHint2": "Ask about nutrition...",
+  "avgWaterLabel": "Avg Water",
+  "caloriesLabel": "Calories",
+  "carbsLabel": "Carbs",
+  "consistencyLabel": "Consistency",
+  "continueWithApple2": "Continue with Apple",
+  "continueWithGoogle2": "Continue with Google",
+  "cookingTime": "Cooking Time",
+  "cuisinePreferences": "Cuisine Preferences",
+  "dietitianNav": "Dietitian",
+  "editPreferences": "Edit Preferences",
+  "fatLabel": "Fat",
+  "foodRestrictions": "Food Restrictions",
+  "foodDislikesHint": "Food dislikes, allergies, or special requests...",
+  "goalAchievementLabel": "Goal Achievement",
+  "groceryBudget": "Grocery Budget",
+  "mealsPerDay": "Meals Per Day",
+  "monthlyLabel": "Monthly",
+  "proteinLabel": "Protein",
+  "regeneratePlan": "Regenerate Plan",
+  "searchLabel2": "Search",
+  "searchFoodsHint2": "Search foods...",
+  "sharePlan": "Share Plan",
+  "thisWeekLabel": "This Week",
+  "topMealLabel": "Top Meal",
+  "waterLabel": "Water",
+  "weightLabel": "Weight",
+  "yearlyLabel": "Yearly",
+  "solidFood": "🍽️  Solid Food"
 }

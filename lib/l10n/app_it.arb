@@ -291,8 +291,7 @@
   "onboardingHeightWeightSub": "Necessario per BMI e calorie.",
   "waterToday": "Acqua oggi",
   "reset": "Ripristina",
-  "confirmDelete": "Tutti i dati verranno ripristinati. Sei sicuro?"
-,
+  "confirmDelete": "Tutti i dati verranno ripristinati. Sei sicuro?",
   "splashTitle": "Calorie tracking made easy",
   "onboardingBirthDate": "Date of Birth",
   "onboardingBirthDateSub": "We will calculate your metabolic rate based on your age",
@@ -313,5 +312,194 @@
   "notifWaterReminder": "Water intake reminders",
   "notifGoalReminder": "Goal achievement notifications",
   "enableNotifications": "Enable Notifications",
-  "skipForNow": "Skip for now"
+  "skipForNow": "Skip for now",
+  "waterAdd250": "+250 ml",
+  "waterAdd500": "+500 ml",
+  "waterAdd700": "+700 ml",
+  "thirtyDays": "30 Giorni",
+  "aiNote": "Nota IA",
+  "additionalNotes": "Note aggiuntive",
+  "avgWaterLabel": "Acqua media",
+  "caloriesLabel": "Calorie",
+  "carbsLabel": "Carboidrati",
+  "consistencyLabel": "Costanza",
+  "cookingTime": "Tempo di cottura",
+  "cuisinePreferences": "Preferenze culinarie",
+  "dietitianNav": "Dietologo",
+  "editPreferences": "Modifica preferenze",
+  "fatLabel": "Grassi",
+  "foodRestrictions": "Restrizioni alimentari",
+  "foodDislikesHint": "Avversioni alimentari, allergie o richieste speciali...",
+  "goalAchievementLabel": "Raggiungimento obiettivo",
+  "groceryBudget": "Budget alimentare",
+  "mealsPerDay": "Pasti al giorno",
+  "monthlyLabel": "Mensile",
+  "proteinLabel": "Proteine",
+  "regeneratePlan": "Rigenera piano",
+  "sharePlan": "Condividi piano",
+  "thisWeekLabel": "Questa settimana",
+  "topMealLabel": "Pasto principale",
+  "waterLabel": "Acqua",
+  "weightLabel": "Peso",
+  "yearlyLabel": "Annuale",
+  "solidFood": "🍽️  Cibo solido",
+  "noGoalSet": "Nessun obiettivo impostato",
+  "kcalRemainingGoal": "{remaining} kcal rimanenti · obiettivo {goal}",
+  "avgPerDay": "media / giorno",
+  "mealsLoggedLabel": "pasti registrati",
+  "weightLostLabel": "↓ {amount} {unit} persi",
+  "weightGainedLabel": "↑ {amount} {unit} guadagnati",
+  "weightStable": "Peso stabile",
+  "currentLabel": "attuale",
+  "targetLabel": "obiettivo",
+  "foodSearch": "Cerca alimenti",
+  "portionGrams": "Porzione: {grams} g",
+  "addToLog": "Aggiungi al diario",
+  "foodAddedToLog": "{name} aggiunto al diario",
+  "noFoodsFound": "Nessun alimento trovato",
+  "foodCount": "{count} alimenti",
+  "searchFoodsHint": "Cerca alimenti...",
+  "continueWithApple": "Continua con Apple",
+  "continueWithGoogle": "Continua con Google",
+  "signInToEatiq": "Accedi a eatiq",
+  "signInSubtitle": "Sincronizza i tuoi progressi su tutti i dispositivi e sblocca analisi nutrizionali personalizzate.",
+  "continueWithoutSignIn": "Continua senza accedere",
+  "legalAgreementNote": "Continuando, accetti i nostri Termini di servizio e l'Informativa sulla privacy.",
+  "subscriptionLegal": "Abbonamento e Legale",
+  "restorePurchases": "Ripristina acquisti",
+  "termsOfService": "Termini di servizio",
+  "privacyPolicy": "Informativa sulla privacy",
+  "goalHitBadge": "Obiettivo {pct}% raggiunto",
+  "consistencyBadge": "{pct}% costante",
+  "aiDietitian": "Dietologo IA",
+  "aiPoweredBy": "Powered by eatiq AI",
+  "onlineLabel": "Online",
+  "aiGreeting": "Ciao! Sono il tuo Dietologo IA powered by eatiq. Chiedimi tutto su nutrizione, pianificazione dei pasti o come raggiungere i tuoi obiettivi di salute. 🥗",
+  "quickPromptProtein": "Quante proteine ho bisogno?",
+  "quickPromptFatLoss": "Migliori alimenti per perdere grasso?",
+  "quickPromptCalories": "Devo contare le calorie?",
+  "quickPromptMealPrep": "Consigli per preparare i pasti?",
+  "searchLabel": "Cerca",
+  "dietitianLabel": "Dietologo",
+  "@kcalRemainingGoal": {
+    "placeholders": {
+      "remaining": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightLostLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@weightGainedLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "@portionGrams": {
+    "placeholders": {
+      "grams": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodAddedToLog": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@foodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@goalHitBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "@consistencyBadge": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "dailySummaryTitle": "Riepilogo giornaliero 📊",
+  "dailySummaryBody": "Oggi hai consumato {cal}/{goal} kcal e {water}L d'acqua. Continua così!",
+  "@dailySummaryBody": {
+    "placeholders": {
+      "cal": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      },
+      "water": {
+        "type": "String"
+      }
+    }
+  },
+  "goalAchievement": "Raggiungimento obiettivo",
+  "consistency": "Costanza",
+  "topDay": "Giorno top",
+  "avgWater": "Acqua media",
+  "weeklyInsight": "Analisi settimanale",
+  "monthlyInsight": "Analisi mensile",
+  "mostConsumedMeal": "Pasto più consumato",
+  "navDaily": "Giornaliero",
+  "navProgram": "Programma",
+  "stepsToday": "Passi",
+  "stepsGoal": "{steps} / {goal}",
+  "@stepsGoal": {
+    "placeholders": {
+      "steps": {
+        "type": "String"
+      },
+      "goal": {
+        "type": "String"
+      }
+    }
+  },
+  "caloriesBurned": "bruciate",
+  "caloriesChartTitle": "Calorie",
+  "noDataYet": "Nessun dato ancora",
+  "recentLogs": "Registrazioni recenti",
+  "noWeightData": "Nessun dato di peso ancora.",
+  "noWeightDataHint": "Inserisci il peso dalla sezione Profilo.",
+  "categoryAll": "Tutti",
+  "categoryDairy": "Latticini",
+  "categoryFruit": "Frutta",
+  "categoryFats": "Grassi",
+  "categoryVegetables": "Verdure",
+  "categoryFastFood": "Fast food",
+  "categorySnacks": "Snack",
+  "askNutritionHint": "Chiedi informazioni sulla nutrizione...",
+  "targetWeight": "Peso obiettivo",
+  "askNutritionHint2": "Chiedi informazioni sulla nutrizione...",
+  "continueWithApple2": "Continua con Apple",
+  "continueWithGoogle2": "Continua con Google",
+  "searchLabel2": "Cerca",
+  "searchFoodsHint2": "Cerca alimenti..."
 }

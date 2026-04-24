@@ -589,11 +589,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get barcodeNotFound => 'المنتج غير موجود. جرّب الإدخال اليدوي.';
 
   @override
-  String get noWeightData => 'Henüz kilo geçmişi yok.';
+  String get noWeightData => 'لا توجد بيانات وزن بعد.';
 
   @override
-  String get noWeightDataHint =>
-      'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
+  String get noWeightDataHint => 'أدخل وزنك من قسم الملف الشخصي.';
 
   @override
   String streakDays(int count) {
@@ -677,33 +676,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmDelete => 'سيتم إعادة ضبط جميع البيانات. هل أنت متأكد؟';
 
   @override
-  String get dailySummaryTitle => 'Günün Özeti 📊';
+  String get dailySummaryTitle => 'ملخص اليوم 📊';
 
   @override
   String dailySummaryBody(String cal, String goal, String water) {
-    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+    return 'اليوم استهلكت $cal/$goal سعرة و$waterل ماء. رائع!';
   }
 
   @override
-  String get goalAchievement => 'Hedef Başarımı';
+  String get goalAchievement => 'تحقيق الهدف';
 
   @override
-  String get consistency => 'İstikrar';
+  String get consistency => 'الاتساق';
 
   @override
-  String get topDay => 'Zirve Gün';
+  String get topDay => 'أفضل يوم';
 
   @override
-  String get avgWater => 'Ort. Su';
+  String get avgWater => 'متوسط الماء';
 
   @override
-  String get weeklyInsight => 'Haftalık Analiz';
+  String get weeklyInsight => 'تحليل أسبوعي';
 
   @override
-  String get monthlyInsight => 'Aylık Analiz';
+  String get monthlyInsight => 'تحليل شهري';
 
   @override
-  String get mostConsumedMeal => 'En Yoğun Öğün';
+  String get mostConsumedMeal => 'الوجبة الأكثر استهلاكاً';
 
   @override
   String get splashTitle => 'Calorie tracking made easy';
@@ -772,13 +771,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get skipForNow => 'Skip for now';
 
   @override
-  String get navDaily => 'Günlük';
+  String get navDaily => 'يومي';
 
   @override
-  String get navProgram => 'Program';
+  String get navProgram => 'البرنامج';
 
   @override
-  String get stepsToday => 'Adım';
+  String get stepsToday => 'خطوات';
 
   @override
   String stepsGoal(String steps, String goal) {
@@ -786,5 +785,280 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get caloriesBurned => 'yakıldı';
+  String get caloriesBurned => 'محروقة';
+
+  @override
+  String get thirtyDays => '30 يوماً';
+
+  @override
+  String get avgPerDay => 'متوسط / يوم';
+
+  @override
+  String get mealsLoggedLabel => 'وجبات مسجلة';
+
+  @override
+  String get caloriesChartTitle => 'سعرات حرارية';
+
+  @override
+  String get noDataYet => 'لا توجد بيانات بعد';
+
+  @override
+  String get recentLogs => 'السجلات الأخيرة';
+
+  @override
+  String get currentLabel => 'الحالي';
+
+  @override
+  String get targetLabel => 'الهدف';
+
+  @override
+  String get noGoalSet => 'لم يتم تحديد هدف';
+
+  @override
+  String kcalRemainingGoal(String remaining, String goal) {
+    return 'متبقي $remaining سعرة · الهدف $goal';
+  }
+
+  @override
+  String weightLostLabel(String amount, String unit) {
+    return '↓ $amount $unit خسرت';
+  }
+
+  @override
+  String weightGainedLabel(String amount, String unit) {
+    return '↑ $amount $unit زدت';
+  }
+
+  @override
+  String get weightStable => 'وزن ثابت';
+
+  @override
+  String get foodSearch => 'البحث عن طعام';
+
+  @override
+  String get searchFoodsHint => 'البحث عن طعام...';
+
+  @override
+  String get noFoodsFound => 'لا توجد أطعمة';
+
+  @override
+  String get addToLog => 'أضف إلى السجل';
+
+  @override
+  String foodAddedToLog(String name) {
+    return 'تمت إضافة $name إلى السجل';
+  }
+
+  @override
+  String portionGrams(String grams) {
+    return 'الحصة: $grams جرام';
+  }
+
+  @override
+  String foodCount(int count) {
+    return '$count أطعمة';
+  }
+
+  @override
+  String get categoryAll => 'الكل';
+
+  @override
+  String get categoryDairy => 'منتجات الألبان';
+
+  @override
+  String get categoryFruit => 'فواكه';
+
+  @override
+  String get categoryFats => 'دهون';
+
+  @override
+  String get categoryVegetables => 'خضروات';
+
+  @override
+  String get categoryFastFood => 'وجبات سريعة';
+
+  @override
+  String get categorySnacks => 'وجبات خفيفة';
+
+  @override
+  String get aiDietitian => 'أخصائي تغذية ذكي';
+
+  @override
+  String get aiPoweredBy => 'مدعوم بذكاء eatiq';
+
+  @override
+  String get onlineLabel => 'متصل';
+
+  @override
+  String get askNutritionHint => 'اسأل عن التغذية...';
+
+  @override
+  String get quickPromptProtein => 'كم البروتين الذي أحتاجه؟';
+
+  @override
+  String get quickPromptFatLoss => 'أفضل الأطعمة لحرق الدهون؟';
+
+  @override
+  String get quickPromptCalories => 'هل يجب أن أحسب السعرات؟';
+
+  @override
+  String get quickPromptMealPrep => 'نصائح لتحضير الوجبات؟';
+
+  @override
+  String get aiGreeting =>
+      'مرحباً! أنا خبير التغذية الذكي المدعوم من eatiq. اسألني عن أي شيء يتعلق بالتغذية أو تخطيط الوجبات أو كيفية تحقيق أهدافك الصحية. 🥗';
+
+  @override
+  String get signInToEatiq => 'تسجيل الدخول إلى eatiq';
+
+  @override
+  String get signInSubtitle =>
+      'زامن تقدمك عبر الأجهزة واحصل على رؤى غذائية مخصصة.';
+
+  @override
+  String get continueWithApple => 'المتابعة مع Apple';
+
+  @override
+  String get continueWithGoogle => 'المتابعة مع Google';
+
+  @override
+  String get continueWithoutSignIn => 'المتابعة بدون تسجيل دخول';
+
+  @override
+  String get legalAgreementNote =>
+      'بالمتابعة، توافق على شروط الخدمة وسياسة الخصوصية.';
+
+  @override
+  String get subscriptionLegal => 'الاشتراك والقانوني';
+
+  @override
+  String get restorePurchases => 'استعادة المشتريات';
+
+  @override
+  String get termsOfService => 'شروط الخدمة';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get searchLabel => 'بحث';
+
+  @override
+  String get dietitianLabel => 'أخصائي تغذية';
+
+  @override
+  String get targetWeight => 'الوزن المستهدف';
+
+  @override
+  String goalHitBadge(String pct) {
+    return 'تحقيق الهدف $pct٪';
+  }
+
+  @override
+  String consistencyBadge(String pct) {
+    return '$pct٪ اتساق';
+  }
+
+  @override
+  String get waterAdd250 => '+250 مل';
+
+  @override
+  String get waterAdd500 => '+500 مل';
+
+  @override
+  String get waterAdd700 => '+700 مل';
+
+  @override
+  String get aiNote => 'ملاحظة الذكاء الاصطناعي';
+
+  @override
+  String get additionalNotes => 'ملاحظات إضافية';
+
+  @override
+  String get avgWaterLabel => 'متوسط الماء';
+
+  @override
+  String get caloriesLabel => 'سعرات حرارية';
+
+  @override
+  String get carbsLabel => 'كربوهيدرات';
+
+  @override
+  String get consistencyLabel => 'الاتساق';
+
+  @override
+  String get cookingTime => 'وقت الطهي';
+
+  @override
+  String get cuisinePreferences => 'تفضيلات المطبخ';
+
+  @override
+  String get dietitianNav => 'أخصائي تغذية';
+
+  @override
+  String get editPreferences => 'تعديل التفضيلات';
+
+  @override
+  String get fatLabel => 'دهون';
+
+  @override
+  String get foodRestrictions => 'القيود الغذائية';
+
+  @override
+  String get foodDislikesHint =>
+      'الأطعمة غير المرغوبة أو الحساسية أو طلبات خاصة...';
+
+  @override
+  String get goalAchievementLabel => 'تحقيق الهدف';
+
+  @override
+  String get groceryBudget => 'ميزانية البقالة';
+
+  @override
+  String get mealsPerDay => 'وجبات في اليوم';
+
+  @override
+  String get monthlyLabel => 'شهري';
+
+  @override
+  String get proteinLabel => 'بروتين';
+
+  @override
+  String get regeneratePlan => 'إعادة إنشاء الخطة';
+
+  @override
+  String get sharePlan => 'مشاركة الخطة';
+
+  @override
+  String get thisWeekLabel => 'هذا الأسبوع';
+
+  @override
+  String get topMealLabel => 'أبرز وجبة';
+
+  @override
+  String get waterLabel => 'ماء';
+
+  @override
+  String get weightLabel => 'الوزن';
+
+  @override
+  String get yearlyLabel => 'سنوي';
+
+  @override
+  String get solidFood => '🍽️  طعام صلب';
+
+  @override
+  String get askNutritionHint2 => 'اسأل عن التغذية...';
+
+  @override
+  String get continueWithApple2 => 'المتابعة مع Apple';
+
+  @override
+  String get continueWithGoogle2 => 'المتابعة مع Google';
+
+  @override
+  String get searchLabel2 => 'بحث';
+
+  @override
+  String get searchFoodsHint2 => 'البحث عن طعام...';
 }

@@ -590,11 +590,10 @@ class AppLocalizationsKa extends AppLocalizations {
   String get barcodeNotFound => 'პროდუქტი ვერ მოიძებნა. სცადეთ ხელით შეყვანა.';
 
   @override
-  String get noWeightData => 'Henüz kilo geçmişi yok.';
+  String get noWeightData => 'წონის მონაცემები ჯერ არ არის.';
 
   @override
-  String get noWeightDataHint =>
-      'Profil sekmesindeki düzenleme alanından kilonuzu kaydedin.';
+  String get noWeightDataHint => 'შეიყვანეთ წონა პროფილის განყოფილებაში.';
 
   @override
   String streakDays(int count) {
@@ -680,33 +679,33 @@ class AppLocalizationsKa extends AppLocalizations {
   String get confirmDelete => 'ყველა მონაცემი წაიშლება. დარწმუნებული ხართ?';
 
   @override
-  String get dailySummaryTitle => 'Günün Özeti 📊';
+  String get dailySummaryTitle => 'დღის შეჯამება 📊';
 
   @override
   String dailySummaryBody(String cal, String goal, String water) {
-    return 'Bugün $cal/$goal kcal ve ${water}L su tükettin. Harika gidiyorsun!';
+    return 'დღეს მიირთვი $cal/$goal კკალ და $waterლ წყალი. შესანიშნავია!';
   }
 
   @override
-  String get goalAchievement => 'Hedef Başarımı';
+  String get goalAchievement => 'მიზნის მიღწევა';
 
   @override
-  String get consistency => 'İstikrar';
+  String get consistency => 'თანმიმდევრულობა';
 
   @override
-  String get topDay => 'Zirve Gün';
+  String get topDay => 'საუკეთესო დღე';
 
   @override
-  String get avgWater => 'Ort. Su';
+  String get avgWater => 'საშ. წყალი';
 
   @override
-  String get weeklyInsight => 'Haftalık Analiz';
+  String get weeklyInsight => 'კვირის ანალიზი';
 
   @override
-  String get monthlyInsight => 'Aylık Analiz';
+  String get monthlyInsight => 'თვის ანალიზი';
 
   @override
-  String get mostConsumedMeal => 'En Yoğun Öğün';
+  String get mostConsumedMeal => 'ყველაზე ხშირი კვება';
 
   @override
   String get splashTitle => 'Calorie tracking made easy';
@@ -775,13 +774,13 @@ class AppLocalizationsKa extends AppLocalizations {
   String get skipForNow => 'Skip for now';
 
   @override
-  String get navDaily => 'Günlük';
+  String get navDaily => 'ყოველდღიური';
 
   @override
-  String get navProgram => 'Program';
+  String get navProgram => 'პროგრამა';
 
   @override
-  String get stepsToday => 'Adım';
+  String get stepsToday => 'ნაბიჯი';
 
   @override
   String stepsGoal(String steps, String goal) {
@@ -789,5 +788,280 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
-  String get caloriesBurned => 'yakıldı';
+  String get caloriesBurned => 'დამწვარი';
+
+  @override
+  String get thirtyDays => '30 დღე';
+
+  @override
+  String get avgPerDay => 'საშ. / დღე';
+
+  @override
+  String get mealsLoggedLabel => 'ჩაწერილი კვება';
+
+  @override
+  String get caloriesChartTitle => 'კალორია';
+
+  @override
+  String get noDataYet => 'მონაცემები ჯერ არ არის';
+
+  @override
+  String get recentLogs => 'ბოლო ჩანაწერები';
+
+  @override
+  String get currentLabel => 'მიმდინარე';
+
+  @override
+  String get targetLabel => 'სამიზნე';
+
+  @override
+  String get noGoalSet => 'მიზანი დაყენებული არ არის';
+
+  @override
+  String kcalRemainingGoal(String remaining, String goal) {
+    return 'დარჩა $remaining კკალ · მიზანი $goal';
+  }
+
+  @override
+  String weightLostLabel(String amount, String unit) {
+    return '↓ $amount $unit მოიკლო';
+  }
+
+  @override
+  String weightGainedLabel(String amount, String unit) {
+    return '↑ $amount $unit მოემატა';
+  }
+
+  @override
+  String get weightStable => 'სტაბილური წონა';
+
+  @override
+  String get foodSearch => 'კვების ძებნა';
+
+  @override
+  String get searchFoodsHint => 'კვების ძებნა...';
+
+  @override
+  String get noFoodsFound => 'საკვები ვერ მოიძებნა';
+
+  @override
+  String get addToLog => 'დღიურში დამატება';
+
+  @override
+  String foodAddedToLog(String name) {
+    return '$name დღიურში დაემატა';
+  }
+
+  @override
+  String portionGrams(String grams) {
+    return 'პორცია: $grams გ';
+  }
+
+  @override
+  String foodCount(int count) {
+    return '$count კვება';
+  }
+
+  @override
+  String get categoryAll => 'ყველა';
+
+  @override
+  String get categoryDairy => 'რძის პროდუქტები';
+
+  @override
+  String get categoryFruit => 'ხილი';
+
+  @override
+  String get categoryFats => 'ცხიმები';
+
+  @override
+  String get categoryVegetables => 'ბოსტნეული';
+
+  @override
+  String get categoryFastFood => 'ფასტ ფუდი';
+
+  @override
+  String get categorySnacks => 'სნეკები';
+
+  @override
+  String get aiDietitian => 'AI დიეტოლოგი';
+
+  @override
+  String get aiPoweredBy => 'eatiq AI-ით უზრუნველყოფილია';
+
+  @override
+  String get onlineLabel => 'ონლაინ';
+
+  @override
+  String get askNutritionHint => 'დასვი კითხვა კვების შესახებ...';
+
+  @override
+  String get quickPromptProtein => 'რამდენი პროტეინი მჭირდება?';
+
+  @override
+  String get quickPromptFatLoss => 'საუკეთესო საკვები ცხიმის დასაწვავად?';
+
+  @override
+  String get quickPromptCalories => 'კალორიების დათვლა საჭიროა?';
+
+  @override
+  String get quickPromptMealPrep => 'კვების მოსამზადებლად რჩევები?';
+
+  @override
+  String get aiGreeting =>
+      'გამარჯობა! მე ვარ თქვენი AI დიეტოლოგი eatiq-ის მიერ. დამისვით ნებისმიერი კითხვა კვების, კვების გეგმის ან ჯანმრთელობის მიზნების შესახებ. 🥗';
+
+  @override
+  String get signInToEatiq => 'eatiq-ში შესვლა';
+
+  @override
+  String get signInSubtitle =>
+      'სინქრონიზაცია ყველა მოწყობილობაზე და პერსონალიზებული კვებითი რჩევები.';
+
+  @override
+  String get continueWithApple => 'Apple-ით გაგრძელება';
+
+  @override
+  String get continueWithGoogle => 'Google-ით გაგრძელება';
+
+  @override
+  String get continueWithoutSignIn => 'გაგრძელება შესვლის გარეშე';
+
+  @override
+  String get legalAgreementNote =>
+      'გაგრძელებით ეთანხმებით ჩვენს მომსახურების პირობებსა და კონფიდენციალურობის პოლიტიკას.';
+
+  @override
+  String get subscriptionLegal => 'გამოწერა და სამართლებრივი';
+
+  @override
+  String get restorePurchases => 'შესყიდვების აღდგენა';
+
+  @override
+  String get termsOfService => 'მომსახურების პირობები';
+
+  @override
+  String get privacyPolicy => 'კონფიდენციალურობის პოლიტიკა';
+
+  @override
+  String get searchLabel => 'ძებნა';
+
+  @override
+  String get dietitianLabel => 'დიეტოლოგი';
+
+  @override
+  String get targetWeight => 'სამიზნე წონა';
+
+  @override
+  String goalHitBadge(String pct) {
+    return 'მიზანი $pct%-ით მიღწეულია';
+  }
+
+  @override
+  String consistencyBadge(String pct) {
+    return '$pct% თანმიმდევრული';
+  }
+
+  @override
+  String get waterAdd250 => '+250 მლ';
+
+  @override
+  String get waterAdd500 => '+500 მლ';
+
+  @override
+  String get waterAdd700 => '+700 მლ';
+
+  @override
+  String get aiNote => 'AI შენიშვნა';
+
+  @override
+  String get additionalNotes => 'დამატებითი შენიშვნები';
+
+  @override
+  String get avgWaterLabel => 'საშ. წყალი';
+
+  @override
+  String get caloriesLabel => 'კალორია';
+
+  @override
+  String get carbsLabel => 'ნახშირწყლები';
+
+  @override
+  String get consistencyLabel => 'თანმიმდევრულობა';
+
+  @override
+  String get cookingTime => 'მომზადების დრო';
+
+  @override
+  String get cuisinePreferences => 'სამზარეულოს პრეფერენციები';
+
+  @override
+  String get dietitianNav => 'დიეტოლოგი';
+
+  @override
+  String get editPreferences => 'პარამეტრების რედაქტირება';
+
+  @override
+  String get fatLabel => 'ცხიმი';
+
+  @override
+  String get foodRestrictions => 'კვებითი შეზღუდვები';
+
+  @override
+  String get foodDislikesHint =>
+      'არასასურველი საკვები, ალერგია ან სპეციალური მოთხოვნები...';
+
+  @override
+  String get goalAchievementLabel => 'მიზნის მიღწევა';
+
+  @override
+  String get groceryBudget => 'კვებითი ბიუჯეტი';
+
+  @override
+  String get mealsPerDay => 'კვება დღეში';
+
+  @override
+  String get monthlyLabel => 'თვიური';
+
+  @override
+  String get proteinLabel => 'პროტეინი';
+
+  @override
+  String get regeneratePlan => 'გეგმის განახლება';
+
+  @override
+  String get sharePlan => 'გეგმის გაზიარება';
+
+  @override
+  String get thisWeekLabel => 'ამ კვირაში';
+
+  @override
+  String get topMealLabel => 'მთავარი კვება';
+
+  @override
+  String get waterLabel => 'წყალი';
+
+  @override
+  String get weightLabel => 'წონა';
+
+  @override
+  String get yearlyLabel => 'წლიური';
+
+  @override
+  String get solidFood => '🍽️  მყარი საკვები';
+
+  @override
+  String get askNutritionHint2 => 'დასვი კითხვა კვების შესახებ...';
+
+  @override
+  String get continueWithApple2 => 'Apple-ით გაგრძელება';
+
+  @override
+  String get continueWithGoogle2 => 'Google-ით გაგრძელება';
+
+  @override
+  String get searchLabel2 => 'ძებნა';
+
+  @override
+  String get searchFoodsHint2 => 'კვების ძებნა...';
 }
