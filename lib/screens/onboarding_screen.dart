@@ -4,10 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
-import '../services/api/nutrition_service.dart';
 import '../services/notification_service.dart';
 import '../generated/app_localizations.dart';
-import 'paywall_screen.dart';
+import 'home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -42,7 +41,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final now = DateTime.now();
     final birth = DateTime(_birthYear, _birthMonth, _birthDay);
     int age = now.year - birth.year;
-    if (now.month < birth.month || (now.month == birth.month && now.day < birth.day)) {
+    if (now.month < birth.month ||
+        (now.month == birth.month && now.day < birth.day)) {
       age--;
     }
     return age.clamp(15, 100);
@@ -55,7 +55,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
     setState(() => _nameError = false);
     if (_page < _totalPages - 1) {
-      _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     } else {
       _finish();
     }
@@ -63,14 +66,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _prev() {
     if (_page > 0) {
-      _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
   void _finish() {
     final provider = context.read<AppProvider>();
     provider.saveProfile(
-      name: _name.trim().isEmpty ? AppLocalizations.of(context).userFallback : _name.trim(),
+      name: _name.trim().isEmpty
+          ? AppLocalizations.of(context).userFallback
+          : _name.trim(),
       age: _calculatedAge,
       height: _heightCm,
       weight: _weightKg,
@@ -83,7 +91,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
     provider.loadHistory();
     provider.loadTodayStats();
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
   }
 
   @override
@@ -110,7 +121,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   if (_page > 0)
                     GestureDetector(
                       onTap: _prev,
-                      child: Icon(Icons.arrow_back_ios_rounded, size: 18, color: textMuted),
+                      child: Icon(
+                        Icons.arrow_back_ios_rounded,
+                        size: 18,
+                        color: textMuted,
+                      ),
                     )
                   else
                     const SizedBox(width: 18),
@@ -260,7 +275,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     weeklyPace: _weeklyPace,
                   ),
                   // 11: Theme
-                  _PageTheme(isDark: isDark, textPrimary: textPrimary, textMuted: textMuted),
+                  _PageTheme(
+                    isDark: isDark,
+                    textPrimary: textPrimary,
+                    textMuted: textMuted,
+                  ),
                 ],
               ),
             ),
@@ -275,13 +294,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accent,
                       foregroundColor: isDark ? AppColors.void_ : AppColors.snow,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
                     ),
                     child: Text(
-                      _page < _totalPages - 1 ? AppLocalizations.of(context).continueBtn : AppLocalizations.of(context).letsGo,
-                      style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
+                      _page < _totalPages - 1
+                          ? AppLocalizations.of(context).continueBtn
+                          : AppLocalizations.of(context).letsGo,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
@@ -318,9 +344,15 @@ class _PageName extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingHello, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.onboardingHello,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingNameSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
+          Text(
+            l.onboardingNameSub,
+            style: AppTypography.titleMedium.copyWith(color: textMuted),
+          ),
           const SizedBox(height: 40),
           TextField(
             autofocus: true,
@@ -331,10 +363,20 @@ class _PageName extends StatelessWidget {
               hintStyle: AppTypography.titleLarge.copyWith(color: textMuted),
               border: InputBorder.none,
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: hasError ? AppColors.coral : (isDark ? AppColors.darkCard : AppColors.lightBorder), width: 2),
+                borderSide: BorderSide(
+                  color: hasError
+                      ? AppColors.coral
+                      : (isDark ? AppColors.darkCard : AppColors.lightBorder),
+                  width: 2,
+                ),
               ),
               focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: hasError ? AppColors.coral : (isDark ? AppColors.lime : AppColors.void_), width: 2),
+                borderSide: BorderSide(
+                  color: hasError
+                      ? AppColors.coral
+                      : (isDark ? AppColors.lime : AppColors.void_),
+                  width: 2,
+                ),
               ),
               errorText: hasError ? l.onboardingNameRequired : null,
             ),
@@ -353,7 +395,13 @@ class _PageGender extends StatelessWidget {
   final String gender;
   final ValueChanged<String> onGender;
 
-  const _PageGender({required this.isDark, required this.textPrimary, required this.textMuted, required this.gender, required this.onGender});
+  const _PageGender({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.gender,
+    required this.onGender,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -363,13 +411,29 @@ class _PageGender extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingGender, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.onboardingGender,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingGenderSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(
+            l.onboardingGenderSub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
           const SizedBox(height: 48),
-          _PillButton(label: l.male, selected: gender == 'male', isDark: isDark, onTap: () => onGender('male')),
+          _PillButton(
+            label: l.male,
+            selected: gender == 'male',
+            isDark: isDark,
+            onTap: () => onGender('male'),
+          ),
           const SizedBox(height: 12),
-          _PillButton(label: l.female, selected: gender == 'female', isDark: isDark, onTap: () => onGender('female')),
+          _PillButton(
+            label: l.female,
+            selected: gender == 'female',
+            isDark: isDark,
+            onTap: () => onGender('female'),
+          ),
         ],
       ),
     );
@@ -403,14 +467,19 @@ class _PageBirthDateState extends State<_PageBirthDate> {
   late FixedExtentScrollController _yearCtrl;
 
   static const int _itemExtent = 44;
-  static final List<int> _years = List.generate(DateTime.now().year - 1920 + 1, (i) => 1920 + i);
+  static final List<int> _years = List.generate(
+    DateTime.now().year - 1920 + 1,
+    (i) => 1920 + i,
+  );
 
   @override
   void initState() {
     super.initState();
     _dayCtrl = FixedExtentScrollController(initialItem: widget.day - 1);
     _monthCtrl = FixedExtentScrollController(initialItem: widget.month - 1);
-    _yearCtrl = FixedExtentScrollController(initialItem: _years.indexOf(widget.year).clamp(0, _years.length - 1));
+    _yearCtrl = FixedExtentScrollController(
+      initialItem: _years.indexOf(widget.year).clamp(0, _years.length - 1),
+    );
   }
 
   @override
@@ -429,18 +498,9 @@ class _PageBirthDateState extends State<_PageBirthDate> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final monthNames = [
-      l.month01,
-      l.month02,
-      l.month03,
-      l.month04,
-      l.month05,
-      l.month06,
-      l.month07,
-      l.month08,
-      l.month09,
-      l.month10,
-      l.month11,
-      l.month12,
+      l.month01, l.month02, l.month03, l.month04,
+      l.month05, l.month06, l.month07, l.month08,
+      l.month09, l.month10, l.month11, l.month12,
     ];
 
     return Padding(
@@ -448,9 +508,15 @@ class _PageBirthDateState extends State<_PageBirthDate> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingBirthDate, style: AppTypography.headlineLarge.copyWith(color: widget.textPrimary)),
+          Text(
+            l.onboardingBirthDate,
+            style: AppTypography.headlineLarge.copyWith(color: widget.textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingBirthDateSub, style: AppTypography.bodyMedium.copyWith(color: widget.textMuted)),
+          Text(
+            l.onboardingBirthDateSub,
+            style: AppTypography.bodyMedium.copyWith(color: widget.textMuted),
+          ),
           const SizedBox(height: 40),
           SizedBox(
             height: 200,
@@ -461,7 +527,9 @@ class _PageBirthDateState extends State<_PageBirthDate> {
                   child: Container(
                     height: _itemExtent.toDouble(),
                     decoration: BoxDecoration(
-                      color: widget.isDark ? AppColors.darkCard : AppColors.lightCard,
+                      color: widget.isDark
+                          ? AppColors.darkCard
+                          : AppColors.lightCard,
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                   ),
@@ -565,13 +633,15 @@ class _DrumColumn extends StatelessWidget {
       childDelegate: ListWheelChildBuilderDelegate(
         childCount: itemCount,
         builder: (context, i) {
-          final isSelected = controller.hasClients && controller.selectedItem == i;
+          final isSelected = controller.hasClients &&
+              controller.selectedItem == i;
           return Center(
             child: Text(
               labelBuilder(i),
               style: TextStyle(
                 fontSize: isSelected ? 16.sp : 14.sp,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                fontWeight:
+                    isSelected ? FontWeight.w700 : FontWeight.w400,
                 color: isSelected ? textPrimary : textMuted,
               ),
             ),
@@ -676,14 +746,23 @@ class _PageHeightWeightDrumState extends State<_PageHeightWeightDrum> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingHeightWeight, style: AppTypography.headlineLarge.copyWith(color: widget.textPrimary)),
+          Text(
+            l.onboardingHeightWeight,
+            style: AppTypography.headlineLarge.copyWith(color: widget.textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingHeightWeightSub, style: AppTypography.bodyMedium.copyWith(color: widget.textMuted)),
+          Text(
+            l.onboardingHeightWeightSub,
+            style: AppTypography.bodyMedium.copyWith(color: widget.textMuted),
+          ),
           const SizedBox(height: 24),
           // Metric / Imperial toggle
           Container(
             padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(12.r)),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
             child: Row(
               children: [
                 _ToggleTab(
@@ -725,7 +804,10 @@ class _PageHeightWeightDrumState extends State<_PageHeightWeightDrum> {
                   children: [
                     Text(
                       l.height,
-                      style: AppTypography.bodyMedium.copyWith(color: widget.textMuted, fontWeight: FontWeight.w600),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: widget.textMuted,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -735,7 +817,10 @@ class _PageHeightWeightDrumState extends State<_PageHeightWeightDrum> {
                           Center(
                             child: Container(
                               height: _itemExtent.toDouble(),
-                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(10.r)),
+                              decoration: BoxDecoration(
+                                color: cardBg,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
                             ),
                           ),
                           _DrumColumn(
@@ -768,7 +853,10 @@ class _PageHeightWeightDrumState extends State<_PageHeightWeightDrum> {
                   children: [
                     Text(
                       l.weight,
-                      style: AppTypography.bodyMedium.copyWith(color: widget.textMuted, fontWeight: FontWeight.w600),
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: widget.textMuted,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -778,7 +866,10 @@ class _PageHeightWeightDrumState extends State<_PageHeightWeightDrum> {
                           Center(
                             child: Container(
                               height: _itemExtent.toDouble(),
-                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(10.r)),
+                              decoration: BoxDecoration(
+                                color: cardBg,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
                             ),
                           ),
                           _DrumColumn(
@@ -819,7 +910,13 @@ class _PageGoal extends StatelessWidget {
   final String goal;
   final ValueChanged<String> onGoal;
 
-  const _PageGoal({required this.isDark, required this.textPrimary, required this.textMuted, required this.goal, required this.onGoal});
+  const _PageGoal({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.goal,
+    required this.onGoal,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -829,15 +926,36 @@ class _PageGoal extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingGoal, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.onboardingGoal,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingGoalSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(
+            l.onboardingGoalSub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
           const SizedBox(height: 48),
-          _PillButton(label: '↓  ${l.goalLose}', selected: goal == 'lose', isDark: isDark, onTap: () => onGoal('lose')),
+          _PillButton(
+            label: '↓  ${l.goalLose}',
+            selected: goal == 'lose',
+            isDark: isDark,
+            onTap: () => onGoal('lose'),
+          ),
           const SizedBox(height: 12),
-          _PillButton(label: '⇔  ${l.goalMaintain}', selected: goal == 'maintain', isDark: isDark, onTap: () => onGoal('maintain')),
+          _PillButton(
+            label: '⇔  ${l.goalMaintain}',
+            selected: goal == 'maintain',
+            isDark: isDark,
+            onTap: () => onGoal('maintain'),
+          ),
           const SizedBox(height: 12),
-          _PillButton(label: '↑  ${l.goalGain}', selected: goal == 'gain', isDark: isDark, onTap: () => onGoal('gain')),
+          _PillButton(
+            label: '↑  ${l.goalGain}',
+            selected: goal == 'gain',
+            isDark: isDark,
+            onTap: () => onGoal('gain'),
+          ),
         ],
       ),
     );
@@ -877,9 +995,15 @@ class _PageTargetWeight extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingTargetWeight, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.onboardingTargetWeight,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingTargetWeightSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(
+            l.onboardingTargetWeightSub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
           const Spacer(),
           // Big value display
           Center(
@@ -888,11 +1012,19 @@ class _PageTargetWeight extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: _displayValue.toStringAsFixed(1),
-                    style: TextStyle(fontSize: 52.sp, fontWeight: FontWeight.w800, color: textPrimary),
+                    style: TextStyle(
+                      fontSize: 52.sp,
+                      fontWeight: FontWeight.w800,
+                      color: textPrimary,
+                    ),
                   ),
                   TextSpan(
                     text: ' $_unit',
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, color: textMuted),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
+                      color: textMuted,
+                    ),
                   ),
                 ],
               ),
@@ -924,7 +1056,14 @@ class _RulerSlider extends StatefulWidget {
   final bool isDark;
   final ValueChanged<double> onChanged;
 
-  const _RulerSlider({required this.value, required this.min, required this.max, required this.step, required this.isDark, required this.onChanged});
+  const _RulerSlider({
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.step,
+    required this.isDark,
+    required this.onChanged,
+  });
 
   @override
   State<_RulerSlider> createState() => _RulerSliderState();
@@ -956,7 +1095,13 @@ class _RulerSliderState extends State<_RulerSlider> {
       child: SizedBox(
         height: 80,
         child: CustomPaint(
-          painter: _RulerPainter(value: widget.value, min: widget.min, max: widget.max, step: widget.step, isDark: widget.isDark),
+          painter: _RulerPainter(
+            value: widget.value,
+            min: widget.min,
+            max: widget.max,
+            step: widget.step,
+            isDark: widget.isDark,
+          ),
           size: Size(double.infinity, 80),
         ),
       ),
@@ -968,7 +1113,13 @@ class _RulerPainter extends CustomPainter {
   final double value, min, max, step;
   final bool isDark;
 
-  _RulerPainter({required this.value, required this.min, required this.max, required this.step, required this.isDark});
+  _RulerPainter({
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.step,
+    required this.isDark,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1003,7 +1154,11 @@ class _RulerPainter extends CustomPainter {
         final isMajor = ((v / (step * 10)).round() * step * 10 - v).abs() < step * 0.1;
         final tickHeight = isMajor ? 28.0 : 16.0;
         paint.color = tickColor.withValues(alpha: isMajor ? 0.6 : 0.3);
-        canvas.drawLine(Offset(x, size.height / 2 - tickHeight / 2), Offset(x, size.height / 2 + tickHeight / 2), paint);
+        canvas.drawLine(
+          Offset(x, size.height / 2 - tickHeight / 2),
+          Offset(x, size.height / 2 + tickHeight / 2),
+          paint,
+        );
 
         // Label at major ticks
         if (isMajor) {
@@ -1011,7 +1166,11 @@ class _RulerPainter extends CustomPainter {
           final tp = TextPainter(
             text: TextSpan(
               text: label,
-              style: TextStyle(fontSize: 10, color: textColor, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 10,
+                color: textColor,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             textDirection: TextDirection.ltr,
           )..layout();
@@ -1022,7 +1181,11 @@ class _RulerPainter extends CustomPainter {
     }
 
     // Center pointer
-    canvas.drawLine(Offset(cx, size.height / 2 - 26), Offset(cx, size.height / 2 + 26), pointerPaint);
+    canvas.drawLine(
+      Offset(cx, size.height / 2 - 26),
+      Offset(cx, size.height / 2 + 26),
+      pointerPaint,
+    );
     // Pointer top triangle
     final path = Path()
       ..moveTo(cx - 6, size.height / 2 - 32)
@@ -1033,7 +1196,8 @@ class _RulerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_RulerPainter old) => old.value != value || old.isDark != isDark;
+  bool shouldRepaint(_RulerPainter old) =>
+      old.value != value || old.isDark != isDark;
 }
 
 // ── Page 7: Haftalık Hız ─────────────────────────────────────────────────────
@@ -1064,9 +1228,15 @@ class _PageWeeklyPace extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingWeeklyPace, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.onboardingWeeklyPace,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingWeeklyPaceSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(
+            l.onboardingWeeklyPaceSub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
           const Spacer(),
           // Big value
           Center(
@@ -1075,11 +1245,19 @@ class _PageWeeklyPace extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: pace.toStringAsFixed(1),
-                    style: TextStyle(fontSize: 52.sp, fontWeight: FontWeight.w800, color: textPrimary),
+                    style: TextStyle(
+                      fontSize: 52.sp,
+                      fontWeight: FontWeight.w800,
+                      color: textPrimary,
+                    ),
                   ),
                   TextSpan(
                     text: ' kg',
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, color: textMuted),
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
+                      color: textMuted,
+                    ),
                   ),
                 ],
               ),
@@ -1127,7 +1305,7 @@ class _PageWeeklyPace extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('0.1 kg', style: AppTypography.labelSmall.copyWith(color: textMuted)),
-                Text('${(maxPace / 2).toStringAsFixed(1)} kg', style: AppTypography.labelSmall.copyWith(color: textMuted)),
+                Text('0.5 kg', style: AppTypography.labelSmall.copyWith(color: textMuted)),
                 Text('$maxPace kg', style: AppTypography.labelSmall.copyWith(color: textMuted)),
               ],
             ),
@@ -1146,7 +1324,13 @@ class _PageActivity extends StatelessWidget {
   final String activity;
   final ValueChanged<String> onActivity;
 
-  const _PageActivity({required this.isDark, required this.textPrimary, required this.textMuted, required this.activity, required this.onActivity});
+  const _PageActivity({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.activity,
+    required this.onActivity,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1157,9 +1341,15 @@ class _PageActivity extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.activityLevel, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.activityLevel,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.activityLevelSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(
+            l.activityLevelSub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
           const SizedBox(height: 32),
           _GoalCard(
             emoji: '🛋️',
@@ -1203,104 +1393,29 @@ class _PageActivity extends StatelessWidget {
 }
 
 // ── Page 9: Beslenme Türü ────────────────────────────────────────────────────
-// EAT-117: Seçenekler BE `dietaryPreferenceOptions` query'sinden çekilir.
-// Network hatası / offline durumda hardcoded fallback kullanılır.
-class _PageDietType extends StatefulWidget {
+class _PageDietType extends StatelessWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
   final String dietType;
   final ValueChanged<String> onDietType;
 
-  const _PageDietType({required this.isDark, required this.textPrimary, required this.textMuted, required this.dietType, required this.onDietType});
-
-  @override
-  State<_PageDietType> createState() => _PageDietTypeState();
-}
-
-class _PageDietTypeState extends State<_PageDietType> {
-  // BE yanıtından DIET_TYPE kategorisindeki key'ler (writeTokens[0] kullanılır).
-  List<({String key, String defaultLabel})>? _remoteOptions;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadOptions();
-  }
-
-  Future<void> _loadOptions() async {
-    try {
-      final all = await NutritionService.instance.dietaryPreferenceOptions();
-      if (!mounted) return;
-      final dietTypes = all
-          .where((o) => o.category == 'DIET_TYPE')
-          .map((o) => (
-                key: (o.writeTokens.isNotEmpty ? o.writeTokens.first : o.key),
-                defaultLabel: o.defaultLabel,
-              ))
-          .toList(growable: false);
-      setState(() => _remoteOptions = dietTypes);
-    } catch (_) {
-      // Sessiz düş — hardcoded fallback kullanılacak.
-    }
-  }
-
-  // Key → emoji map. BE yeni key ekleyince burada emoji tanımlanır; tanımsız
-  // key için nötr fallback döner.
-  String _emojiFor(String key) {
-    switch (key) {
-      case 'standard':
-        return '🍽️';
-      case 'low_carb':
-        return '🥬';
-      case 'keto':
-        return '🥑';
-      case 'high_protein':
-        return '🥩';
-      case 'vegan':
-        return '🌱';
-      case 'vegetarian':
-        return '🥦';
-      case 'pescatarian':
-        return '🐟';
-      case 'mediterranean':
-        return '🫒';
-      case 'custom':
-        return '⚙️';
-      default:
-        return '🍴';
-    }
-  }
-
-  // Key → localized label. Mobil i18n tanımı varsa onu, yoksa BE'nin
-  // defaultLabel'ını kullan.
-  String _labelFor(String key, String defaultLabel, AppLocalizations l) {
-    switch (key) {
-      case 'standard':
-        return l.dietStandard;
-      case 'low_carb':
-        return l.dietLowCarb;
-      case 'keto':
-        return l.dietKeto;
-      case 'high_protein':
-        return l.dietHighProtein;
-      case 'custom':
-        return l.dietCustom;
-      default:
-        return defaultLabel.isEmpty ? key : defaultLabel;
-    }
-  }
+  const _PageDietType({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.dietType,
+    required this.onDietType,
+  });
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-
-    // BE yanıtı geldiyse onu, gelmediyse (loading / error) statik fallback'i kullan.
-    final options = _remoteOptions ?? const [
-      (key: 'standard', defaultLabel: 'Standard'),
-      (key: 'low_carb', defaultLabel: 'Low-carb'),
-      (key: 'keto', defaultLabel: 'Keto'),
-      (key: 'high_protein', defaultLabel: 'High-protein'),
-      (key: 'custom', defaultLabel: 'Custom'),
+    final options = [
+      ('standard', '🍽️', l.dietStandard),
+      ('low_carb', '🥬', l.dietLowCarb),
+      ('keto', '🥑', l.dietKeto),
+      ('high_protein', '🥩', l.dietHighProtein),
+      ('custom', '⚙️', l.dietCustom),
     ];
 
     return SingleChildScrollView(
@@ -1308,21 +1423,25 @@ class _PageDietTypeState extends State<_PageDietType> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingDietType, style: AppTypography.headlineLarge.copyWith(color: widget.textPrimary)),
-          const SizedBox(height: 8),
-          Text(l.onboardingDietTypeSub, style: AppTypography.bodyMedium.copyWith(color: widget.textMuted)),
-          const SizedBox(height: 32),
-          ...options.map(
-            (opt) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _PillButton(
-                label: '${_emojiFor(opt.key)}  ${_labelFor(opt.key, opt.defaultLabel, l)}',
-                selected: widget.dietType == opt.key,
-                isDark: widget.isDark,
-                onTap: () => widget.onDietType(opt.key),
-              ),
-            ),
+          Text(
+            l.onboardingDietType,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
           ),
+          const SizedBox(height: 8),
+          Text(
+            l.onboardingDietTypeSub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
+          const SizedBox(height: 32),
+          ...options.map((opt) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _PillButton(
+              label: '${opt.$2}  ${opt.$3}',
+              selected: dietType == opt.$1,
+              isDark: isDark,
+              onTap: () => onDietType(opt.$1),
+            ),
+          )),
         ],
       ),
     );
@@ -1335,7 +1454,13 @@ class _PageNotification extends StatelessWidget {
   final Color textPrimary, textMuted;
   final VoidCallback onEnable, onSkip;
 
-  const _PageNotification({required this.isDark, required this.textPrimary, required this.textMuted, required this.onEnable, required this.onSkip});
+  const _PageNotification({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.onEnable,
+    required this.onSkip,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1358,8 +1483,15 @@ class _PageNotification extends StatelessWidget {
           Container(
             width: 80.w,
             height: 80.h,
-            decoration: BoxDecoration(color: isDark ? AppColors.darkCard : AppColors.void_, shape: BoxShape.circle),
-            child: Icon(Icons.notifications_rounded, size: 36.sp, color: isDark ? AppColors.darkText : AppColors.snow),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkCard : AppColors.void_,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.notifications_rounded,
+              size: 36.sp,
+              color: isDark ? AppColors.darkText : AppColors.snow,
+            ),
           ),
           const SizedBox(height: 20),
           Text(
@@ -1375,22 +1507,26 @@ class _PageNotification extends StatelessWidget {
           ),
           const SizedBox(height: 40),
           // Notification type list
-          ...items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(12.r)),
-                child: Row(
-                  children: [
-                    Icon(item.$1, size: 18.sp, color: textMuted),
-                    const SizedBox(width: 12),
-                    Text(item.$2, style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
-                  ],
-                ),
+          ...items.map((item) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                children: [
+                  Icon(item.$1, size: 18.sp, color: textMuted),
+                  const SizedBox(width: 12),
+                  Text(
+                    item.$2,
+                    style: AppTypography.bodyMedium.copyWith(color: textPrimary),
+                  ),
+                ],
               ),
             ),
-          ),
+          )),
           const Spacer(),
           // Enable button
           SizedBox(
@@ -1400,7 +1536,9 @@ class _PageNotification extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: accent,
                 foregroundColor: isDark ? AppColors.void_ : AppColors.snow,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 elevation: 0,
               ),
@@ -1416,7 +1554,10 @@ class _PageNotification extends StatelessWidget {
             onTap: onSkip,
             child: Text(
               l.skipForNow,
-              style: AppTypography.bodyMedium.copyWith(color: textMuted, decoration: TextDecoration.underline),
+              style: AppTypography.bodyMedium.copyWith(
+                color: textMuted,
+                decoration: TextDecoration.underline,
+              ),
             ),
           ),
           const SizedBox(height: 32),
@@ -1468,26 +1609,37 @@ class _PageSummary extends StatelessWidget {
     }
 
     double tdee = bmr * multiplier;
-    if (goal == 'lose') tdee -= 400;
+    if (goal == 'lose') tdee -= (weeklyPace * 7700 / 7).clamp(200, 700);
     if (goal == 'gain') tdee += 300;
-    tdee = tdee.roundToDouble();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingSummaryTitle, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.onboardingSummaryTitle,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingSummarySub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(
+            l.onboardingSummarySub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
           const SizedBox(height: 40),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-            decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(20.r)),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(20.r),
+            ),
             child: Column(
               children: [
-                Text(l.onboardingRecommend, style: AppTypography.titleMedium.copyWith(color: textMuted)),
+                Text(
+                  l.onboardingRecommend,
+                  style: AppTypography.titleMedium.copyWith(color: textMuted),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -1496,10 +1648,16 @@ class _PageSummary extends StatelessWidget {
                   children: [
                     Text(
                       tdee.toStringAsFixed(0),
-                      style: AppTypography.displayLarge.copyWith(color: isDark ? AppColors.lime : AppColors.limeDeep, fontSize: 48.sp),
+                      style: AppTypography.displayLarge.copyWith(
+                        color: isDark ? AppColors.lime : AppColors.limeDeep,
+                        fontSize: 48.sp,
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    Text('kcal', style: AppTypography.titleMedium.copyWith(color: textMuted)),
+                    Text(
+                      'kcal',
+                      style: AppTypography.titleMedium.copyWith(color: textMuted),
+                    ),
                   ],
                 ),
               ],
@@ -1516,7 +1674,11 @@ class _PageTheme extends StatelessWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
 
-  const _PageTheme({required this.isDark, required this.textPrimary, required this.textMuted});
+  const _PageTheme({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1526,9 +1688,15 @@ class _PageTheme extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(l.onboardingTheme, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
+          Text(
+            l.onboardingTheme,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
           const SizedBox(height: 8),
-          Text(l.onboardingThemeSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+          Text(
+            l.onboardingThemeSub,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
           const SizedBox(height: 32),
           Row(
             children: [
@@ -1567,12 +1735,21 @@ class _PillButton extends StatelessWidget {
   final bool selected, isDark;
   final VoidCallback onTap;
 
-  const _PillButton({required this.label, required this.selected, required this.isDark, required this.onTap});
+  const _PillButton({
+    required this.label,
+    required this.selected,
+    required this.isDark,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? (isDark ? AppColors.lime : AppColors.void_) : Colors.transparent;
-    final textColor = selected ? (isDark ? AppColors.void_ : AppColors.snow) : (isDark ? AppColors.darkText : AppColors.lightText);
+    final bg = selected
+        ? (isDark ? AppColors.lime : AppColors.void_)
+        : Colors.transparent;
+    final textColor = selected
+        ? (isDark ? AppColors.void_ : AppColors.snow)
+        : (isDark ? AppColors.darkText : AppColors.lightText);
     final borderColor = isDark ? AppColors.darkSurface : AppColors.lightBorder;
 
     return GestureDetector(
@@ -1583,12 +1760,18 @@ class _PillButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(14.r),
-          border: selected ? null : Border.all(color: borderColor, width: 1),
+          border: selected
+              ? null
+              : Border.all(color: borderColor, width: 1),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: textColor),
+          style: TextStyle(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w700,
+            color: textColor,
+          ),
         ),
       ),
     );
@@ -1601,23 +1784,39 @@ class _ToggleTab extends StatelessWidget {
   final bool selected, isDark;
   final VoidCallback onTap;
 
-  const _ToggleTab({required this.label, required this.selected, required this.isDark, required this.onTap});
+  const _ToggleTab({
+    required this.label,
+    required this.selected,
+    required this.isDark,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? (isDark ? AppColors.lime : AppColors.void_) : Colors.transparent;
-    final textColor = selected ? (isDark ? AppColors.void_ : AppColors.snow) : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary);
+    final bg = selected
+        ? (isDark ? AppColors.lime : AppColors.void_)
+        : Colors.transparent;
+    final textColor = selected
+        ? (isDark ? AppColors.void_ : AppColors.snow)
+        : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary);
 
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10.r)),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(10.r),
+          ),
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textColor),
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
           ),
         ),
       ),
@@ -1630,12 +1829,22 @@ class _ThemeCard extends StatelessWidget {
   final IconData icon;
   final bool selected, isDark;
   final VoidCallback onTap;
-  const _ThemeCard({required this.label, required this.icon, required this.selected, required this.isDark, required this.onTap});
+  const _ThemeCard({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.isDark,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? (isDark ? AppColors.lime : AppColors.void_) : (isDark ? AppColors.darkCard : AppColors.lightCard);
-    final fgColor = selected ? (isDark ? AppColors.void_ : AppColors.snow) : (isDark ? AppColors.darkText : AppColors.lightText);
+    final bg = selected
+        ? (isDark ? AppColors.lime : AppColors.void_)
+        : (isDark ? AppColors.darkCard : AppColors.lightCard);
+    final fgColor = selected
+        ? (isDark ? AppColors.void_ : AppColors.lime)
+        : (isDark ? AppColors.darkText : AppColors.lightText);
     final borderColor = isDark ? null : AppColors.lightBorder;
 
     return Expanded(
@@ -1646,7 +1855,12 @@ class _ThemeCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(14.r),
-            border: selected ? null : Border.all(color: borderColor ?? Colors.transparent, width: 0.5),
+            border: selected
+                ? null
+                : Border.all(
+                    color: borderColor ?? Colors.transparent,
+                    width: 0.5,
+                  ),
           ),
           child: Column(
             children: [
@@ -1676,10 +1890,16 @@ class _GoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? (isDark ? AppColors.lime : AppColors.void_) : (isDark ? AppColors.darkCard : AppColors.lightCard);
-    final titleColor = selected ? (isDark ? AppColors.void_ : AppColors.snow) : (isDark ? AppColors.darkText : AppColors.lightText);
+    final bg = selected
+        ? (isDark ? AppColors.lime : AppColors.void_)
+        : (isDark ? AppColors.darkCard : AppColors.lightCard);
+    final titleColor = selected
+        ? (isDark ? AppColors.void_ : AppColors.lime)
+        : (isDark ? AppColors.darkText : AppColors.lightText);
     final subColor = selected
-        ? (isDark ? AppColors.void_.withValues(alpha: 0.6) : AppColors.snow.withValues(alpha: 0.7))
+        ? (isDark
+              ? AppColors.void_.withValues(alpha: 0.6)
+              : AppColors.lime.withValues(alpha: 0.7))
         : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary);
     final borderColor = isDark ? AppColors.darkSurface : AppColors.lightBorder;
 
@@ -1705,7 +1925,12 @@ class _GoalCard extends StatelessWidget {
                 ],
               ),
             ),
-            if (selected) Icon(Icons.check_circle_rounded, color: isDark ? AppColors.void_ : AppColors.lime, size: 20.sp),
+            if (selected)
+              Icon(
+                Icons.check_circle_rounded,
+                color: isDark ? AppColors.void_ : AppColors.lime,
+                size: 20.sp,
+              ),
           ],
         ),
       ),
