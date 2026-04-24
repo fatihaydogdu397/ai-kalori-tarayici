@@ -1,14 +1,15 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-/// RevenueCat entegrasyonu.
-/// EAT-123: API key'leri artık `.env`'den değil compile-time'da inject edilir:
-///   flutter build ... --dart-define=RC_IOS_KEY=appl_xxx \
-///                     --dart-define=RC_ANDROID_KEY=goog_xxx
+/// RevenueCat entegrasyonu
+/// API key'leri .env içinden okunur:
+/// RC_IOS_KEY=appl_xxx
+/// RC_ANDROID_KEY=goog_xxx
 class PurchaseService {
-  static const String _iosKey = String.fromEnvironment('RC_IOS_KEY');
-  static const String _androidKey = String.fromEnvironment('RC_ANDROID_KEY');
+  static String get _iosKey => dotenv.env['RC_IOS_KEY'] ?? '';
+  static String get _androidKey => dotenv.env['RC_ANDROID_KEY'] ?? '';
 
   static const monthlyId = 'com.fatihaydogdu.eatiq.premium.monthly';
   static const yearlyId = 'com.fatihaydogdu.eatiq.premium.yearly';

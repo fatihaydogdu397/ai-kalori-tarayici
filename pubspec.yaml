@@ -20,6 +20,7 @@ dependencies:
 
   # HTTP & API
   http: ^1.2.2
+  flutter_dotenv: ^5.2.1
 
   # State Management
   provider: ^6.1.2
@@ -78,3 +79,4 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - .env

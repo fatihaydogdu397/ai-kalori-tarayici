@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import 'api_exception.dart';
@@ -28,21 +29,12 @@ class ApiClient {
   /// alırsa ikinci kez tetiklenip logout→logout sonsuz döngüsüne girmesin.
   bool _handlingAuthFailure = false;
 
-  // EAT-123: endpoint compile-time'da `--dart-define=API_BASE_URL=...` ile
-  // inject edilir. Bundled .env kaldırıldı — hiçbir secret APK/IPA'ya girmez.
-  static const String _apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: '',
-  );
-
   Uri get _uri {
-    if (_apiBaseUrl.isEmpty) {
-      throw ApiException(
-        'API_BASE_URL not set. Build with --dart-define=API_BASE_URL=<url>.',
-        code: 'CONFIG_ERROR',
-      );
+    final url = dotenv.env['API_BASE_URL'];
+    if (url == null || url.isEmpty) {
+      throw ApiException('API_BASE_URL missing in .env', code: 'CONFIG_ERROR');
     }
-    return Uri.parse(_apiBaseUrl);
+    return Uri.parse(url);
   }
 
   Future<Map<String, dynamic>> query(
