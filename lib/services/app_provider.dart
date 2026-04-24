@@ -992,23 +992,17 @@ class AppProvider extends ChangeNotifier {
     return restored;
   }
 
-  /// Kalan günlük tarama sayısı. Premium ise `999` (sınırsız göstergesi).
-  /// Free kullanıcı için BE `remainingScans` tek source of truth.
+  /// EAT-123 — Server is the single source of truth for scan entitlement.
+  /// `isPremium` stays for UI only (paywall/unlimited badge); it is NOT
+  /// consulted here to avoid client-side tamper granting unlimited scans.
+  /// Backend returns premium users' remaining count directly (≥ 999 when
+  /// unlimited).
   Future<int> remainingScans() async {
-    if (isPremium) return 999;
     if (!_isLoggedIn) return freeDailyLimit;
-    try {
-      return await _progressService.remainingScans();
-    } on ApiException {
-      return 0;
-    }
+    return _progressService.remainingScans();
   }
 
-  Future<bool> canScan() async {
-    if (isPremium) return true;
-    final left = await remainingScans();
-    return left > 0;
-  }
+  Future<bool> canScan() async => (await remainingScans()) > 0;
 
   // ---------------------------------------------------------------------------
   // Streak

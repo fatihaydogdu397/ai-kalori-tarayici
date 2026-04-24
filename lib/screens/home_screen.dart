@@ -45,10 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (picked == null || !mounted) return;
 
     final provider = context.read<AppProvider>();
-    if (!provider.isPremium && provider.history.length >= 20) {
-      _showPaywall();
-      return;
-    }
 
     // PorsiyonPickerSheet aç
     final result = await showModalBottomSheet<({int amount, bool isLiquid, CookingMethod? cooking})>(
