@@ -19,6 +19,7 @@ import 'api/token_storage.dart';
 import 'api/user_service.dart';
 import 'api/water_service.dart';
 import 'api/blood_test_service.dart';
+import 'offline/connectivity_watcher.dart';
 import '../models/blood_test.dart';
 import '../main.dart' show rootNavigatorKey;
 import '../screens/auth/auth_screen.dart';
@@ -613,13 +614,20 @@ class AppProvider extends ChangeNotifier {
 
   Future<void> logWeight(double newWeight, DateTime date) async {
     _weight = newWeight;
+    var queued = false;
 
     if (_isLoggedIn) {
       final iso = date.toIso8601String().substring(0, 10);
       try {
         await _weightService.logWeight(newWeight, date: iso);
-      } on ApiException {
-        rethrow;
+      } on ApiException catch (e) {
+        // EAT-141: offline ise queue'ya atıldı; kullanıcıya hata göstermeden
+        // devam et. Reconnect'te replay + loadWeightLogs tetiklenecek.
+        if (e.code == 'QUEUED') {
+          queued = true;
+        } else {
+          rethrow;
+        }
       }
       // Profilin güncel weight'i de BE'ye yazılsın (silent).
       unawaited(() async {
@@ -629,7 +637,9 @@ class AppProvider extends ChangeNotifier {
       }());
     }
 
-    await loadWeightLogs();
+    if (!queued) {
+      await loadWeightLogs();
+    }
     notifyListeners();
   }
 
@@ -769,6 +779,9 @@ class AppProvider extends ChangeNotifier {
       await authLogout();
     };
 
+    // EAT-141: connectivity watcher + replay pending mutations on reconnect.
+    await _startOfflineReplay();
+
     if (!await _tokenStorage.hasSession()) {
       _isLoggedIn = false;
       notifyListeners();
@@ -778,6 +791,8 @@ class AppProvider extends ChangeNotifier {
       final user = await _authService.me();
       _applyBackendUser(user);
       _isLoggedIn = true;
+      // Oturum açıldıysa önceki kapatmalardan kalan queue'yu hemen boşalt.
+      unawaited(ApiClient.instance.replayPendingMutations());
     } on ApiException catch (e) {
       if (e.isUnauthenticated) {
         // Token geçersiz / expire → temizle.
@@ -790,6 +805,25 @@ class AppProvider extends ChangeNotifier {
       }
     }
     notifyListeners();
+  }
+
+  bool _offlineReplayStarted = false;
+
+  Future<void> _startOfflineReplay() async {
+    if (_offlineReplayStarted) return;
+    _offlineReplayStarted = true;
+    await ConnectivityWatcher.instance.start();
+    // AppProvider'ın ömrü uygulamanın ömrüyle aynı; watcher kendi
+    // dispose'unu yönetiyor, ayrıca subscription tutmuyoruz.
+    ConnectivityWatcher.instance.onRestored.listen((_) {
+      if (!_isLoggedIn) return;
+      unawaited(ApiClient.instance.replayPendingMutations().then((_) {
+        // Backend ile eşitlendikten sonra bugünkü sayaçları yenile ki queued
+        // yazımlardan sonra UI'daki veriler ile BE aynı satırda olsun.
+        unawaited(loadTodayStats());
+        unawaited(loadWeightLogs());
+      }));
+    });
   }
 
   Future<void> loadAuthStatus() => bootstrapSession();
@@ -1095,8 +1129,13 @@ class AppProvider extends ChangeNotifier {
     try {
       final saved = await _waterService.logWater(newTotal);
       _waterToday = saved;
-    } on ApiException {
-      rethrow;
+    } on ApiException catch (e) {
+      // EAT-141: offline → mutasyon queue'ya atıldı; optimistic olarak ilerle.
+      if (e.code == 'QUEUED') {
+        _waterToday = newTotal;
+      } else {
+        rethrow;
+      }
     }
     unawaited(_healthService.logWater(liters: liters, time: DateTime.now()));
     notifyListeners();

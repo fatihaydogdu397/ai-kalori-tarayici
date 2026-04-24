@@ -52,6 +52,9 @@ dependencies:
   # Backend API
   flutter_secure_storage: ^9.2.2
 
+  # EAT-141: offline mutation queue — replay logWater/logWeight on reconnect.
+  connectivity_plus: ^6.1.0
+
   # Social Sign-In (EAT-116)
   google_sign_in: ^6.2.1
   sign_in_with_apple: ^6.1.4
