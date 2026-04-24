@@ -10,6 +10,7 @@ class PurchaseService {
   static const String _iosKey = String.fromEnvironment('RC_IOS_KEY');
   static const String _androidKey = String.fromEnvironment('RC_ANDROID_KEY');
 
+  static const weeklyId = 'com.fatihaydogdu.eatiq.premium.weekly';
   static const monthlyId = 'com.fatihaydogdu.eatiq.premium.monthly';
   static const yearlyId = 'com.fatihaydogdu.eatiq.premium.yearly';
 
@@ -34,17 +35,39 @@ class PurchaseService {
     }
   }
 
-  /// Aylık veya yıllık paketi satın al
-  static Future<bool> purchase({required bool yearly}) async {
+  /// Hangi planda olduğunu döndürür (weekly, monthly, yearly veya null)
+  static Future<String?> getActivePlan() async {
+    try {
+      final info = await Purchases.getCustomerInfo();
+      final ent = info.entitlements.active['eatiq Premium'];
+      if (ent == null) return null;
+      if (ent.productIdentifier.contains('weekly')) return 'weekly';
+      if (ent.productIdentifier.contains('monthly')) return 'monthly';
+      if (ent.productIdentifier.contains('yearly')) return 'yearly';
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Belirtilen paketi (weekly, monthly, yearly) satın al
+  static Future<bool> purchase({required String planType}) async {
     try {
       final offerings = await Purchases.getOfferings();
       if (offerings.current == null) {
         debugPrint('[PurchaseService] Offerings boş — App Store Connect bağlantısı kontrol edilmeli');
         return false;
       }
-      final pkg = yearly
-          ? offerings.current!.annual
-          : offerings.current!.monthly;
+      
+      Package? pkg;
+      if (planType == 'weekly') {
+        pkg = offerings.current!.weekly;
+      } else if (planType == 'monthly') {
+        pkg = offerings.current!.monthly;
+      } else if (planType == 'yearly') {
+        pkg = offerings.current!.annual;
+      }
+
       if (pkg == null) return false;
       await Purchases.purchasePackage(pkg);
       return true;
