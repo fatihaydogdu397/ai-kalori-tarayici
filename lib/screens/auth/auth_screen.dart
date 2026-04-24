@@ -27,19 +27,24 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       // Native SDK'dan idToken al.
+      // EAT-116 (IDEA): Google + Facebook prod-transfer sonrası açılacak.
+      // Bundle ID şirket Apple Dev hesabına taşınınca OAuth Client ID'ler
+      // yeniden yaratılacak; şimdi yapılan config o anda çöpe gider.
+      // O zamana kadar Apple + email path aktif, bu iki buton "coming soon".
       String? idToken;
       switch (providerName.toUpperCase()) {
-        case 'GOOGLE':
-          idToken = await SocialSignIn.google();
-          break;
         case 'APPLE':
           idToken = await SocialSignIn.apple();
           break;
+        case 'GOOGLE':
         case 'FACEBOOK':
           if (mounted) setState(() => _isLoading = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Facebook sign-in will be available soon.'),
+            SnackBar(
+              content: Text(
+                '${providerName[0].toUpperCase()}${providerName.substring(1).toLowerCase()} '
+                'sign-in will be available soon.',
+              ),
               backgroundColor: AppColors.amber,
             ),
           );

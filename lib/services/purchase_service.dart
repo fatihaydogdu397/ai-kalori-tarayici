@@ -14,6 +14,12 @@ class PurchaseService {
   static const monthlyId = 'com.fatihaydogdu.eatiq.premium.monthly';
   static const yearlyId = 'com.fatihaydogdu.eatiq.premium.yearly';
 
+  /// `true` once `Purchases.configure(...)` has run with a real key.
+  /// When false, every method below short-circuits to safe defaults so the
+  /// native RevenueCat SDK never gets called — calling it unconfigured is a
+  /// Swift `fatalError` that Dart try/catch cannot intercept.
+  static bool _configured = false;
+
   static Future<void> init() async {
     if (_iosKey.isEmpty && _androidKey.isEmpty) {
       debugPrint('[PurchaseService] RC key bulunamadı — mock mod aktif');
@@ -23,10 +29,12 @@ class PurchaseService {
     await Purchases.setLogLevel(LogLevel.error);
     final config = PurchasesConfiguration(Platform.isIOS ? _iosKey : _androidKey);
     await Purchases.configure(config);
+    _configured = true;
   }
 
   /// Kullanıcının aktif aboneliği var mı?
   static Future<bool> checkPremium() async {
+    if (!_configured) return false;
     try {
       final info = await Purchases.getCustomerInfo();
       return info.entitlements.active.containsKey('eatiq Premium');
@@ -37,6 +45,7 @@ class PurchaseService {
 
   /// Hangi planda olduğunu döndürür (weekly, monthly, yearly veya null)
   static Future<String?> getActivePlan() async {
+    if (!_configured) return null;
     try {
       final info = await Purchases.getCustomerInfo();
       final ent = info.entitlements.active['eatiq Premium'];
@@ -52,13 +61,17 @@ class PurchaseService {
 
   /// Belirtilen paketi (weekly, monthly, yearly) satın al
   static Future<bool> purchase({required String planType}) async {
+    if (!_configured) {
+      debugPrint('[PurchaseService] purchase() mock modda yoksayıldı');
+      return false;
+    }
     try {
       final offerings = await Purchases.getOfferings();
       if (offerings.current == null) {
         debugPrint('[PurchaseService] Offerings boş — App Store Connect bağlantısı kontrol edilmeli');
         return false;
       }
-      
+
       Package? pkg;
       if (planType == 'weekly') {
         pkg = offerings.current!.weekly;
@@ -83,6 +96,7 @@ class PurchaseService {
 
   /// Satın alımları geri yükle
   static Future<bool> restore() async {
+    if (!_configured) return false;
     try {
       final info = await Purchases.restorePurchases();
       return info.entitlements.active.containsKey('eatiq Premium');
