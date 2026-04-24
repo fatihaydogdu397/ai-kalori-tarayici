@@ -30,19 +30,24 @@ class ApiClient {
 
   // EAT-123: endpoint compile-time'da `--dart-define=API_BASE_URL=...` ile
   // inject edilir. Bundled .env kaldırıldı — hiçbir secret APK/IPA'ya girmez.
-  static const String _apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: '',
-  );
+  //
+  // Dev convenience: `--dart-define` geçilmediyse debug build'de otomatik
+  // `http://localhost:4000/graphql` fallback kullanılır. Release build'de
+  // fallback yok → explicit `--dart-define=API_BASE_URL=...` zorunlu.
+  static const String _apiBaseUrlEnv = String.fromEnvironment('API_BASE_URL');
+  static const String _devFallbackUrl = 'http://localhost:4000/graphql';
 
   Uri get _uri {
-    if (_apiBaseUrl.isEmpty) {
+    final url = _apiBaseUrlEnv.isNotEmpty
+        ? _apiBaseUrlEnv
+        : (kReleaseMode ? '' : _devFallbackUrl);
+    if (url.isEmpty) {
       throw ApiException(
         'API_BASE_URL not set. Build with --dart-define=API_BASE_URL=<url>.',
         code: 'CONFIG_ERROR',
       );
     }
-    return Uri.parse(_apiBaseUrl);
+    return Uri.parse(url);
   }
 
   Future<Map<String, dynamic>> query(
@@ -202,8 +207,39 @@ class ApiClient {
     Map<String, dynamic>? variables,
   ) {
     final op = _opLabel(operationName, document);
-    final vars = variables == null ? '' : ' vars=${jsonEncode(variables)}';
+    final vars = variables == null ? '' : ' vars=${jsonEncode(_redact(variables))}';
     _log('→ $op$vars');
+  }
+
+  // EAT-124 (2f): request variables log'larında sensitive alanları redact et.
+  // Nested input objeleri için recursive (ör. `{input: {password: ...}}`).
+  // Release build'de _log zaten no-op — bu ek guard debug sızıntısı regression'ı
+  // için.
+  static const Set<String> _redactedKeys = {
+    'password',
+    'newPassword',
+    'currentPassword',
+    'refreshToken',
+    'idToken',
+    'accessToken',
+    'token',
+    'code',
+    'otp',
+    'imageBase64',
+    'base64',
+  };
+
+  dynamic _redact(dynamic value) {
+    if (value is Map) {
+      return value.map((k, v) => MapEntry(
+            k,
+            _redactedKeys.contains(k) ? '***REDACTED***' : _redact(v),
+          ));
+    }
+    if (value is List) {
+      return value.map(_redact).toList();
+    }
+    return value;
   }
 
   void _logResponse(
