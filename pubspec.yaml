@@ -24,8 +24,9 @@ dependencies:
   # State Management
   provider: ^6.1.2
 
-  # Lokal Veritabanı (Geçmiş)
-  sqflite: ^2.3.3+1
+  # Lokal Veritabanı (Geçmiş) — EAT-124 2d: encrypted at rest via SQLCipher.
+  # `sqflite_sqlcipher` is a drop-in; adds `password:` param to openDatabase.
+  sqflite_sqlcipher: ^3.4.0
   path: ^1.9.0
 
   # Animasyon

@@ -1,55 +1,141 @@
-import 'package:sqflite/sqflite.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:path/path.dart' as p;
 import 'package:path/path.dart';
 import '../models/food_analysis.dart';
 
 class DatabaseService {
   static Database? _database;
 
+  // EAT-124 2d: encryption key lives in Keychain (iOS) / encrypted Keystore (Android).
+  // Generated once per install; survives app kills, wiped on uninstall.
+  static const _secureStorage = FlutterSecureStorage();
+  static const _keyStorageName = 'eatiq_db_key_v1';
+  static const _migrationFlag = 'db_encrypted_v1';
+
   Future<Database> get database async {
     _database ??= await _initDatabase();
     return _database!;
   }
 
+  Future<String> _getOrCreateEncryptionKey() async {
+    final existing = await _secureStorage.read(key: _keyStorageName);
+    if (existing != null && existing.isNotEmpty) return existing;
+    // 256-bit random key, base64-encoded for SQLCipher's password param.
+    final rng = Random.secure();
+    final bytes = List<int>.generate(32, (_) => rng.nextInt(256));
+    final key = base64Encode(bytes);
+    await _secureStorage.write(key: _keyStorageName, value: key);
+    return key;
+  }
+
+  /// One-time migration: if a plaintext `kalori_tarayici.db` exists from a pre-2d
+  /// install, copy rows into a fresh encrypted DB and delete the plaintext file.
+  /// Guarded by a SharedPreferences flag so it runs at most once.
+  Future<void> _migratePlaintextIfNeeded(String path, String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_migrationFlag) ?? false) return;
+
+    final file = File(path);
+    if (!file.existsSync()) {
+      await prefs.setBool(_migrationFlag, true);
+      return;
+    }
+
+    // Try to open the file as plaintext. If it's already encrypted (fresh
+    // install of 2d version), the open will fail or read garbage — in that
+    // case we just mark migration complete without touching the file.
+    Database? old;
+    try {
+      old = await openDatabase(path, readOnly: true);
+      final analyses = await old.query('analyses');
+      final water = await old.query('water_log');
+      final weight = await old.query('weight_log');
+      await old.close();
+
+      await file.delete();
+
+      final fresh = await openDatabase(
+        path,
+        password: key,
+        version: 5,
+        onCreate: _createSchema,
+      );
+      final batch = fresh.batch();
+      for (final row in analyses) {
+        batch.insert('analyses', row);
+      }
+      for (final row in water) {
+        batch.insert('water_log', row);
+      }
+      for (final row in weight) {
+        batch.insert('weight_log', row);
+      }
+      await batch.commit(noResult: true);
+      await fresh.close();
+    } catch (_) {
+      // Plaintext open failed → either file is corrupt or already encrypted.
+      // Either way, don't lose data: leave the file untouched so a subsequent
+      // openDatabase(password: key) either succeeds or fails loudly.
+      try {
+        await old?.close();
+      } catch (_) {}
+    }
+
+    await prefs.setBool(_migrationFlag, true);
+  }
+
+  Future<void> _createSchema(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE analyses (
+        id TEXT PRIMARY KEY,
+        imagePath TEXT NOT NULL,
+        summary TEXT,
+        advice TEXT,
+        analyzedAt TEXT NOT NULL,
+        totalCalories REAL,
+        totalProtein REAL,
+        totalCarbs REAL,
+        totalFat REAL,
+        totalFiber REAL,
+        totalSugar REAL,
+        mealCategory TEXT,
+        isFavorite INTEGER DEFAULT 0
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS water_log (
+        id TEXT,
+        date TEXT,
+        liters REAL
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS weight_log (
+        id TEXT PRIMARY KEY,
+        date TEXT NOT NULL,
+        weight REAL NOT NULL
+      )
+    ''');
+  }
+
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'kalori_tarayici.db');
+    final key = await _getOrCreateEncryptionKey();
+
+    await _migratePlaintextIfNeeded(path, key);
 
     return openDatabase(
       path,
+      password: key,
       version: 5,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE analyses (
-            id TEXT PRIMARY KEY,
-            imagePath TEXT NOT NULL,
-            summary TEXT,
-            advice TEXT,
-            analyzedAt TEXT NOT NULL,
-            totalCalories REAL,
-            totalProtein REAL,
-            totalCarbs REAL,
-            totalFat REAL,
-            totalFiber REAL,
-            totalSugar REAL,
-            mealCategory TEXT,
-            isFavorite INTEGER DEFAULT 0
-          )
-        ''');
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS water_log (
-            id TEXT,
-            date TEXT,
-            liters REAL
-          )
-        ''');
-        await db.execute('''
-          CREATE TABLE IF NOT EXISTS weight_log (
-            id TEXT PRIMARY KEY,
-            date TEXT NOT NULL,
-            weight REAL NOT NULL
-          )
-        ''');
-      },
+      onCreate: _createSchema,
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
           await db.execute('''
@@ -90,11 +176,32 @@ class DatabaseService {
 
   Future<List<FoodAnalysis>> getAllAnalyses() async {
     final db = await database;
-    final maps = await db.query(
-      'analyses',
-      orderBy: 'analyzedAt DESC',
-    );
-    return maps.map((m) => FoodAnalysis.fromMap(m)).toList();
+    final maps = await db.query('analyses', orderBy: 'analyzedAt DESC');
+    final appDir = await getApplicationDocumentsDirectory();
+    final docsPath = appDir.path;
+
+    return maps.map((m) {
+      final analysis = FoodAnalysis.fromMap(m);
+      final stored = analysis.imagePath;
+
+      // Sadece dosya adı kaydedilmişse (yeni format) → tam yolu ekle
+      if (!stored.startsWith('/')) {
+        return analysis.copyWith(imagePath: p.join(docsPath, stored));
+      }
+
+      // Tam path kaydedilmiş ama UUID değişmiş → basename'den yeniden çöz
+      if (!File(stored).existsSync()) {
+        final filename = p.basename(stored);
+        if (filename.isNotEmpty) {
+          final resolved = p.join(docsPath, filename);
+          if (File(resolved).existsSync()) {
+            return analysis.copyWith(imagePath: resolved);
+          }
+        }
+      }
+
+      return analysis;
+    }).toList();
   }
 
   Future<void> deleteAnalysis(String id) async {
