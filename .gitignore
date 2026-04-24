@@ -46,3 +46,13 @@ app.*.map.json
 .env
 .env.local
 ios/build/
+
+# Nested backend repo (read-only, tracked separately — must not enter this repo)
+/eatiq_backend/
+
+# Local analysis / scratch artefacts
+analyzer_output.txt
+/scratch_*.py
+/create_*figma*.py
+/fix_arb.py
+/figma_screens*.svg
