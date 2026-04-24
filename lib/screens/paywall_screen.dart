@@ -4,7 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
-import '../services/purchase_service.dart';
+// DEV-BYPASS-PAYWALL: import '../services/purchase_service.dart' removed
+// while fake-purchase is active; restore alongside _purchase() revert.
 import '../generated/app_localizations.dart';
 import 'home_screen.dart';
 
@@ -33,30 +34,25 @@ class _PaywallScreenState extends State<PaywallScreen> {
   ];
 
   Future<void> _purchase() async {
+    // DEV-BYPASS-PAYWALL: Pre-launch geçici. Kullanıcı paywall'ı görüyor ama
+    // plan seçince gerçek RevenueCat satın alımı yerine local dev-premium
+    // flag'i set ediliyor → tüm premium ekranlara erişebilsin. Launch öncesi
+    // bu blok revert edilecek; `_selectedPlan` kullanımı ile gerçek
+    // PurchaseService.purchase(planType: _selectedPlan) geri gelecek.
     setState(() => _isLoading = true);
     HapticFeedback.mediumImpact();
 
-    final success = await PurchaseService.purchase(planType: _selectedPlan);
     final provider = context.read<AppProvider>();
-    
-    if (success) {
-      await provider.refreshPremiumStatus();
-    }
+    await provider.enableDevPremium();
+    await Future<void>.delayed(const Duration(milliseconds: 400));
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (provider.isPremium) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
-      // Satın alma veya iptal sonrası hala premium değil, ekranda kalsın.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Satın alma tamamlanamadı veya iptal edildi.')),
-      );
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
   }
 
   Future<void> _restore() async {

@@ -779,6 +779,9 @@ class AppProvider extends ChangeNotifier {
       await authLogout();
     };
 
+    // DEV-BYPASS-PAYWALL: persisted flag splash isPremium check'inden önce yüklensin.
+    await _loadDevPremium();
+
     // EAT-141: connectivity watcher + replay pending mutations on reconnect.
     await _startOfflineReplay();
 
@@ -883,6 +886,8 @@ class AppProvider extends ChangeNotifier {
       } catch (_) {}
     }
     await _tokenStorage.clear();
+    // DEV-BYPASS-PAYWALL: logout sonrası sonraki hesap tekrar paywall görsün.
+    await _clearDevPremium();
     _isLoggedIn = false;
     _userName = '';
     notifyListeners();
@@ -993,11 +998,37 @@ class AppProvider extends ChangeNotifier {
   // Freemium — günlük 5 ücretsiz tarama
   static const int freeDailyLimit = 5;
 
-  // DEV ONLY: launch öncesi false yap, paywall'ı yeniden aktive eder.
-  static const bool kBypassPaywall = true;
+  // DEV-BYPASS-PAYWALL: Pre-launch geçici davranış. Kullanıcı onboarding'den
+  // sonra paywall'ı hâlâ görüyor ama "Continue with <plan>" butonu gerçek
+  // RevenueCat akışı yerine bu flag'i set ediyor — kullanıcı tüm premium
+  // ekranlarına ulaşabilsin ki UI sıkıntılarını tespit edelim. SharedPrefs'te
+  // persist — bir kez "satın aldıktan" sonra logout'a kadar premium kalır.
+  // Launch öncesi: bu blok + PaywallScreen._purchase() + home/diet_plan
+  // isPremium check'leri revert edilecek. `grep -rn "DEV-BYPASS-PAYWALL"`
+  // ile hepsi bulunur.
+  static const String _devPremiumPrefKey = 'devPremiumOverride';
+  bool _devPremiumOverride = false;
 
   bool _isPremium = false;
-  bool get isPremium => kBypassPaywall || _isPremium;
+  bool get isPremium => _devPremiumOverride || _isPremium;
+
+  Future<void> _loadDevPremium() async {
+    final prefs = await SharedPreferences.getInstance();
+    _devPremiumOverride = prefs.getBool(_devPremiumPrefKey) ?? false;
+  }
+
+  Future<void> enableDevPremium() async {
+    _devPremiumOverride = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_devPremiumPrefKey, true);
+    notifyListeners();
+  }
+
+  Future<void> _clearDevPremium() async {
+    _devPremiumOverride = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_devPremiumPrefKey);
+  }
 
   /// BE `me` query'si + RevenueCat kombinasyonu. BE source of truth.
   /// Webhook (EAT-107) satın alma sonrası user.is_premium'u günceller; FE

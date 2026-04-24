@@ -150,7 +150,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showPaywall() {
-    if (AppProvider.kBypassPaywall) return;
+    // DEV-BYPASS-PAYWALL: premium (fake veya gerçek) ise paywall açma.
+    if (context.read<AppProvider>().isPremium) return;
     Navigator.push(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
   }
 

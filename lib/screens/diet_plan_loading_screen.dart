@@ -89,7 +89,10 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
       _stepTimer?.cancel();
       if (!mounted) return;
       if (e.code == 'PREMIUM_REQUIRED') {
-        if (AppProvider.kBypassPaywall) {
+        // DEV-BYPASS-PAYWALL: fake-premium kullanıcıda paywall'a yönlendirmek
+        // yerine BE'nin error mesajını gösteriyoruz (gerçek abonelik yok, BE
+        // reddetti). Gerçek free kullanıcı normal paywall'a yönlendirilir.
+        if (context.read<AppProvider>().isPremium) {
           _showError(e.message);
           return;
         }
