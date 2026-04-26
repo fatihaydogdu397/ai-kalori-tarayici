@@ -18,27 +18,10 @@ const _restrictionOptions = [
   ('halal', '☪️', 'Halal'),
 ];
 
-const _cuisineOptions = [
-  ('turkish', '🫙', 'Turkish'),
-  ('mediterranean', '🫒', 'Mediterranean'),
-  ('asian', '🍜', 'Asian'),
-  ('italian', '🍝', 'Italian'),
-  ('american', '🍔', 'American'),
-  ('mexican', '🌮', 'Mexican'),
-  ('middle_eastern', '🧆', 'Middle Eastern'),
-  ('no_pref', '🌍', 'No Preference'),
-];
-
 const _cookOptions = [
   ('quick', '⚡', 'Quick', '< 15 min'),
   ('medium', '🍳', 'Moderate', '15–30 min'),
   ('relaxed', '👨‍🍳', 'Relaxed', '30–60 min'),
-];
-
-const _budgetOptions = [
-  ('low', '💸', 'Budget', 'Affordable meals'),
-  ('medium', '💳', 'Moderate', 'Regular groceries'),
-  ('high', '🌟', 'Premium', 'Quality ingredients'),
 ];
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -51,11 +34,8 @@ class DietProfileEditScreen extends StatefulWidget {
 
 class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
   late Set<String> _restrictions;
-  late Set<String> _cuisines;
   late int _mealsPerDay;
   late String _cookingTime;
-  late String _budget;
-  late TextEditingController _notesController;
   bool _saving = false;
 
   @override
@@ -63,39 +43,32 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
     super.initState();
     final p = context.read<AppProvider>();
     _restrictions = Set.from(p.dietRestrictions.isEmpty ? ['none'] : p.dietRestrictions);
-    _cuisines = Set.from(p.dietCuisines.isEmpty ? ['no_pref'] : p.dietCuisines);
     _mealsPerDay = p.dietMealsPerDay;
     _cookingTime = p.dietCookingTime;
-    _budget = p.dietBudget;
-    _notesController = TextEditingController(text: p.dietNotes);
-  }
-
-  @override
-  void dispose() {
-    _notesController.dispose();
-    super.dispose();
   }
 
   Future<void> _save({bool regenerate = false}) async {
     setState(() => _saving = true);
+    // cuisines/budget/notes UI'dan kaldırıldı; BE şeması hâlâ alanları
+    // zorunlu tuttuğu için boş değer geçiyoruz.
     await context.read<AppProvider>().saveAnamnesisProfile(
       restrictions: _restrictions.toList(),
-      cuisines: _cuisines.toList(),
+      cuisines: const [],
       mealsPerDay: _mealsPerDay,
       cookingTime: _cookingTime,
-      budget: _budget,
-      notes: _notesController.text.trim(),
+      budget: 'medium',
+      notes: '',
     );
     if (!mounted) return;
 
     if (regenerate) {
       final data = {
         'restrictions': _restrictions.toList(),
-        'cuisines': _cuisines.toList(),
+        'cuisines': const <String>[],
         'mealsPerDay': _mealsPerDay,
         'cookingTime': _cookingTime,
-        'budget': _budget,
-        'notes': _notesController.text.trim(),
+        'budget': 'medium',
+        'notes': '',
       };
       Navigator.pushReplacement(
         context,
@@ -117,23 +90,6 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
           if (_restrictions.isEmpty) _restrictions.add('none');
         } else {
           _restrictions.add(id);
-        }
-      }
-    });
-    HapticFeedback.selectionClick();
-  }
-
-  void _toggleCuisine(String id) {
-    setState(() {
-      if (id == 'no_pref') {
-        _cuisines = {'no_pref'};
-      } else {
-        _cuisines.remove('no_pref');
-        if (_cuisines.contains(id)) {
-          _cuisines.remove(id);
-          if (_cuisines.isEmpty) _cuisines.add('no_pref');
-        } else {
-          _cuisines.add(id);
         }
       }
     });
@@ -211,26 +167,6 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
 
                     SizedBox(height: 28.h),
 
-                    // ── Cuisines ──────────────────────────────────────
-                    _SectionTitle(title: 'Cuisine Preferences', isDark: isDark),
-                    SizedBox(height: 12.h),
-                    Wrap(
-                      spacing: 8.w,
-                      runSpacing: 8.h,
-                      children: _cuisineOptions.map((opt) {
-                        final isSelected = _cuisines.contains(opt.$1);
-                        return _EditPill(
-                          label: '${opt.$2} ${opt.$3}',
-                          isSelected: isSelected,
-                          isDark: isDark,
-                          accent: accent,
-                          onTap: () => _toggleCuisine(opt.$1),
-                        );
-                      }).toList(),
-                    ),
-
-                    SizedBox(height: 28.h),
-
                     // ── Meals per day ─────────────────────────────────
                     _SectionTitle(title: 'Meals Per Day', isDark: isDark),
                     SizedBox(height: 12.h),
@@ -259,47 +195,6 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
                         HapticFeedback.selectionClick();
                       },
                     )),
-
-                    SizedBox(height: 28.h),
-
-                    // ── Budget ────────────────────────────────────────
-                    _SectionTitle(title: 'Grocery Budget', isDark: isDark),
-                    SizedBox(height: 12.h),
-                    ..._budgetOptions.map((opt) => _OptionRow(
-                      id: opt.$1,
-                      emoji: opt.$2,
-                      title: opt.$3,
-                      subtitle: opt.$4,
-                      isSelected: _budget == opt.$1,
-                      isDark: isDark,
-                      accent: accent,
-                      onTap: () {
-                        setState(() => _budget = opt.$1);
-                        HapticFeedback.selectionClick();
-                      },
-                    )),
-
-                    SizedBox(height: 28.h),
-
-                    // ── Notes ─────────────────────────────────────────
-                    _SectionTitle(title: 'Additional Notes', isDark: isDark),
-                    SizedBox(height: 12.h),
-                    TextField(
-                      controller: _notesController,
-                      maxLines: 4,
-                      style: TextStyle(fontSize: 14.sp, color: textPrimary),
-                      decoration: InputDecoration(
-                        hintText: 'Food dislikes, allergies, or special requests...',
-                        hintStyle: TextStyle(fontSize: 13.sp, color: textMuted),
-                        filled: true,
-                        fillColor: isDark ? AppColors.darkCard : AppColors.lightCard,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: EdgeInsets.all(14.w),
-                      ),
-                    ),
 
                     SizedBox(height: 32.h),
 

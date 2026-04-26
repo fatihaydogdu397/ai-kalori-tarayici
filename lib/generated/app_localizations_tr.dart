@@ -738,6 +738,18 @@ class AppLocalizationsTr extends AppLocalizations {
       'Size uygun makro oranlarını hesaplayalım';
 
   @override
+  String get onboardingAllergiesTitle => 'Alerjiler & Kısıtlamalar';
+
+  @override
+  String get onboardingAllergiesSub => 'Uyumsuz yiyeceklerde seni uyaralım';
+
+  @override
+  String get onboardingAllergiesReligious => 'Dini & Yaşam Tarzı';
+
+  @override
+  String get onboardingAllergiesAllergens => 'Alerji & İntoleranslar';
+
+  @override
   String get dietStandard => 'Standart Beslenme';
 
   @override

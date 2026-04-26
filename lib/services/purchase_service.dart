@@ -2,6 +2,11 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
+/// Result of a Restore Purchases attempt — distinguishes "no active sub on
+/// this account" from a network/SDK error so the UI can show the right
+/// message (EAT-159).
+enum RestoreResult { success, noEntitlement, error }
+
 /// RevenueCat entegrasyonu.
 /// EAT-123: API key'leri artık `.env`'den değil compile-time'da inject edilir:
 ///   flutter build ... --dart-define=RC_IOS_KEY=appl_xxx \
@@ -94,14 +99,18 @@ class PurchaseService {
     }
   }
 
-  /// Satın alımları geri yükle
-  static Future<bool> restore() async {
-    if (!_configured) return false;
+  /// Satın alımları geri yükle. Üç ayrı sonucu net döndürür ki UI
+  /// "abonelik yok" ile "ağ hatası" farkını kullanıcıya gösterebilsin.
+  static Future<RestoreResult> restore() async {
+    if (!_configured) return RestoreResult.error;
     try {
       final info = await Purchases.restorePurchases();
-      return info.entitlements.active.containsKey('eatiq Premium');
-    } catch (_) {
-      return false;
+      return info.entitlements.active.containsKey('eatiq Premium')
+          ? RestoreResult.success
+          : RestoreResult.noEntitlement;
+    } catch (e) {
+      debugPrint('[PurchaseService] restore error: $e');
+      return RestoreResult.error;
     }
   }
 }

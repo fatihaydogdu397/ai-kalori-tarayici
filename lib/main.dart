@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/app_localizations.dart';
 import 'services/app_provider.dart';
 import 'services/purchase_service.dart';
-import 'screens/splash_screen.dart';
+import 'screens/getting_started_screen.dart';
 import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
+import 'widgets/keyboard_dismisser.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Root navigator — AppProvider.authLogout uses this to kick the user back
@@ -16,6 +20,26 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env optional — compile-time --dart-define still works as fallback.
+  }
+
+  // iOS keychain app silinince temizlenmez; reinstall sonrası eski token
+  // hayalet oturum açar. SharedPreferences ise app silinince gider — ilk
+  // açılışta marker yoksa fresh install say, secure storage'ı temizle.
+  final prefs = await SharedPreferences.getInstance();
+  if (!(prefs.getBool('install_marker') ?? false)) {
+    try {
+      await const FlutterSecureStorage(
+        aOptions: AndroidOptions(encryptedSharedPreferences: true),
+        iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+      ).deleteAll();
+    } catch (_) {}
+    await prefs.setBool('install_marker', true);
+  }
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light));
 
@@ -79,7 +103,8 @@ class EatiqApp extends StatelessWidget {
                   Locale('ru'),
                   Locale('ka'),
                 ],
-                home: const SplashScreen(),
+                builder: (context, child) => KeyboardDismisser(child: child ?? const SizedBox.shrink()),
+                home: const GettingStartedScreen(),
               );
             },
           );

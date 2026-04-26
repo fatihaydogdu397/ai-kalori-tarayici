@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import '../offline/mutation_queue.dart';
@@ -29,22 +30,23 @@ class ApiClient {
   /// alırsa ikinci kez tetiklenip logout→logout sonsuz döngüsüne girmesin.
   bool _handlingAuthFailure = false;
 
-  // EAT-123: endpoint compile-time'da `--dart-define=API_BASE_URL=...` ile
-  // inject edilir. Bundled .env kaldırıldı — hiçbir secret APK/IPA'ya girmez.
-  //
-  // Dev convenience: `--dart-define` geçilmediyse debug build'de otomatik
-  // `http://localhost:4000/graphql` fallback kullanılır. Release build'de
-  // fallback yok → explicit `--dart-define=API_BASE_URL=...` zorunlu.
+  // Endpoint kaynak sırası:
+  //   1) Runtime `.env` (flutter_dotenv) — geliştirici deneyimi için pratik
+  //   2) Compile-time `--dart-define=API_BASE_URL=...` (release/CI)
+  //   3) Debug fallback → `http://localhost:4000/graphql`
   static const String _apiBaseUrlEnv = String.fromEnvironment('API_BASE_URL');
   static const String _devFallbackUrl = 'http://localhost:4000/graphql';
 
   Uri get _uri {
-    final url = _apiBaseUrlEnv.isNotEmpty
-        ? _apiBaseUrlEnv
-        : (kReleaseMode ? '' : _devFallbackUrl);
+    String url = _apiBaseUrlEnv;
+    if (url.isEmpty) {
+      final fromDotenv = dotenv.isInitialized ? (dotenv.env['API_BASE_URL'] ?? '') : '';
+      if (fromDotenv.isNotEmpty) url = fromDotenv;
+    }
+    if (url.isEmpty && !kReleaseMode) url = _devFallbackUrl;
     if (url.isEmpty) {
       throw ApiException(
-        'API_BASE_URL not set. Build with --dart-define=API_BASE_URL=<url>.',
+        'API_BASE_URL not set. Add it to .env or build with --dart-define=API_BASE_URL=<url>.',
         code: 'CONFIG_ERROR',
       );
     }

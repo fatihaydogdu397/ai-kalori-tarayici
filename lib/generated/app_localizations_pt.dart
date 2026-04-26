@@ -739,6 +739,18 @@ class AppLocalizationsPt extends AppLocalizations {
       'We will calculate your ideal macro ratios';
 
   @override
+  String get onboardingAllergiesTitle => 'Allergies & Restrictions';
+
+  @override
+  String get onboardingAllergiesSub => 'We will warn you when a food conflicts';
+
+  @override
+  String get onboardingAllergiesReligious => 'Religious & Lifestyle';
+
+  @override
+  String get onboardingAllergiesAllergens => 'Allergies & Intolerances';
+
+  @override
   String get dietStandard => 'Standard Diet';
 
   @override

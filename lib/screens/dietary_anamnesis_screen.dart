@@ -9,6 +9,7 @@ import '../services/app_provider.dart';
 import '../services/api/nutrition_service.dart';
 import 'diet_plan_loading_screen.dart';
 import 'blood_test_upload_screen.dart';
+import '../main.dart' show rootNavigatorKey;
 
 // ── Multi-select pill data ────────────────────────────────────────────────────
 class _PillOption {
@@ -29,17 +30,6 @@ const _restrictions = [
   _PillOption('halal', 'Halal', '☪️'),
 ];
 
-const _cuisines = [
-  _PillOption('turkish', 'Turkish', '🫙'),
-  _PillOption('mediterranean', 'Mediterranean', '🫒'),
-  _PillOption('asian', 'Asian', '🍜'),
-  _PillOption('italian', 'Italian', '🍝'),
-  _PillOption('american', 'American', '🍔'),
-  _PillOption('mexican', 'Mexican', '🌮'),
-  _PillOption('middle_eastern', 'Middle Eastern', '🧆'),
-  _PillOption('no_pref', 'No Preference', '🌍'),
-];
-
 // ── Screen ────────────────────────────────────────────────────────────────────
 class DietaryAnamnesisScreen extends StatefulWidget {
   const DietaryAnamnesisScreen({super.key});
@@ -50,24 +40,15 @@ class DietaryAnamnesisScreen extends StatefulWidget {
 
 class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
   int _page = 0;
-  static const int _totalPages = 6; // EAT-135: +1 for disliked foods step.
+  static const int _totalPages = 4;
 
   // Form state
   final Set<String> _selectedRestrictions = {};
-  final Set<String> _selectedCuisines = {};
   int _mealsPerDay = 4;
   String _cookingTime = 'medium'; // quick / medium / relaxed
-  String _budget = 'medium'; // low / medium / high
-  final _notesController = TextEditingController();
 
   // EAT-135: disliked foods (id, display name) — generateDietPlan'a iletiliyor.
   final List<({String id, String name})> _dislikedFoods = [];
-
-  @override
-  void dispose() {
-    _notesController.dispose();
-    super.dispose();
-  }
 
   void _next() {
     if (_page < _totalPages - 1) {
@@ -89,18 +70,17 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
 
   Future<void> _finish() async {
     final restrictions = _selectedRestrictions.toList();
-    final cuisines = _selectedCuisines.toList();
-    final notes = _notesController.text.trim();
     final dislikedIds = _dislikedFoods.map((f) => f.id).toList();
 
-    // Provider'a kaydet (persist) — EAT-135: dislikedFoodIds de gidiyor.
+    // Provider'a kaydet (persist) — cuisines/budget/notes UI'dan kaldırıldı,
+    // BE şeması hâlâ alanları zorunlu tuttuğu için boş değer geçiyoruz.
     await context.read<AppProvider>().saveAnamnesisProfile(
       restrictions: restrictions,
-      cuisines: cuisines,
+      cuisines: const [],
       mealsPerDay: _mealsPerDay,
       cookingTime: _cookingTime,
-      budget: _budget,
-      notes: notes,
+      budget: 'medium',
+      notes: '',
       dislikedFoodIds: dislikedIds,
     );
 
@@ -108,11 +88,11 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
 
     final data = {
       'restrictions': restrictions,
-      'cuisines': cuisines,
+      'cuisines': const <String>[],
       'mealsPerDay': _mealsPerDay,
       'cookingTime': _cookingTime,
-      'budget': _budget,
-      'notes': notes,
+      'budget': 'medium',
+      'notes': '',
       'dislikedFoodIds': dislikedIds,
     };
 
@@ -124,8 +104,7 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
         builder: (_) => BloodTestUploadScreen(
           isOnboarding: true,
           onCompleted: () {
-            Navigator.pushReplacement(
-              context,
+            rootNavigatorKey.currentState?.pushReplacement(
               MaterialPageRoute(builder: (_) => DietPlanLoadingScreen(anamnesisData: data)),
             );
           },
@@ -141,31 +120,40 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
     final accent = isDark ? AppColors.lime : AppColors.void_;
     final progress = (_page + 1) / _totalPages;
 
-    return Scaffold(
-      backgroundColor: bg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Progress bar
-            _ProgressHeader(
-              progress: progress,
-              page: _page,
-              totalPages: _totalPages,
-              isDark: isDark,
-              accent: accent,
-              onBack: _back,
-            ),
-            // Page content
-            Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
-                child: _buildPage(isDark, accent),
+    return PopScope(
+      // First step → allow system pop (exits the flow). Later steps → intercept
+      // and step back inside the multi-step flow instead of exiting.
+      canPop: _page == 0,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        _back();
+      },
+      child: Scaffold(
+        backgroundColor: bg,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Progress bar
+              _ProgressHeader(
+                progress: progress,
+                page: _page,
+                totalPages: _totalPages,
+                isDark: isDark,
+                accent: accent,
+                onBack: _back,
               ),
-            ),
-            // Bottom CTA
-            _buildBottomCTA(isDark, accent),
-          ],
+              // Page content
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  transitionBuilder: (child, anim) => FadeTransition(opacity: anim, child: child),
+                  child: _buildPage(isDark, accent),
+                ),
+              ),
+              // Bottom CTA
+              _buildBottomCTA(isDark, accent),
+            ],
+          ),
         ),
       ),
     );
@@ -196,48 +184,24 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
           },
         );
       case 1:
-        return _PageCuisines(
-          key: const ValueKey(1),
-          isDark: isDark,
-          accent: accent,
-          selected: _selectedCuisines,
-          onToggle: (id) {
-            setState(() {
-              if (id == 'no_pref') {
-                _selectedCuisines.clear();
-                _selectedCuisines.add('no_pref');
-              } else {
-                _selectedCuisines.remove('no_pref');
-                if (_selectedCuisines.contains(id)) {
-                  _selectedCuisines.remove(id);
-                } else {
-                  _selectedCuisines.add(id);
-                }
-              }
-            });
-          },
-        );
-      case 2:
         return _PageMealsPerDay(
-          key: const ValueKey(2),
+          key: const ValueKey(1),
           isDark: isDark,
           accent: accent,
           value: _mealsPerDay,
           onChanged: (v) => setState(() => _mealsPerDay = v),
         );
-      case 3:
+      case 2:
         return _PageCookingTime(
-          key: const ValueKey(3),
+          key: const ValueKey(2),
           isDark: isDark,
           accent: accent,
           selected: _cookingTime,
           onSelected: (v) => setState(() => _cookingTime = v),
-          budget: _budget,
-          onBudget: (v) => setState(() => _budget = v),
         );
-      case 4:
+      case 3:
         return _PageDislikedFoods(
-          key: const ValueKey(4),
+          key: const ValueKey(3),
           isDark: isDark,
           accent: accent,
           selected: _dislikedFoods,
@@ -251,13 +215,6 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
               }
             });
           },
-        );
-      case 5:
-        return _PageNotes(
-          key: const ValueKey(5),
-          isDark: isDark,
-          accent: accent,
-          controller: _notesController,
         );
       default:
         return const SizedBox.shrink();
@@ -404,57 +361,7 @@ class _PageRestrictions extends StatelessWidget {
 }
 
 // ── Page 2: Cuisines ──────────────────────────────────────────────────────────
-class _PageCuisines extends StatelessWidget {
-  final bool isDark;
-  final Color accent;
-  final Set<String> selected;
-  final void Function(String) onToggle;
-
-  const _PageCuisines({
-    super.key,
-    required this.isDark,
-    required this.accent,
-    required this.selected,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 32.h),
-          Text('Cuisine preferences?', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: textPrimary)),
-          SizedBox(height: 8.h),
-          Text('We\'ll include your favorites in the plan', style: TextStyle(fontSize: 14.sp, color: textMuted)),
-          SizedBox(height: 32.h),
-          Wrap(
-            spacing: 10.w,
-            runSpacing: 10.h,
-            children: _cuisines.map((opt) {
-              final isSelected = selected.contains(opt.id);
-              return _MultiPill(
-                label: '${opt.emoji} ${opt.label}',
-                isSelected: isSelected,
-                isDark: isDark,
-                accent: accent,
-                onTap: () => onToggle(opt.id),
-              );
-            }).toList(),
-          ),
-          SizedBox(height: 32.h),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Page 3: Meals Per Day ─────────────────────────────────────────────────────
+// ── Page 1: Meals Per Day ─────────────────────────────────────────────────────
 class _PageMealsPerDay extends StatelessWidget {
   final bool isDark;
   final Color accent;
@@ -599,14 +506,12 @@ class _StepperBtn extends StatelessWidget {
   }
 }
 
-// ── Page 4: Cooking Time + Budget ─────────────────────────────────────────────
+// ── Page 2: Cooking Time ──────────────────────────────────────────────────────
 class _PageCookingTime extends StatelessWidget {
   final bool isDark;
   final Color accent;
   final String selected;
   final void Function(String) onSelected;
-  final String budget;
-  final void Function(String) onBudget;
 
   const _PageCookingTime({
     super.key,
@@ -614,8 +519,6 @@ class _PageCookingTime extends StatelessWidget {
     required this.accent,
     required this.selected,
     required this.onSelected,
-    required this.budget,
-    required this.onBudget,
   });
 
   @override
@@ -629,19 +532,13 @@ class _PageCookingTime extends StatelessWidget {
       ('relaxed', '👨‍🍳', 'Relaxed', '30–60 min'),
     ];
 
-    const budgetOptions = [
-      ('low', '💸', 'Budget', 'Affordable meals'),
-      ('medium', '💳', 'Moderate', 'Regular groceries'),
-      ('high', '🌟', 'Premium', 'Quality ingredients'),
-    ];
-
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 32.h),
-          Text('Cooking & budget', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: textPrimary)),
+          Text('Cooking time', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: textPrimary)),
           SizedBox(height: 8.h),
           Text('We\'ll keep your meals practical', style: TextStyle(fontSize: 14.sp, color: textMuted)),
           SizedBox(height: 28.h),
@@ -658,23 +555,6 @@ class _PageCookingTime extends StatelessWidget {
                 isDark: isDark,
                 accent: accent,
                 onTap: () => onSelected(opt.$1),
-              );
-            }).toList(),
-          ),
-          SizedBox(height: 24.h),
-          Text('Grocery budget', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textMuted, letterSpacing: 0.5)),
-          SizedBox(height: 12.h),
-          Column(
-            children: budgetOptions.map((opt) {
-              final isSelected = budget == opt.$1;
-              return _OptionRow(
-                emoji: opt.$2,
-                title: opt.$3,
-                subtitle: opt.$4,
-                isSelected: isSelected,
-                isDark: isDark,
-                accent: accent,
-                onTap: () => onBudget(opt.$1),
               );
             }).toList(),
           ),
@@ -725,7 +605,8 @@ class _PageDislikedFoodsState extends State<_PageDislikedFoods> {
 
   Future<void> _search(String q) async {
     final trimmed = q.trim();
-    if (trimmed.isEmpty) {
+    // EAT-163: min 3 chars guard.
+    if (trimmed.length < 3) {
       if (!mounted) return;
       setState(() {
         _results = const [];
@@ -928,79 +809,6 @@ class _PageDislikedFoodsState extends State<_PageDislikedFoods> {
                     },
                   ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Page 6: Notes ─────────────────────────────────────────────────────────────
-class _PageNotes extends StatelessWidget {
-  final bool isDark;
-  final Color accent;
-  final TextEditingController controller;
-
-  const _PageNotes({
-    super.key,
-    required this.isDark,
-    required this.accent,
-    required this.controller,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 32.h),
-          Text('Anything else?', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: textPrimary)),
-          SizedBox(height: 8.h),
-          Text('Food dislikes, health notes, or special requests', style: TextStyle(fontSize: 14.sp, color: textMuted)),
-          SizedBox(height: 32.h),
-          TextField(
-            controller: controller,
-            maxLines: 5,
-            style: TextStyle(fontSize: 15.sp, color: textPrimary),
-            decoration: InputDecoration(
-              hintText: 'e.g. I hate broccoli, I\'m lactose intolerant, I prefer high-protein breakfasts...',
-              hintStyle: TextStyle(fontSize: 13.sp, color: textMuted),
-              filled: true,
-              fillColor: cardBg,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14.r),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: EdgeInsets.all(16.w),
-            ),
-          ),
-          SizedBox(height: 20.h),
-          Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: isDark ? 0.08 : 0.07),
-              borderRadius: BorderRadius.circular(14.r),
-              border: Border.all(color: accent.withValues(alpha: 0.2), width: 1),
-            ),
-            child: Row(
-              children: [
-                Text('✨', style: TextStyle(fontSize: 20.sp)),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Text(
-                    'AI will generate a personalized 7-day meal plan tailored exactly to your profile.',
-                    style: TextStyle(fontSize: 13.sp, color: textPrimary, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 32.h),
         ],
       ),
     );

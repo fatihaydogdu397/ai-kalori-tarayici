@@ -8,6 +8,8 @@ import '../services/notification_service.dart';
 import '../services/api/api_exception.dart';
 import '../generated/app_localizations.dart';
 import 'blood_tests_screen.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_of_service_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -445,19 +447,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               textPrimary: textPrimary,
                               showDivider: true,
                             ),
-                            // Terms of Service
+                            // Terms of Service (EAT-158: in-app WebView)
                             GestureDetector(
-                              onTap: () => launchUrl(
-                                Uri.parse('https://eatiq.app/terms'),
-                                mode: LaunchMode.externalApplication,
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const TermsOfServiceScreen(),
+                                ),
                               ),
                               child: _SettingRow(
                                 icon: Icons.description_outlined,
                                 iconColor: textMuted,
                                 label: l.termsOfService,
                                 trailing: Icon(
-                                  Icons.open_in_new_rounded,
-                                  size: 16,
+                                  Icons.chevron_right_rounded,
+                                  size: 18,
                                   color: textMuted,
                                 ),
                                 divColor: divColor,
@@ -465,19 +469,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 showDivider: true,
                               ),
                             ),
-                            // Privacy Policy
+                            // Privacy Policy (EAT-158: in-app WebView)
                             GestureDetector(
-                              onTap: () => launchUrl(
-                                Uri.parse('https://eatiq.app/privacy'),
-                                mode: LaunchMode.externalApplication,
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const PrivacyPolicyScreen(),
+                                ),
                               ),
                               child: _SettingRow(
                                 icon: Icons.shield_outlined,
                                 iconColor: textMuted,
                                 label: l.privacyPolicy,
                                 trailing: Icon(
-                                  Icons.open_in_new_rounded,
-                                  size: 16,
+                                  Icons.chevron_right_rounded,
+                                  size: 18,
                                   color: textMuted,
                                 ),
                                 divColor: divColor,
@@ -505,28 +511,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           borderRadius: BorderRadius.circular(14),
                           border: border,
                         ),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => _confirmDeleteAccount(
-                            context,
-                            provider,
-                            isDark,
-                            textPrimary,
-                            textMuted,
-                            accent,
-                            accentFg,
-                          ),
-                          child: _SettingRow(
-                            icon: Icons.delete_forever_rounded,
-                            iconColor: const Color(0xFFFF3B30),
-                            label: Localizations.localeOf(context).languageCode == 'tr'
-                                ? 'Hesabımı Sil'
-                                : 'Delete My Account',
-                            trailing: Icon(Icons.chevron_right_rounded, size: 18, color: textMuted),
-                            divColor: divColor,
-                            textPrimary: textPrimary,
-                            showDivider: false,
-                          ),
+                        child: Column(
+                          children: [
+                            // EAT-161: Logout
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _confirmLogout(
+                                context,
+                                provider,
+                                isDark,
+                                textPrimary,
+                                textMuted,
+                                accent,
+                              ),
+                              child: _SettingRow(
+                                icon: Icons.logout_rounded,
+                                iconColor: textMuted,
+                                label: Localizations.localeOf(context).languageCode == 'tr'
+                                    ? 'Çıkış Yap'
+                                    : 'Log Out',
+                                trailing: Icon(Icons.chevron_right_rounded, size: 18, color: textMuted),
+                                divColor: divColor,
+                                textPrimary: textPrimary,
+                                showDivider: true,
+                              ),
+                            ),
+                            // EAT-96 / EAT-160: Delete account (Danger Zone)
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _confirmDeleteAccount(
+                                context,
+                                provider,
+                                isDark,
+                                textPrimary,
+                                textMuted,
+                                accent,
+                                accentFg,
+                              ),
+                              child: _SettingRow(
+                                icon: Icons.delete_forever_rounded,
+                                iconColor: const Color(0xFFFF3B30),
+                                label: Localizations.localeOf(context).languageCode == 'tr'
+                                    ? 'Hesabımı Sil'
+                                    : 'Delete My Account',
+                                trailing: Icon(Icons.chevron_right_rounded, size: 18, color: textMuted),
+                                divColor: divColor,
+                                textPrimary: textPrimary,
+                                showDivider: false,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
 
@@ -540,6 +574,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
         },
       ),
     );
+  }
+
+  /// EAT-161: confirmation dialog → AppProvider.authLogout() → AuthScreen.
+  Future<void> _confirmLogout(
+    BuildContext context,
+    AppProvider provider,
+    bool isDark,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+  ) async {
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          isTr ? 'Çıkış yap?' : 'Log out?',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: textPrimary),
+        ),
+        content: Text(
+          isTr
+              ? 'Hesabından çıkış yapmak istediğinden emin misin?'
+              : 'Are you sure you want to log out?',
+          style: TextStyle(fontSize: 14.sp, color: textMuted, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              isTr ? 'Vazgeç' : 'Cancel',
+              style: TextStyle(color: textMuted, fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              isTr ? 'Çıkış Yap' : 'Log Out',
+              style: TextStyle(color: accent, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    // authLogout token'ı temizler ve AuthScreen'e push eder; ayrıca pop yok.
+    await provider.authLogout();
   }
 
   /// EAT-96: iki aşamalı onay → `deleteAccount` mutation → authLogout.

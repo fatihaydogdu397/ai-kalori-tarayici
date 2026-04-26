@@ -102,6 +102,16 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   void _onSearchChanged(String v) {
     setState(() => _query = v);
     _debounce?.cancel();
+    final q = v.trim();
+    // EAT-163: min 3 chars guard. Empty query keeps category-only listing;
+    // 1–2 chars hold back the request and clear stale results.
+    if (q.isNotEmpty && q.length < 3) {
+      setState(() {
+        _items = const [];
+        _loading = false;
+      });
+      return;
+    }
     _debounce = Timer(const Duration(milliseconds: 350), _loadFoods);
   }
 

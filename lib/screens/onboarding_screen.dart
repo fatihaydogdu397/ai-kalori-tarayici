@@ -8,6 +8,7 @@ import '../services/api/nutrition_service.dart';
 import '../services/notification_service.dart';
 import '../generated/app_localizations.dart';
 import 'paywall_screen.dart';
+import 'blood_test_upload_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -20,9 +21,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _pageController = PageController();
   int _page = 0;
   static const int _totalPages = 12;
+  int _bloodTestsUploaded = 0;
 
   // User data
-  String _name = '';
   String _gender = 'male';
   int _birthDay = 15;
   int _birthMonth = 1;
@@ -36,7 +37,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String _activityLevel = 'active';
   String _dietType = 'standard';
 
-  bool _nameError = false;
+  // Allergies & restrictions (BE keys; writeTokens expanded at finish).
+  final Set<String> _restrictionKeys = {};
+  final Set<String> _allergenKeys = {};
+  List<DietaryPreferenceOption> _dietaryOptions = const [];
 
   int get _calculatedAge {
     final now = DateTime.now();
@@ -49,11 +53,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _next() {
-    if (_page == 0 && _name.trim().isEmpty) {
-      setState(() => _nameError = true);
-      return;
-    }
-    setState(() => _nameError = false);
     if (_page < _totalPages - 1) {
       _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
@@ -69,8 +68,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _finish() {
     final provider = context.read<AppProvider>();
+    final restrictionTokens = _dietaryOptions
+        .where((o) => o.category == 'RESTRICTION' && _restrictionKeys.contains(o.key))
+        .expand((o) => o.writeTokens)
+        .toList(growable: false);
+    final allergenTokens = _dietaryOptions
+        .where((o) => o.category == 'ALLERGEN' && _allergenKeys.contains(o.key))
+        .expand((o) => o.writeTokens)
+        .toList(growable: false);
+    final authName = provider.userName.trim();
     provider.saveProfile(
-      name: _name.trim().isEmpty ? AppLocalizations.of(context).userFallback : _name.trim(),
+      name: authName.isEmpty ? AppLocalizations.of(context).userFallback : authName,
       age: _calculatedAge,
       height: _heightCm,
       weight: _weightKg,
@@ -80,6 +88,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       targetWeight: _targetWeightKg,
       weeklyPace: _weeklyPace,
       dietType: _dietType,
+      allergens: allergenTokens,
+      dietRestrictions: restrictionTokens,
     );
     provider.loadHistory();
     provider.loadTodayStats();
@@ -94,7 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
     final accent = isDark ? AppColors.lime : AppColors.void_;
 
-    // Notification page (index 9) has its own buttons
+    // Notification page (now index 9 after removing Name + Summary).
     final bool isNotifPage = _page == 9;
 
     return Scaffold(
@@ -136,19 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (p) => setState(() => _page = p),
                 children: [
-                  // 0: Name
-                  _PageName(
-                    isDark: isDark,
-                    textPrimary: textPrimary,
-                    textMuted: textMuted,
-                    value: _name,
-                    hasError: _nameError,
-                    onChanged: (v) => setState(() {
-                      _name = v;
-                      _nameError = false;
-                    }),
-                  ),
-                  // 1: Gender
+                  // 0: Gender
                   _PageGender(
                     isDark: isDark,
                     textPrimary: textPrimary,
@@ -156,7 +154,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     gender: _gender,
                     onGender: (v) => setState(() => _gender = v),
                   ),
-                  // 2: Birth Date
+                  // 1: Birth Date
                   _PageBirthDate(
                     isDark: isDark,
                     textPrimary: textPrimary,
@@ -170,7 +168,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       _birthYear = y;
                     }),
                   ),
-                  // 3: Height & Weight drum picker
+                  // 2: Height & Weight drum picker
                   _PageHeightWeightDrum(
                     isDark: isDark,
                     textPrimary: textPrimary,
@@ -182,7 +180,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onHeight: (v) => setState(() => _heightCm = v),
                     onWeight: (v) => setState(() => _weightKg = v),
                   ),
-                  // 4: Goal
+                  // 3: Goal
                   _PageGoal(
                     isDark: isDark,
                     textPrimary: textPrimary,
@@ -199,7 +197,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       }
                     }),
                   ),
-                  // 5: Target Weight
+                  // 4: Target Weight
                   _PageTargetWeight(
                     isDark: isDark,
                     textPrimary: textPrimary,
@@ -210,7 +208,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     goal: _goal,
                     onChanged: (v) => setState(() => _targetWeightKg = v),
                   ),
-                  // 6: Weekly Pace
+                  // 5: Weekly Pace
                   _PageWeeklyPace(
                     isDark: isDark,
                     textPrimary: textPrimary,
@@ -219,7 +217,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     goal: _goal,
                     onChanged: (v) => setState(() => _weeklyPace = v),
                   ),
-                  // 7: Activity Level
+                  // 6: Activity Level
                   _PageActivity(
                     isDark: isDark,
                     textPrimary: textPrimary,
@@ -227,13 +225,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     activity: _activityLevel,
                     onActivity: (v) => setState(() => _activityLevel = v),
                   ),
-                  // 8: Diet Type
+                  // 7: Diet Type
                   _PageDietType(
                     isDark: isDark,
                     textPrimary: textPrimary,
                     textMuted: textMuted,
                     dietType: _dietType,
                     onDietType: (v) => setState(() => _dietType = v),
+                  ),
+                  // 8: Allergies & Restrictions
+                  _PageAllergiesRestrictions(
+                    isDark: isDark,
+                    textPrimary: textPrimary,
+                    textMuted: textMuted,
+                    restrictionKeys: _restrictionKeys,
+                    allergenKeys: _allergenKeys,
+                    onOptionsLoaded: (opts) => setState(() => _dietaryOptions = opts),
+                    onToggle: () => setState(() {}),
                   ),
                   // 9: Notification Permission
                   _PageNotification(
@@ -246,18 +254,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                     onSkip: _next,
                   ),
-                  // 10: Summary
-                  _PageSummary(
+                  // 10: Optional blood-test upload
+                  _PageBloodTestOptional(
                     isDark: isDark,
                     textPrimary: textPrimary,
                     textMuted: textMuted,
-                    weight: _weightKg,
-                    height: _heightCm,
-                    age: _calculatedAge.toDouble(),
-                    gender: _gender,
-                    activity: _activityLevel,
-                    goal: _goal,
-                    weeklyPace: _weeklyPace,
+                    uploadedCount: _bloodTestsUploaded,
+                    onUpload: () async {
+                      final res = await Navigator.of(context).push<bool>(
+                        MaterialPageRoute(builder: (_) => const BloodTestUploadScreen()),
+                      );
+                      if (res == true && mounted) {
+                        setState(() => _bloodTestsUploaded++);
+                      }
+                    },
                   ),
                   // 11: Theme
                   _PageTheme(isDark: isDark, textPrimary: textPrimary, textMuted: textMuted),
@@ -293,60 +303,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-// ── Page 1: İsim ──────────────────────────────────────────────────────────────
-class _PageName extends StatelessWidget {
-  final bool isDark;
-  final Color textPrimary, textMuted;
-  final String value;
-  final bool hasError;
-  final ValueChanged<String> onChanged;
-
-  const _PageName({
-    required this.isDark,
-    required this.textPrimary,
-    required this.textMuted,
-    required this.value,
-    required this.hasError,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l.onboardingHello, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
-          const SizedBox(height: 8),
-          Text(l.onboardingNameSub, style: AppTypography.titleMedium.copyWith(color: textMuted)),
-          const SizedBox(height: 40),
-          TextField(
-            autofocus: true,
-            onChanged: onChanged,
-            style: AppTypography.titleLarge.copyWith(color: textPrimary),
-            decoration: InputDecoration(
-              hintText: l.onboardingNameHint,
-              hintStyle: AppTypography.titleLarge.copyWith(color: textMuted),
-              border: InputBorder.none,
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: hasError ? AppColors.coral : (isDark ? AppColors.darkCard : AppColors.lightBorder), width: 2),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: hasError ? AppColors.coral : (isDark ? AppColors.lime : AppColors.void_), width: 2),
-              ),
-              errorText: hasError ? l.onboardingNameRequired : null,
-            ),
-            cursorColor: isDark ? AppColors.lime : AppColors.void_,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Page 2: Cinsiyet ─────────────────────────────────────────────────────────
+// ── Page 0: Cinsiyet ─────────────────────────────────────────────────────────
 class _PageGender extends StatelessWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
@@ -1329,6 +1286,172 @@ class _PageDietTypeState extends State<_PageDietType> {
   }
 }
 
+// ── Page 9b: Allergies & Restrictions ────────────────────────────────────────
+// BE `dietaryPreferenceOptions` query'sinden RESTRICTION + ALLERGEN kategorileri
+// çekilir; seçimler `writeTokens` olarak genişletilip user.dietRestrictions[] /
+// user.allergens[] alanlarına yazılır.
+class _PageAllergiesRestrictions extends StatefulWidget {
+  final bool isDark;
+  final Color textPrimary, textMuted;
+  final Set<String> restrictionKeys;
+  final Set<String> allergenKeys;
+  final ValueChanged<List<DietaryPreferenceOption>> onOptionsLoaded;
+  final VoidCallback onToggle;
+
+  const _PageAllergiesRestrictions({
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.restrictionKeys,
+    required this.allergenKeys,
+    required this.onOptionsLoaded,
+    required this.onToggle,
+  });
+
+  @override
+  State<_PageAllergiesRestrictions> createState() => _PageAllergiesRestrictionsState();
+}
+
+class _PageAllergiesRestrictionsState extends State<_PageAllergiesRestrictions> {
+  List<DietaryPreferenceOption> _restrictions = const [];
+  List<DietaryPreferenceOption> _allergens = const [];
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final all = await NutritionService.instance.dietaryPreferenceOptions();
+      if (!mounted) return;
+      widget.onOptionsLoaded(all);
+      setState(() {
+        _restrictions = all.where((o) => o.category == 'RESTRICTION').toList(growable: false);
+        _allergens = all.where((o) => o.category == 'ALLERGEN').toList(growable: false);
+        _loaded = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loaded = true);
+    }
+  }
+
+  void _toggle(Set<String> bucket, String key) {
+    if (bucket.contains(key)) {
+      bucket.remove(key);
+    } else {
+      bucket.add(key);
+    }
+    setState(() {});
+    widget.onToggle();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.onboardingAllergiesTitle, style: AppTypography.headlineLarge.copyWith(color: widget.textPrimary)),
+          const SizedBox(height: 8),
+          Text(l.onboardingAllergiesSub, style: AppTypography.bodyMedium.copyWith(color: widget.textMuted)),
+          const SizedBox(height: 32),
+          if (!_loaded)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: CircularProgressIndicator(
+                  color: widget.isDark ? AppColors.lime : AppColors.void_,
+                  strokeWidth: 2,
+                ),
+              ),
+            )
+          else ...[
+            if (_restrictions.isNotEmpty) ...[
+              Text(
+                l.onboardingAllergiesReligious,
+                style: AppTypography.titleMedium.copyWith(color: widget.textMuted, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _restrictions
+                    .map((o) => _Chip(
+                          label: o.defaultLabel,
+                          selected: widget.restrictionKeys.contains(o.key),
+                          isDark: widget.isDark,
+                          onTap: () => _toggle(widget.restrictionKeys, o.key),
+                        ))
+                    .toList(growable: false),
+              ),
+              const SizedBox(height: 24),
+            ],
+            if (_allergens.isNotEmpty) ...[
+              Text(
+                l.onboardingAllergiesAllergens,
+                style: AppTypography.titleMedium.copyWith(color: widget.textMuted, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _allergens
+                    .map((o) => _Chip(
+                          label: o.defaultLabel,
+                          selected: widget.allergenKeys.contains(o.key),
+                          isDark: widget.isDark,
+                          onTap: () => _toggle(widget.allergenKeys, o.key),
+                        ))
+                    .toList(growable: false),
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final bool selected, isDark;
+  final VoidCallback onTap;
+
+  const _Chip({required this.label, required this.selected, required this.isDark, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isDark ? AppColors.lime : AppColors.void_;
+    final bg = selected ? accent : Colors.transparent;
+    final textColor = selected
+        ? (isDark ? AppColors.void_ : AppColors.snow)
+        : (isDark ? AppColors.darkText : AppColors.lightText);
+    final borderColor = isDark ? AppColors.darkSurface : AppColors.lightBorder;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(100.r),
+          border: selected ? null : Border.all(color: borderColor, width: 1),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textColor),
+        ),
+      ),
+    );
+  }
+}
+
 // ── Page 10: Bildirim İzni ───────────────────────────────────────────────────
 class _PageNotification extends StatelessWidget {
   final bool isDark;
@@ -1426,92 +1549,111 @@ class _PageNotification extends StatelessWidget {
   }
 }
 
-// ── Page 11: Özet ─────────────────────────────────────────────────────────────
-class _PageSummary extends StatelessWidget {
+// ── Page 10: Optional Blood-Test Upload ──────────────────────────────────────
+// EAT-156: standalone BloodTestUploadScreen (push) ile çağrılır. Inline TR/EN —
+// 10-locale l10n migration follow-up'ta yapılacak.
+class _PageBloodTestOptional extends StatelessWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
-  final double weight, height, age;
-  final String gender, activity, goal;
-  final double weeklyPace;
+  final int uploadedCount;
+  final Future<void> Function() onUpload;
 
-  const _PageSummary({
+  const _PageBloodTestOptional({
     required this.isDark,
     required this.textPrimary,
     required this.textMuted,
-    required this.weight,
-    required this.height,
-    required this.age,
-    required this.gender,
-    required this.activity,
-    required this.goal,
-    required this.weeklyPace,
+    required this.uploadedCount,
+    required this.onUpload,
   });
+
+  String _t(BuildContext ctx, String tr, String en) =>
+      Localizations.localeOf(ctx).languageCode == 'tr' ? tr : en;
 
   @override
   Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
+    final accent = isDark ? AppColors.lime : AppColors.void_;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
-
-    double bmr;
-    if (gender == 'male') {
-      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-    } else {
-      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-    }
-    double multiplier = 1.55;
-    if (activity == 'sedentary') {
-      multiplier = 1.2;
-    } else if (activity == 'light') {
-      multiplier = 1.375;
-    } else if (activity == 'very_active') {
-      multiplier = 1.725;
-    }
-
-    double tdee = bmr * multiplier;
-    if (goal == 'lose') tdee -= 400;
-    if (goal == 'gain') tdee += 300;
-    tdee = tdee.roundToDouble();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(l.onboardingSummaryTitle, style: AppTypography.headlineLarge.copyWith(color: textPrimary)),
-          const SizedBox(height: 8),
-          Text(l.onboardingSummarySub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
-          const SizedBox(height: 40),
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-            decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(20.r)),
-            child: Column(
-              children: [
-                Text(l.onboardingRecommend, style: AppTypography.titleMedium.copyWith(color: textMuted)),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      tdee.toStringAsFixed(0),
-                      style: AppTypography.displayLarge.copyWith(color: isDark ? AppColors.lime : AppColors.limeDeep, fontSize: 48.sp),
+            width: 80.w,
+            height: 80.h,
+            decoration: BoxDecoration(color: isDark ? AppColors.darkCard : AppColors.void_, shape: BoxShape.circle),
+            child: Icon(Icons.science_rounded, size: 36.sp, color: isDark ? AppColors.darkText : AppColors.snow),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            _t(context, 'Kan tahlilini yükle', 'Upload your blood test'),
+            textAlign: TextAlign.center,
+            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _t(
+              context,
+              'Opsiyoneldir. Yüklersen AI diyet önerilerimiz ve planın daha sana özel olur. İstersen şimdi atla, sonra profilden ekleyebilirsin.',
+              'Optional. If you upload, the AI personalizes your plan and recommendations. You can skip for now and add later from your profile.',
+            ),
+            textAlign: TextAlign.center,
+            style: AppTypography.bodyMedium.copyWith(color: textMuted),
+          ),
+          const SizedBox(height: 32),
+          if (uploadedCount > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: accent, width: 1.2),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle_rounded, size: 18.sp, color: accent),
+                  const SizedBox(width: 8),
+                  Text(
+                    _t(
+                      context,
+                      uploadedCount == 1 ? '1 dosya yüklendi' : '$uploadedCount dosya yüklendi',
+                      uploadedCount == 1 ? '1 file uploaded' : '$uploadedCount files uploaded',
                     ),
-                    const SizedBox(width: 8),
-                    Text('kcal', style: AppTypography.titleMedium.copyWith(color: textMuted)),
-                  ],
-                ),
-              ],
+                    style: AppTypography.bodyMedium.copyWith(color: textPrimary, fontWeight: FontWeight.w700),
+                  ),
+                ],
+              ),
+            ),
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onUpload,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: accent,
+                side: BorderSide(color: accent, width: 1.5),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              icon: Icon(Icons.upload_file_rounded, size: 20.sp),
+              label: Text(
+                uploadedCount > 0
+                    ? _t(context, 'Bir tane daha ekle', 'Upload another')
+                    : _t(context, 'Yükle', 'Upload'),
+                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
+              ),
             ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 }
 
-// ── Page 12: Tema ─────────────────────────────────────────────────────────────
+// ── Page 11: Tema ─────────────────────────────────────────────────────────────
 class _PageTheme extends StatelessWidget {
   final bool isDark;
   final Color textPrimary, textMuted;

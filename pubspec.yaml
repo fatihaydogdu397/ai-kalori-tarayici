@@ -51,6 +51,7 @@ dependencies:
 
   # Backend API
   flutter_secure_storage: ^9.2.2
+  flutter_dotenv: ^5.1.0
 
   # EAT-141: offline mutation queue — replay logWater/logWeight on reconnect.
   connectivity_plus: ^6.1.0
@@ -63,11 +64,18 @@ dependencies:
   # Blood test upload (PDF + image picking)
   file_picker: ^8.1.2
 
+  # In-app WebView for Privacy Policy & Terms (EAT-158)
+  webview_flutter: ^4.7.0
+
+  # In-app PDF viewer for blood-test reports (EAT-169)
+  pdfrx: ^1.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.4
 
 flutter_launcher_icons:
   android: true
@@ -76,9 +84,17 @@ flutter_launcher_icons:
   min_sdk_android: 21
   remove_alpha_ios: true
 
+flutter_native_splash:
+  color: "#0F0F14"
+  android: true
+  ios: true
+  android_12:
+    color: "#0F0F14"
+
 flutter:
   generate: true
   uses-material-design: true
   assets:
     - assets/images/
     - assets/icons/
+    - .env

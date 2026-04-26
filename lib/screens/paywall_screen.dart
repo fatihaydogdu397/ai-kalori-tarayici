@@ -4,10 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
-// DEV-BYPASS-PAYWALL: import '../services/purchase_service.dart' removed
-// while fake-purchase is active; restore alongside _purchase() revert.
+import '../services/purchase_service.dart';
 import '../generated/app_localizations.dart';
 import 'home_screen.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_of_service_screen.dart';
 
 class PaywallScreen extends StatefulWidget {
   const PaywallScreen({super.key});
@@ -55,22 +56,67 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
+  /// EAT-159: 3 branch — success+entitlement / success+no-entitlement / error.
+  /// `_isLoading` butonu disabled tutar; aşağıdaki snackbar mesajları
+  /// kullanıcıya neyin yanlış gittiğini net söyler.
   Future<void> _restore() async {
     setState(() => _isLoading = true);
     final provider = context.read<AppProvider>();
-    final success = await provider.restorePurchases();
+    final result = await provider.restorePurchases();
     if (!mounted) return;
     setState(() => _isLoading = false);
-    
-    if (success && provider.isPremium) {
-       Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Geri yüklenecek abonelik bulunamadı.')),
-      );
+
+    final isTr = Localizations.localeOf(context).languageCode == 'tr';
+
+    switch (result) {
+      case RestoreResult.success:
+        if (provider.isPremium) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(isTr ? 'Aboneliğin geri yüklendi.' : 'Subscription restored.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        } else {
+          // RC entitlement aktif ama BE henüz yansıtmadı (webhook gecikmesi).
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                isTr
+                    ? 'Abonelik bulundu, eşitleniyor… Birazdan yeniden dene.'
+                    : 'Subscription found, syncing… Please retry shortly.',
+              ),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      case RestoreResult.noEntitlement:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isTr
+                  ? 'Bu Apple/Google hesabında aktif abonelik yok.'
+                  : 'No active subscription on this Apple/Google account.',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      case RestoreResult.error:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isTr
+                  ? 'Geri yükleme başarısız oldu. İnternet bağlantını kontrol edip tekrar dene.'
+                  : 'Restore failed. Check your connection and try again.',
+            ),
+            backgroundColor: AppColors.coral,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
     }
   }
 
@@ -372,7 +418,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 ),
                 Text('  ·  ', style: TextStyle(fontSize: 12.sp, color: textMuted)),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+                  ),
                   child: Text(
                     'Privacy Policy',
                     style: TextStyle(fontSize: 12.sp, color: textMuted, decoration: TextDecoration.underline),
@@ -380,7 +429,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 ),
                 Text('  ·  ', style: TextStyle(fontSize: 12.sp, color: textMuted)),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const TermsOfServiceScreen()),
+                  ),
                   child: Text(
                     'Terms',
                     style: TextStyle(fontSize: 12.sp, color: textMuted, decoration: TextDecoration.underline),

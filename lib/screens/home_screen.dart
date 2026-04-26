@@ -452,7 +452,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return RefreshIndicator(
               color: isDark ? AppColors.lime : AppColors.limeDark,
               onRefresh: () async {
-                await provider.fetchHistoryByDate(DateTime.now());
+                await provider.loadHistory();
+                await provider.loadTodayStats();
               },
               child: body,
             );
@@ -1179,15 +1180,18 @@ class _MealRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onFavorite,
-              behavior: HitTestBehavior.opaque,
-              child: Icon(
-                analysis.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                size: 16,
-                color: analysis.isFavorite ? AppColors.coral : textMuted,
+            // EAT-162: hide "Add to favorites" entirely for already-favorited
+            // items; remove-from-favorites lives on the Favorites screen.
+            if (!analysis.isFavorite)
+              GestureDetector(
+                onTap: onFavorite,
+                behavior: HitTestBehavior.opaque,
+                child: Icon(
+                  Icons.favorite_border_rounded,
+                  size: 16,
+                  color: textMuted,
+                ),
               ),
-            ),
           ],
         ),
       ),

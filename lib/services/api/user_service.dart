@@ -14,7 +14,7 @@ class UserService {
   static const String _userFields = '''
     id email name surname avatarUrl
     age height weight gender goal activityLevel
-    dietType allergens
+    dietType allergens dietRestrictions
     dietCookingTime dietBudget dietNotes
     mealsPerDay
     dailyCalorieGoal dailyProteinGoal dailyCarbsGoal dailyFatGoal
@@ -37,6 +37,7 @@ class UserService {
     String? activityLevel,
     String? dietType,
     List<String>? allergens,
+    List<String>? dietRestrictions,
     List<String>? cuisinePreferences,
     List<String>? dislikedFoodIds,
     String? dietCookingTime,
@@ -66,11 +67,12 @@ class UserService {
       input['dietType'] = dietType.toUpperCase();
     }
     if (allergens != null) input['allergens'] = allergens;
+    if (dietRestrictions != null) input['dietRestrictions'] = dietRestrictions;
     if (cuisinePreferences != null) {
       input['cuisinePreferences'] = cuisinePreferences;
     }
     if (dislikedFoodIds != null) {
-      input['dislikedFoodIds'] = dislikedFoodIds;
+      input['dislikes'] = dislikedFoodIds;
     }
     if (dietCookingTime != null && dietCookingTime.isNotEmpty) {
       input['dietCookingTime'] = dietCookingTime.toUpperCase();

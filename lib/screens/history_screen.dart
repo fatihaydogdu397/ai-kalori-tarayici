@@ -498,18 +498,21 @@ class _HistoryCard extends StatelessWidget {
                             child: Icon(Icons.add_circle_outline_rounded, size: 18, color: calColor),
                           ),
                         ),
-                      GestureDetector(
-                        onTap: onFavorite,
-                        behavior: HitTestBehavior.opaque,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Icon(
-                            analysis.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                            size: 16,
-                            color: analysis.isFavorite ? AppColors.coral : textMuted,
+                      // EAT-162: hide "Add to favorites" entirely for already-favorited
+                      // items; remove-from-favorites lives on the Favorites screen.
+                      if (!analysis.isFavorite)
+                        GestureDetector(
+                          onTap: onFavorite,
+                          behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Icon(
+                              Icons.favorite_border_rounded,
+                              size: 16,
+                              color: textMuted,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                   Text(

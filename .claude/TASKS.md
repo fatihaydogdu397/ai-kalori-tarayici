@@ -352,8 +352,47 @@ Gemini diğer 9 dile çevirir: `app_en`, `app_de`, `app_fr`, `app_es`, `app_ar`,
 - onboardingde calorie goal neden var onu sorgulayalım kalori goali en son vermemiz lazım değil mi
 - yemeğin resmini çektikten veya galeriden çektikten sonra sadece ortalama porsiyon büyüklüğünü kullanıcıya soralım bir scroll bar ile,
 
--diyet listesi oluşturma onboarding
-food restriction
-cusine preference silinecek
-cooking budget sayfası silinecek
-arayıp arattığını tag gibi seçecek - foodstan çekecek yani searchten çekecek bir iki kelimelik tagler şeklinde istemediği şeyleri kullanıcı seçecek
+
+
+
+
+-------------------------------------------------------
+
+
+
+
+
+
+
+
+-------------------------------------------------------
+
+
+
+
+
+- en başta splash ile başlayalım uygulama açılırken getting startedden önce uzunca bir süre beyaz ekranda kalıyor bunun sebebini bulalım gerekirse oraya getting started in üzerinde bulunan eatiq logosunun olduğu bir splash yapıştıralım 
+- onboarding ekranında kullanıcının adını almayalım o ekranı kaldıralım zaten loginde registerda veya sosyal loginlerde alıyoruz
+- ekranın herhangi bir yerine basınca klavye kapansın bazen gereksiz açık kalıyor bununla ilgili bir yapı kurup uygulama geneline uygula
+- choose your diet type ekranındaki dataları biz backendden mi almaya başladık ayrıca diyet tipi birden fazla seçemiyor muyduk yanlış mı hatırlıyorum
+- onboardinge optional kan tahlili gibi belgeleri yükleme kısmı ekleyelim
+- you're set ekranını silelim onboardingden goal görmesine gerek yok kullanıcının 
+- kullanıcı loginse ve premium ise anasayfa gelsin splashte kontrol edelim ona göre yönlendirelim bu yapılmış mı kontrol et
+- privacy policy sayfası ve terms of conditions sayfası yapılacak ama benim verdiğim linklere webview açacaksın
+- restore purchase diyince nolacak o kısmı düzenleyelim mantıklı hale getirelim işlevsel olsun analizini yap
+- hesap silme özelliği olacak backendi varsa bağlayalım settings sayfasında 
+- logout özelliği var mı bakılacak eklenecek
+- favorilerden eklenen bir öğünde favoriye ekle butonu görünmeyecek
+- uygulama genelinde food search ettiğimiz yerlerde 3 karakterden az ise istek atmayacağız 
+- uygulamayı yeniden başlattığımda neden onboarding sürecinden başlıyor anasayfaya ya da logine gitmesi gerekiyor bunu düzeltelim
+- cusine preference diyet onboardingden silinecek
+- grocery budget kısmı diyet onboardingden silinecek
+- diyet listesi oluştururken ekranı sola kaydırarak geri yapılıyorsa diyet bilgilerini aldığımız onboardingin ilk sayfasında olmadığı sürece önceki aşamaya yönlenecek diğer türlü diyet listesi onboardinginden çıkıyoruz bu bir bug haliyle
+- anything else sayfasını diyet listesi onboardingden siliyoruz
+- backendden dönen diyet listesi öğünlerinde öğünlere ne eklediğimiz yazsın şuan sadece alması gereken kalori ve makrolar yazıyor mesela: 4 yumurta, yarım somun ekmek, şekersiz çay, kibrit kutusu kadar peynir gibi öğün yazmamız lazım
+- diyet listesindeki bugüne ait öğünü "bu öğünü yedim" gibi bir özellik eklememiz lazım eklediğimiz öğünü tekrar ekleyemeyi engelliyoruz, fakat anasayfadan veya geçmiş ekranından bugüne ait öğünü sildiğinde diyet listemizi anasayfadaki silinen öğünü tekrar "bu öğünü yedim" diye eklenebilir statüsüne alacağız
+- yüklenen tahlillerin pdfleri nasıl açılacak ""fileUrl":"https://0d4c8fdedf0450f132ed1b0067b3f390.r2.cloudflarestorage.com/eatiq/blood-tests/45c8d815-7f7a-483d-90df-ed13af41d1e7/0ba9c8b1-4fcd-4bdf-8356-816a529b73f9.pdf" " bu şekilde dönüyor backendden
+- uygulamada gezinirken bazen durduk yere login ekranına yönlendiriyor sebebine bakılacak gerekirse backende task açılacak backendden dönen data bu şekilde; "anonymous [200] 524ms {"errors":[{"message":"Unauthorized","locations":[{"line":2,"column":9}],"path":["dietPlanWeeklyLimit"],"extensions":{"code":"UNAUTHENTICATED","stacktrace":["GraphQLError: Unauthorized","    at GraphqlExceptionFilter.catch (/app/dist/common/filters/graphql-exception.filter.js:51:20)","    at ExternalExceptionsHandler.invokeCustomFilters (/app/node_modules/@nestjs/core/exceptions/external-exceptions-handler.js:31:32)","    at ExternalExceptionsHandler.next (/app/node_modules/@nestjs/core/exceptions/external-exceptions-handler.js:14:29)","    at Object.dietPlanWeeklyLimit (/app/node_modules/@nestjs/core/helpers/external-proxy.js:14:42)","    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"]}}],"data":null}
+flutter: 
+flutter: [ApiClient] ← anonymous [200] 530ms {"errors":[{"message":"Unauthorized","locations":[{"line":2,"column":9}],"path":["myDietPlan"],"extensions":{"code":"UNAUTHENTICATED","stacktrace":["GraphQLError: Unauthorized","    at GraphqlExceptionFilter.catch (/app/dist/common/filters/graphql-exception.filter.js:51:20)","    at ExternalExceptionsHandler.invokeCustomFilters (/app/node_modules/@nestjs/core/exceptions/external-exceptions-handler.js:31:32)","    at ExternalExceptionsHandler.next (/app/node_modules/@nestjs/core/exceptions/external-exceptions-handler.js:14:29)","    at Object.myDietPlan (/app/node_modules/@nestjs/core/helpers/external-proxy.js:14:42)","    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"]}}],"data":{"myDietPlan":null}}"
+

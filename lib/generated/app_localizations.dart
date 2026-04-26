@@ -1506,6 +1506,30 @@ abstract class AppLocalizations {
   /// **'Size uygun makro oranlarını hesaplayalım'**
   String get onboardingDietTypeSub;
 
+  /// No description provided for @onboardingAllergiesTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alerjiler & Kısıtlamalar'**
+  String get onboardingAllergiesTitle;
+
+  /// No description provided for @onboardingAllergiesSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uyumsuz yiyeceklerde seni uyaralım'**
+  String get onboardingAllergiesSub;
+
+  /// No description provided for @onboardingAllergiesReligious.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dini & Yaşam Tarzı'**
+  String get onboardingAllergiesReligious;
+
+  /// No description provided for @onboardingAllergiesAllergens.
+  ///
+  /// In tr, this message translates to:
+  /// **'Alerji & İntoleranslar'**
+  String get onboardingAllergiesAllergens;
+
   /// No description provided for @dietStandard.
   ///
   /// In tr, this message translates to:

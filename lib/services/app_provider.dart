@@ -654,6 +654,8 @@ class AppProvider extends ChangeNotifier {
     double? targetWeight,
     double? weeklyPace,
     String? dietType,
+    List<String>? allergens,
+    List<String>? dietRestrictions,
   }) async {
     final actLevel = activityLevel ?? _activityLevel;
 
@@ -668,6 +670,8 @@ class AppProvider extends ChangeNotifier {
       goal: goal,
       activityLevel: actLevel,
       dietType: dietType,
+      allergens: allergens,
+      dietRestrictions: dietRestrictions,
     );
     _applyBackendUser(res);
 
@@ -758,6 +762,11 @@ class AppProvider extends ChangeNotifier {
   Future<bool> isOnboardingDone() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('onboardingDone') ?? false;
+  }
+
+  Future<void> setOnboardingDone(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboardingDone', val);
   }
 
   // ---------------------------------------------------------------------------
@@ -1048,13 +1057,13 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> restorePurchases() async {
-    final restored = await PurchaseService.restore();
-    if (restored) {
+  Future<RestoreResult> restorePurchases() async {
+    final result = await PurchaseService.restore();
+    if (result == RestoreResult.success) {
       // RevenueCat'ten onay geldiyse BE'den de güncel state'i çek.
       await refreshPremiumStatus();
     }
-    return restored;
+    return result;
   }
 
   /// EAT-123 — Server is the single source of truth for scan entitlement.

@@ -44,6 +44,7 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
         allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png'],
         withData: false,
       );
+      if (!mounted) return;
       if (res != null && res.files.isNotEmpty) {
         setState(() {
           _picked = res.files.first;
@@ -51,6 +52,7 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() => _errorMessage = e.toString());
     }
   }
@@ -63,6 +65,7 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
       firstDate: DateTime(now.year - 10),
       lastDate: now,
     );
+    if (!mounted) return;
     if (res != null) setState(() => _testDate = res);
   }
 
@@ -109,8 +112,10 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
         Navigator.pop(context, true);
       }
     } on ApiException catch (e) {
+      if (!mounted) return;
       setState(() => _errorMessage = e.message);
     } catch (e) {
+      if (!mounted) return;
       setState(() => _errorMessage = e.toString());
     } finally {
       if (mounted) setState(() => _uploading = false);

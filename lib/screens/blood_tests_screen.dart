@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../models/blood_test.dart';
 import '../services/app_provider.dart';
 import '../theme/app_theme.dart';
 import 'blood_test_upload_screen.dart';
+import 'pdf_viewer_screen.dart';
 
 String _t(BuildContext ctx, String tr, String en) =>
     Localizations.localeOf(ctx).languageCode == 'tr' ? tr : en;
@@ -28,11 +28,14 @@ class _BloodTestsScreenState extends State<BloodTestsScreen> {
     });
   }
 
-  Future<void> _openFile(String url) async {
+  void _openFile(String url) {
     if (url.isEmpty) return;
     final uri = Uri.tryParse(url);
     if (uri == null) return;
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PdfViewerScreen(url: url)),
+    );
   }
 
   Future<void> _confirmDelete(BloodTest test) async {
