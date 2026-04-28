@@ -80,7 +80,64 @@
 <script id="md-source" type="text/markdown">
 # Eatiq — Tam Uygulama Şeması (Mobil × Backend Blueprint)
 
-> **Amaç:** Uygulamadaki tüm ekranları, alt akışları, backend endpoint'lerini ve bağlantı durumlarını tek dosyada görmek. **Son pull:** `eatiq_backend@e6ce8c0` (main, 2026-04-23). Mobil: Flutter 3.41.
+> **Amaç:** Uygulamadaki tüm ekranları, alt akışları, backend endpoint'lerini ve bağlantı durumlarını tek dosyada görmek. **Son pull:** `eatiq_backend@main` (2026-04-26). Mobil: Flutter 3.41 / Dart 3.11.
+
+---
+
+## 🚀 Implementation Status — 2026-04-26 Pre-Launch Polish
+
+**Jira:** Fatih uygulamayı dolaştı, 22 madde paylaştı. Backend audit ile 1 BE-blocked + 4 BE-only ayıklandıktan sonra 17 mobile task tek oturumda DONE'a alındı.
+
+**Açılan epic'ler (3):**
+- [EAT-149](https://baseflowtech.atlassian.net/browse/EAT-149) Pre-Launch Mobile Polish — 18 task
+- [EAT-150](https://baseflowtech.atlassian.net/browse/EAT-150) Diet Plan Concrete Foods & Meal Tracking — 4 task (BE+Mobile pair)
+- [EAT-151](https://baseflowtech.atlassian.net/browse/EAT-151) Auth & Token Stability — 1 BE task
+
+**Mobil tarafı tamamlandı (DONE — 17 task, dart analyze 0 error):**
+
+| Task | Konu | Etkilenen dosya(lar) |
+|------|------|---------------------|
+| ✅ [EAT-152](https://baseflowtech.atlassian.net/browse/EAT-152) | Native splash (cold-start blank gap fix) | `pubspec.yaml`, `ios/Runner/Base.lproj/LaunchScreen.storyboard`, `android/app/src/main/res/{values,values-night,values-v31,values-night-v31}/styles.xml`, `…/drawable*/launch_background.xml`, generated splash assets |
+| ✅ [EAT-153](https://baseflowtech.atlassian.net/browse/EAT-153) | Drop "Name" step from onboarding | `onboarding_screen.dart` (page count 13→11; name from `AppProvider.userName`) |
+| ✅ [EAT-154](https://baseflowtech.atlassian.net/browse/EAT-154) | Global tap-to-dismiss keyboard | **NEW** `lib/widgets/keyboard_dismisser.dart`, `main.dart` (MaterialApp.builder) |
+| ✅ [EAT-156](https://baseflowtech.atlassian.net/browse/EAT-156) | Optional blood-test upload step in onboarding | `onboarding_screen.dart` (page 10 `_PageBloodTestOptional`, multi-upload via `BloodTestUploadScreen`) |
+| ✅ [EAT-157](https://baseflowtech.atlassian.net/browse/EAT-157) | Remove "You're set" final summary | `onboarding_screen.dart` (`_PageSummary` removed) |
+| ✅ [EAT-158](https://baseflowtech.atlassian.net/browse/EAT-158) | Privacy Policy & Terms in-app WebView | **NEW** `lib/widgets/webview_screen.dart`, **NEW** `lib/screens/privacy_policy_screen.dart` (`baseflow.ee/privacy/`), **NEW** `lib/screens/terms_of_service_screen.dart` (`baseflow.ee/terms/`), `settings_screen.dart` + `paywall_screen.dart` linklendi |
+| ✅ [EAT-159](https://baseflowtech.atlassian.net/browse/EAT-159) | Restore Purchases — 3-branch UX | `purchase_service.dart` (yeni `RestoreResult` enum: success / noEntitlement / error), `app_provider.dart`, `paywall_screen.dart` |
+| ✅ [EAT-160](https://baseflowtech.atlassian.net/browse/EAT-160) | Delete Account in Settings | UI mevcuttu (`_confirmDeleteAccount` settings_screen.dart:545); audit doğrulandı |
+| ✅ [EAT-161](https://baseflowtech.atlassian.net/browse/EAT-161) | Logout button in Settings ACCOUNT section | `settings_screen.dart` (`_confirmLogout` + ACCOUNT Column'a Logout row) |
+| ✅ [EAT-162](https://baseflowtech.atlassian.net/browse/EAT-162) | Hide "Add to favorites" when already favorited | `history_screen.dart`, `home_screen.dart` (conditional `if (!analysis.isFavorite)`) |
+| ✅ [EAT-163](https://baseflowtech.atlassian.net/browse/EAT-163) | Min 3 chars before food-search request | `food_search_screen.dart` `_onSearchChanged`, `dietary_anamnesis_screen.dart` `_search` (DislikedFoods page) |
+| ✅ [EAT-164](https://baseflowtech.atlassian.net/browse/EAT-164) | App restart routing bug (4 case matrix) | `splash_screen.dart` `_checkOnboarding` rewrite, `app_provider.dart` `setOnboardingDone` setter, BE-source-of-truth (height>0 && weight>0 → flag set) |
+| ✅ [EAT-165](https://baseflowtech.atlassian.net/browse/EAT-165) | Remove "Cuisine preferences" step | `dietary_anamnesis_screen.dart`, `diet_profile_edit_screen.dart` |
+| ✅ [EAT-166](https://baseflowtech.atlassian.net/browse/EAT-166) | Remove "Grocery budget" step | `dietary_anamnesis_screen.dart` (`_PageCookingTime` budget UI), `diet_profile_edit_screen.dart` |
+| ✅ [EAT-167](https://baseflowtech.atlassian.net/browse/EAT-167) | Swipe-back bug in diet onboarding | `dietary_anamnesis_screen.dart` (`PopScope` intercept; `_page>0` → `_back()`) |
+| ✅ [EAT-168](https://baseflowtech.atlassian.net/browse/EAT-168) | Remove "Anything else?" notes step | `dietary_anamnesis_screen.dart`, `diet_profile_edit_screen.dart` |
+| ✅ [EAT-169](https://baseflowtech.atlassian.net/browse/EAT-169) | Open uploaded blood-test PDFs in-app | **NEW** `lib/screens/pdf_viewer_screen.dart` (PdfViewer.uri + InteractiveViewer image fallback), `blood_tests_screen.dart` `_openFile()` |
+
+**Yapı değişikliği:**
+- Onboarding flow: **13 → 11 sayfa** (Name + Summary çıktı, BloodTest girdi → toplam 12 ile 1 net azaltım)
+- Diet anamnesis: **6 → 4 sayfa** (Cuisines + Notes çıktı, CookingTime'dan budget kaldırıldı)
+- Diet profile edit: Cuisine + Budget + Notes section'ları kaldırıldı
+- Splash: 1400ms → 600ms transition; "Get Started" landing UI kaldırıldı (logged-out user direkt AuthScreen'e push); native splash arkasında Flutter splash sade logo + scanner visual kaldı
+- Mevcut `splash_screen.dart` silindi → `lib/screens/getting_started_screen.dart` (welcome landing) ve sade native splash bridge ayrıldı
+
+**Yeni dependency'ler (pubspec):**
+- `flutter_native_splash: ^2.4.4` — iOS storyboard + Android styles autogen
+- `webview_flutter: ^4.7.0` — Privacy/Terms in-app WebView
+- `pdfrx: ^1.0.0` — Blood test PDF viewer
+
+**BE-blocked (mobile beklemede):**
+- 🟡 [EAT-155](https://baseflowtech.atlassian.net/browse/EAT-155) Diet type onboarding multi-select restore → BE [EAT-175](https://baseflowtech.atlassian.net/browse/EAT-175) (`dietType` scalar enum, multi-select için array kolonu gerekiyor)
+- 🟡 [EAT-171](https://baseflowtech.atlassian.net/browse/EAT-171) Render concrete food items in diet-plan → BE [EAT-170](https://baseflowtech.atlassian.net/browse/EAT-170)
+- 🟡 [EAT-173](https://baseflowtech.atlassian.net/browse/EAT-173) "I ate this meal" toggle UI → BE [EAT-172](https://baseflowtech.atlassian.net/browse/EAT-172) (`completeMeal` var, `uncompleteMeal` + auto-revert eksik)
+- 🟡 [EAT-174](https://baseflowtech.atlassian.net/browse/EAT-174) BE auth investigation (spurious UNAUTHENTICATED, mobile follow-up gerekirse)
+
+**Geçici çözümler / follow-up:**
+- ⏳ Yeni eklenen string'ler (`EAT-156, 158, 161, 169`) inline TR/EN `_t(ctx, tr, en)` helper kullanıyor; 8 dilin (FR/ES/DE/AR/JA/ZH/PT/KA) ARB migrate'i pre-launch son aşamada toplu yapılacak
+- ⏳ `saveAnamnesisProfile` BE şeması hâlâ `cuisines`/`budget`/`notes` required tutuyor; mobile boş değer geçiyor (`const []`, `'medium'`, `''`). BE temizliği [EAT-170](https://baseflowtech.atlassian.net/browse/EAT-170) tarafında yapılabilir.
+
+**Commit:** `91f26b3` (origin/main) — 64 dosya, +2120/-1180
 
 ---
 
@@ -218,18 +275,21 @@ flowchart LR
 
 ---
 
-## ② Tam Navigation Akışı — 27 Ekran Tek Diyagramda
+## ② Tam Navigation Akışı — 30 Ekran Tek Diyagramda
 
-> Node renkleri: **mavi** = ana flow, **yeşil** = tab, **turuncu** = modal/sheet, **kırmızı** = eksik entegrasyon.
+> Node renkleri: **mavi** = ana flow, **yeşil** = tab, **turuncu** = modal/sheet, **kırmızı** = eksik entegrasyon, **mor** = WebView/PDF viewer.
 
 ```mermaid
 flowchart TD
-    START([Uygulama Açılır]) --> SP["🚀 Splash<br/>splash_screen.dart"]
+    START([Uygulama Açılır]) --> NSP["🟦 Native Splash<br/>(LaunchScreen.storyboard /<br/>launch_background.xml)<br/>EAT-152"]
+    NSP --> SP["🚀 Flutter Splash<br/>splash_screen.dart<br/>(600ms branded transition)"]
 
-    SP -->|loggedIn=false| AUTH["🔐 Auth<br/>auth_screen.dart"]
-    SP -->|loggedIn & !onboard| ONB["📝 Onboarding<br/>12 step"]
-    SP -->|loggedIn & onboard & !premium| PAY["💎 Paywall"]
-    SP -->|loggedIn & premium| HOME
+    SP -->|loggedIn=false| GS["👋 Getting Started<br/>getting_started_screen.dart"]
+    SP -->|loggedIn=false (returning)| AUTH
+    SP -->|loggedIn & onboarded & premium| HOME
+    SP -->|loggedIn & onboarded & free| PAY
+    SP -->|loggedIn & not-onboarded| ONB["📝 Onboarding<br/>11 step"]
+    GS --> AUTH["🔐 Auth<br/>auth_screen.dart"]
 
     AUTH --> SL["📧 Email/Password"]
     AUTH --> SG["🔵 Google"]
@@ -244,6 +304,8 @@ flowchart TD
     SA --> HOME
     REG --> ONB
 
+    ONB -.optional step 10.-> ONB_BT["⬆️ Optional Blood-Test Upload<br/>(within onboarding)<br/>EAT-156"]
+    ONB_BT --> BTU
     ONB --> PAY
     PAY -->|Purchase OK / Skip| HOME
 
@@ -257,7 +319,7 @@ flowchart TD
     T1 --> FAB{{"➕ FAB Sheet"}}
     FAB --> CAM["📷 Kamera/Galeri"]
     FAB --> BAR["🔲 Barkod<br/>barcode_scanner_screen.dart"]
-    FAB --> SRC["🔍 Food Search<br/>food_search_screen.dart"]
+    FAB --> SRC["🔍 Food Search<br/>food_search_screen.dart<br/>(min 3 chars guard EAT-163)"]
     FAB --> MAN["✏️ Manual<br/>manual_entry_screen.dart"]
     FAB --> WSH{{"💧 Su Ekle<br/>bottom sheet"}}
     FAB --> WGT{{"⚖️ Kilo Ekle<br/>bottom sheet"}}
@@ -271,10 +333,10 @@ flowchart TD
     RES -->|Retry| CAM
 
     %% History altından açılır
-    T1 -->|see history| HIST["📅 History<br/>history_screen.dart"]
+    T1 -->|see history| HIST["📅 History<br/>history_screen.dart<br/>(fav button hidden when favorited EAT-162)"]
 
     %% Program akışı
-    T3 -->|plan yok| ANAM["📋 Dietary Anamnesis<br/>5 step form"]
+    T3 -->|plan yok| ANAM["📋 Dietary Anamnesis<br/>4 step form<br/>(swipe-back fixed EAT-167)"]
     T3 -->|plan var| WDP["🗓️ Weekly Diet Plan<br/>weekly_diet_plan_screen.dart"]
     ANAM -->|optional| BTU
     ANAM --> DPL["⏳ Diet Plan Loading<br/>6 step animation"]
@@ -287,48 +349,55 @@ flowchart TD
     SET --> DPE
     SET --> BT["🩸 Blood Tests<br/>blood_tests_screen.dart"]
     SET --> PAY2["💎 Paywall"]
+    SET --> PRV["📜 Privacy Policy<br/>privacy_policy_screen.dart<br/>(in-app WebView EAT-158)"]
+    SET --> TOS["📜 Terms of Service<br/>terms_of_service_screen.dart<br/>(in-app WebView EAT-158)"]
+    SET --> LO[["🚪 Logout<br/>(EAT-161, confirm dialog)"]]
+    SET --> DA[["🗑️ Delete Account<br/>(EAT-160, danger dialog)"]]
     BT --> BTU["⬆️ Blood Test Upload<br/>blood_test_upload_screen.dart"]
+    BT --> PDF["📄 PDF/Image Viewer<br/>pdf_viewer_screen.dart<br/>(in-app, EAT-169)"]
+
+    PAY -.altta.-> PRV
+    PAY -.altta.-> TOS
 
     %% AI Dietitian
     HOME -. modal .-> AID["🤖 AI Dietitian<br/>ai_dietitian_screen.dart"]
     AID -. ⚫ STUB .-> AIXX["AIService<br/>throws UnimplementedError"]
-
-    %% Social login modal alt akış
-    AUTH -. modal .-> SLM["social_login_screen.dart<br/>🟡 duplicate UI"]
 
     classDef flow fill:#cfe2ff,stroke:#0d6efd,color:#000
     classDef tab fill:#d1e7dd,stroke:#198754,color:#000
     classDef modal fill:#fff3cd,stroke:#ffc107,color:#000
     classDef missing fill:#f8d7da,stroke:#dc3545,color:#000
     classDef stub fill:#e2e3e5,stroke:#6c757d,color:#000
+    classDef webview fill:#e7d6ff,stroke:#6f42c1,color:#000
 
-    class SP,AUTH,LOG,REG,FPO,RPW,ONB,PAY,PAY2,HOME,RES,BAR,SRC,MAN,HIST,ANAM,DPL,WDP,SET,DPE,BT,BTU flow
+    class NSP,SP,GS,AUTH,LOG,REG,FPO,RPW,ONB,ONB_BT,PAY,PAY2,HOME,RES,BAR,SRC,MAN,HIST,ANAM,DPL,WDP,SET,DPE,BT,BTU flow
     class T1,T2,T3,T4 tab
-    class FAB,PPS,WSH,WGT,CAM,SLM modal
-    class SF,SF2 missing
+    class FAB,PPS,WSH,WGT,CAM,LO,DA modal
+    class SF missing
     class AID,AIXX stub
+    class PRV,TOS,PDF webview
 ```
 
-**Okunuş:** Splash 4 farklı yola çatallanır (login, onboarding, paywall, home). Home 4 tab; her FAB çağrısı 6 farklı giriş yolunu tetikler (kamera, galeri, barkod, arama, manuel, su/kilo). Program tab'ı Anamnesis → Loading → WeeklyPlan üçlüsüne yönlendirir. AI Dietitian şu an **stub** (UnimplementedError).
+**Okunuş:** Native splash artık cold-start blank gap'i kapatıyor (EAT-152) — Flutter splash 600ms branded transition. Splash routing 4 case'i intelligent yönetiyor (logged-in/out × onboarded/not, premium/free; EAT-164). Logged-out user direkt AuthScreen'e gidiyor (eski "Get Started" landing kalktı, kalan welcome içerikleri `getting_started_screen.dart`'a taşındı). Onboarding 11 step (Name + Summary + Cuisine + Budget + Anything-else çıktı, optional blood-test upload step girdi). Diet anamnesis 4 step (Cuisines + Notes + Budget kaldırıldı). Settings'ten Privacy/Terms in-app WebView'a, blood-test PDF'leri in-app PDF viewer'a açılıyor. AI Dietitian hâlâ **stub** (UnimplementedError).
 
 ---
 
-## ③ Ekran Envanteri (27 ekran)
+## ③ Ekran Envanteri (30 ekran + 2 paylaşılan widget)
 
-> Her satır: ekran adı — dosya:satır — özet — parent/children — kullandığı servis(ler).
+> Her satır: ekran adı — dosya:satır — özet — parent/children — kullandığı servis(ler). 2026-04-26 itibarıyla `social_login_screen.dart` legacy duplicate **silindi**; yerine 4 yeni ekran (GettingStarted, PrivacyPolicy, TermsOfService, PdfViewer) ve 2 paylaşılan widget (KeyboardDismisser, WebViewScreen) eklendi.
 
-### A) Auth & Onboarding (7 ekran)
+### A) Auth & Onboarding (8 ekran)
 
 | # | Ekran | Dosya:Satır | Görev | Kullandığı Servis |
 |---|-------|-------------|-------|-------------------|
-| 1 | **Splash** | [lib/screens/splash_screen.dart:16](lib/screens/splash_screen.dart) | Bootstrap + ilk yönlendirme | `AppProvider.bootstrapSession()` |
+| 1 | **Splash** | [lib/screens/splash_screen.dart](lib/screens/splash_screen.dart) | 600ms branded transition + routing (EAT-164: 4-case matrix). Native splash önce gösteriliyor, blank gap kapatılıyor (EAT-152) | `AppProvider.bootstrapSession`, `setOnboardingDone` |
+| 1b | **Getting Started** | [lib/screens/getting_started_screen.dart](lib/screens/getting_started_screen.dart) | Welcome / "Get Started" landing — yalnız ilk-launch logged-out kullanıcı için splash sonrası görünür | — |
 | 2 | **Auth** | [lib/screens/auth/auth_screen.dart:14](lib/screens/auth/auth_screen.dart) | Sosyal/email seçim hub'ı | `AuthService`, `SocialSignIn` |
 | 3 | **Login** | [lib/screens/auth/login_screen.dart:9](lib/screens/auth/login_screen.dart) | Email + parola login | `AuthService.login` |
 | 4 | **Register** | [lib/screens/auth/register_screen.dart:8](lib/screens/auth/register_screen.dart) | Email + parola kayıt | `AuthService.signup` |
 | 5 | **Forgot Password (OTP)** | [lib/screens/auth/forgot_password_otp_screen.dart:9](lib/screens/auth/forgot_password_otp_screen.dart) | OTP iste + doğrula | `AuthService.forgotPassword`, `verifyOtp` |
 | 6 | **Reset Password** | [lib/screens/auth/reset_password_screen.dart:7](lib/screens/auth/reset_password_screen.dart) | Yeni parola belirle | `AuthService.resetPassword` |
-| 7 | **Onboarding** | [lib/screens/onboarding_screen.dart:11](lib/screens/onboarding_screen.dart) | 12 adım profil formu (ad, cinsiyet, doğum, boy, kilo, hedef, tempo, aktivite, diyet tipi, özet) | `UserService.updateProfile` |
-| 7b | **Social Login (legacy modal)** | [lib/screens/social_login_screen.dart:9](lib/screens/social_login_screen.dart) | 🟡 Eski duplicate UI — Auth Screen'in yanında kalmış | `SocialSignIn` |
+| 7 | **Onboarding** | [lib/screens/onboarding_screen.dart](lib/screens/onboarding_screen.dart) | **11 adım** profil formu: cinsiyet → doğum → boy/kilo → hedef → target weight → weekly pace → aktivite → diyet tipi → allerji/restriction → notification → optional blood-test upload (EAT-156) → tema. Name/Summary kaldırıldı (EAT-153/157). | `UserService.updateProfile`, `BloodTestService.uploadBloodTest` (optional) |
 
 ### B) Ana Dashboard & Meal Entry (6 ekran + 4 modal)
 
@@ -351,7 +420,7 @@ flowchart TD
 |---|-------|-------------|-------|-------------------|
 | 14 | **Progress** | [lib/screens/progress_screen.dart:10](lib/screens/progress_screen.dart) | Today/Week/30D/Weight grafikler | `ProgressService.todayStats/weeklyStats/monthlyStats`, `WeightService.weightLogs` |
 | 15 | **Program** | [lib/screens/program_screen.dart:9](lib/screens/program_screen.dart) | Aktif plan varsa göster, yoksa anamnez tetikle | `DietPlanService.myDietPlan` |
-| 16 | **Dietary Anamnesis** | [lib/screens/dietary_anamnesis_screen.dart:41](lib/screens/dietary_anamnesis_screen.dart) | 5 adım: kısıtlamalar, cuisine, öğün sayısı, pişirme, bütçe | `UserService.updateProfile` (diet prefs) |
+| 16 | **Dietary Anamnesis** | [lib/screens/dietary_anamnesis_screen.dart](lib/screens/dietary_anamnesis_screen.dart) | **4 adım**: restrictions → meals/day → cooking time → disliked foods. Cuisines + Notes + Budget kaldırıldı (EAT-165/166/168). Swipe-back artık önceki adıma gidiyor (EAT-167, `PopScope`). Min 3 chars search guard (EAT-163). | `UserService.updateProfile`, `NutritionService.foods` |
 | 17 | **Diet Plan Loading** | [lib/screens/diet_plan_loading_screen.dart:11](lib/screens/diet_plan_loading_screen.dart) | 6 adım Lottie animasyonu + AI çağrısı | `DietPlanService.generateDietPlan` |
 | 18 | **Weekly Diet Plan** | [lib/screens/weekly_diet_plan_screen.dart:47](lib/screens/weekly_diet_plan_screen.dart) | 7 gün × 4 öğün, completeMeal | `DietPlanService.regenerateDay`, `completeMeal` |
 
@@ -361,20 +430,28 @@ flowchart TD
 |---|-------|-------------|-------|-------------------|
 | 19 | **Profile** | [lib/screens/profile_screen.dart:10](lib/screens/profile_screen.dart) | Kullanıcı özeti, streak, kilo, settings ikonu | `UserService.me`, `WeightService` |
 | 20 | **Settings** | [lib/screens/settings_screen.dart:11](lib/screens/settings_screen.dart) | Dil/tema/bildirim/hedef | `SettingsService.appSettings/updateAppSettings`, `UserService.updateProfile`, `NotificationService` |
-| 21 | **Diet Profile Edit** | [lib/screens/diet_profile_edit_screen.dart:45](lib/screens/diet_profile_edit_screen.dart) | Anamnez formunun düzenlenebilir versiyonu + regenerate | `UserService.updateProfile`, `DietPlanService.generateDietPlan` |
-| 22 | **Blood Tests** | [lib/screens/blood_tests_screen.dart:15](lib/screens/blood_tests_screen.dart) | Yüklenmiş kan testleri listesi | `BloodTestService.myBloodTests`, `deleteBloodTest` |
+| 21 | **Diet Profile Edit** | [lib/screens/diet_profile_edit_screen.dart](lib/screens/diet_profile_edit_screen.dart) | Anamnez formunun düzenlenebilir versiyonu + regenerate. **Cuisine + Budget + Notes section'ları kaldırıldı** (EAT-165/166/168). Restrictions + Meals + Cooking Time kaldı. | `UserService.updateProfile`, `DietPlanService.generateDietPlan` |
+| 22 | **Blood Tests** | [lib/screens/blood_tests_screen.dart](lib/screens/blood_tests_screen.dart) | Yüklenmiş kan testleri listesi. Tıklanırsa **in-app PdfViewer** (EAT-169) açılıyor (eski `url_launcher` external kalktı). | `BloodTestService.myBloodTests`, `deleteBloodTest` |
 | 23 | **Blood Test Upload** | [lib/screens/blood_test_upload_screen.dart:20](lib/screens/blood_test_upload_screen.dart) | PDF/image base64 upload | `BloodTestService.uploadBloodTest` |
+| 26 | **PDF/Image Viewer** | [lib/screens/pdf_viewer_screen.dart](lib/screens/pdf_viewer_screen.dart) | URL extension'a göre PDF (`PdfViewer.uri`) veya image (`InteractiveViewer + Image.network`) render. AppBar localized title, error state. (EAT-169) | `pdfrx` |
+| 27 | **Privacy Policy** | [lib/screens/privacy_policy_screen.dart](lib/screens/privacy_policy_screen.dart) | `baseflow.ee/privacy/` URL'sini `WebViewScreen` ile in-app render. (EAT-158) | `webview_flutter` |
+| 28 | **Terms of Service** | [lib/screens/terms_of_service_screen.dart](lib/screens/terms_of_service_screen.dart) | `baseflow.ee/terms/` URL'sini `WebViewScreen` ile in-app render. (EAT-158) | `webview_flutter` |
 
 ### E) Premium & AI (2 ekran)
 
 | # | Ekran | Dosya:Satır | Görev | Kullandığı Servis |
 |---|-------|-------------|-------|-------------------|
-| 24 | **Paywall** | [lib/screens/paywall_screen.dart:11](lib/screens/paywall_screen.dart) | RevenueCat paketleri + purchase | `PurchaseService` (RevenueCat SDK) + `AppProvider.refreshPremiumStatus` (BE `me.isPremium`) |
+| 24 | **Paywall** | [lib/screens/paywall_screen.dart](lib/screens/paywall_screen.dart) | RevenueCat paketleri + purchase. **Restore Purchases 3-branch UX** (success/noEntitlement/error, EAT-159). Privacy/Terms linkleri in-app WebView'a. | `PurchaseService` (`RestoreResult` enum) + `AppProvider.restorePurchases/refreshPremiumStatus` |
 | 25 | **AI Dietitian** ⚫ | [lib/screens/ai_dietitian_screen.dart:32](lib/screens/ai_dietitian_screen.dart) | Chat UI — mock/stub | `AIService.analyzeFood()` → `UnimplementedError` |
 
-### F) Reserved / yarım (varsa)
+### F) Paylaşılan Widget'lar (yeni — EAT-149 sprint çıktısı)
 
-> Mevcut `lib/screens/` listesinde başka dosya yok. `social_login_screen.dart` (#7b) gereksiz duplicate, silinmeye aday.
+| # | Widget | Dosya | Görev |
+|---|--------|-------|-------|
+| W1 | **KeyboardDismisser** | [lib/widgets/keyboard_dismisser.dart](lib/widgets/keyboard_dismisser.dart) | Tap-to-dismiss keyboard wrapper. `MaterialApp.builder` üzerinden tüm Navigator stack'i kapsıyor. (EAT-154) |
+| W2 | **WebViewScreen** | [lib/widgets/webview_screen.dart](lib/widgets/webview_screen.dart) | Generic in-app WebView base — URL + title alır, loading spinner + error retry. Privacy/Terms screen'leri buna sarılı. (EAT-158) |
+| (mevcut) | **PortionPickerSheet** | [lib/widgets/portion_picker_sheet.dart](lib/widgets/portion_picker_sheet.dart) | Porsiyon + liquid + cooking method picker | — |
+| (mevcut) | **LiquidWaveProgress** | [lib/widgets/liquid_wave_progress.dart](lib/widgets/liquid_wave_progress.dart) | Su göstergesi animasyonu | — |
 
 ---
 
@@ -502,7 +579,8 @@ Resolver yok; servisler `UserEvent` tablosuna fire-and-forget log atar (BARCODE_
 
 | Ekran / Akış | Çağrılan Backend Endpoint(leri) | Durum | Not |
 |--------------|---------------------------------|-------|-----|
-| **Splash** | `me` (bootstrap) | 🟢 | AppProvider.loadAuthStatus + refreshPremiumStatus |
+| **Splash** | `me` (bootstrap) | 🟢 | AppProvider.loadAuthStatus + refreshPremiumStatus + setOnboardingDone (EAT-164) |
+| **Getting Started** | — | 🟢 | UI only, ilk-launch welcome landing |
 | **Auth (hub)** | — | 🟢 | UI only, servis login ekranlarında |
 | **Login** | `login` | 🟢 | Email+password, 5/min throttle |
 | **Register** | `signup` | 🟢 | Email+password |
@@ -511,7 +589,7 @@ Resolver yok; servisler `UserEvent` tablosuna fire-and-forget log atar (BARCODE_
 | **Social Login (Google)** | `socialLogin(provider=google)` | 🟢 | google_sign_in → idToken |
 | **Social Login (Apple)** | `socialLogin(provider=apple)` | 🟢 | sign_in_with_apple → identityToken |
 | **Social Login (Facebook)** | `socialLogin(provider=facebook)` | 🔴 **PLANNED** | Backend hazır, mobilde SDK entegrasyonu yok |
-| **Onboarding (12 step)** | `updateProfile` | 🟢 | Step sonunda tüm profile push |
+| **Onboarding (11 step)** | `updateProfile`, optional `uploadBloodTest` | 🟢 | Step sonunda tüm profile push. Page 10 optional blood-test upload (EAT-156). Name/Summary kaldırıldı (EAT-153/157). |
 | **Home — Dashboard** | `todayStats`, `getDailyMeals`, `appSettings` | 🟢 | initState sonrası 3 parallel load |
 | **Home — FAB Kamera** | `remainingScans`, `analyzeFood` | 🟢 | AI chain (OpenAI→Gemini→Claude) |
 | **Home — FAB Galeri** | `analyzeFood` | 🟢 | Aynı analyzeFood mutation |
@@ -527,15 +605,17 @@ Resolver yok; servisler `UserEvent` tablosuna fire-and-forget log atar (BARCODE_
 | **Progress (Weight tab)** | `weightLogs` | 🟢 | Grafiklerle birlikte |
 | **Program (empty state)** | `myDietPlan` | 🟢 | null → Anamnesis CTA |
 | **Program (active)** | `myDietPlan`, `dietPlanWeeklyLimit` | 🟢 | Aktif planı render + kalan kota |
-| **Dietary Anamnesis** | `updateProfile` (diet prefs) + optional `uploadBloodTest` | 🟢 | 5 adım form sonunda updateProfile |
+| **Dietary Anamnesis (4 step)** | `updateProfile` (diet prefs) + optional `uploadBloodTest` | 🟢 | 4 adım form: restrictions → meals/day → cooking time → disliked foods. Cuisines/Notes/Budget kaldırıldı (EAT-165/166/168), BE'ye boş değer geçiyor. |
 | **Diet Plan Loading** | `generateDietPlan` | 🟢 | dislikedFoodIds dahil |
 | **Weekly Diet Plan** | `regenerateDay`, `completeMeal` | 🟢 | Gün bazlı regen + öğün tamamlama |
 | **Profile** | `me`, `weightLogs` | 🟢 | Kullanıcı özeti + kilo |
-| **Settings** | `appSettings`, `updateAppSettings`, `updateProfile` | 🟢 | Notif + tema + hedef + dil |
-| **Diet Profile Edit** | `updateProfile`, `generateDietPlan` | 🟢 | Değişiklik → regenerate |
-| **Blood Tests (list)** | `myBloodTests`, `deleteBloodTest` | 🟢 | List + long-press delete |
+| **Settings** | `appSettings`, `updateAppSettings`, `updateProfile`, `deleteAccount`, `logout` | 🟢 | Notif + tema + hedef + dil + ACCOUNT section: Logout (EAT-161) + Delete Account (EAT-160). Privacy/Terms in-app WebView linkleri (EAT-158). |
+| **Privacy Policy / Terms of Service** | — | 🟢 | In-app WebView (`webview_flutter ^4.7.0`); URL: `baseflow.ee/privacy/`, `baseflow.ee/terms/` (EAT-158) |
+| **Diet Profile Edit** | `updateProfile`, `generateDietPlan` | 🟢 | Değişiklik → regenerate. Cuisine/Budget/Notes section'ları kaldırıldı. |
+| **Blood Tests (list)** | `myBloodTests`, `deleteBloodTest` | 🟢 | List + long-press delete; row tap → in-app PDF/Image viewer (EAT-169) |
 | **Blood Test Upload** | `uploadBloodTest` | 🟢 | Base64, max 10MB, JPG/PNG/PDF |
-| **Paywall** | RevenueCat SDK → `POST /webhook/revenuecat` → `me.isPremium` | 🟢 | Client triggers, webhook validates |
+| **PDF/Image Viewer** | — | 🟢 | `pdfrx ^1.0.0` + `InteractiveViewer Image.network` (EAT-169) |
+| **Paywall** | RevenueCat SDK → `POST /webhook/revenuecat` → `me.isPremium`; Restore: `Purchases.restorePurchases()` → `RestoreResult` enum | 🟢 | Client triggers, webhook validates. Restore 3-branch UX: success / noEntitlement / error (EAT-159) |
 | **AI Dietitian Chat** | **— (yok)** | ⚫ **STUB** | `AIService` UnimplementedError; BE'de chat endpoint yok |
 | **Notifications (local)** | `updateAppSettings` (sync) | 🟡 | Reminder flutter_local_notifications; push kanalı yok |
 | **Apple HealthKit** | — | 🟡 | Device only (steps, active cal) |
@@ -928,9 +1008,8 @@ erDiagram
 - [lib/services/database_service.dart](lib/services/database_service.dart) hala `analyses`, `water_log`, `weight_log` tablolarını tutuyor. AppProvider artık backend üzerinden çalışıyor; bu dosya aktif kullanılıyor mu netleşmeli
 - **Aksiyon:** çağrılarını grepleyip ya tamamen kaldır ya da "offline queue" için repurpose et
 
-### 8.6 🟡 social_login_screen.dart duplicate
-- [lib/screens/social_login_screen.dart](lib/screens/social_login_screen.dart) eski akıştan kalmış; AuthScreen (#2) ile fonksiyonel duplicate
-- **Aksiyon:** sil veya merge
+### 8.6 ✅ social_login_screen.dart duplicate — KALDIRILDI
+- 2026-04-24 [EAT-137](https://baseflowtech.atlassian.net/browse/EAT-137) ile silindi.
 
 ### 8.7 ⚠️ Kullanılmayan backend endpoint: `food.generateMealPlan`
 - `src/food/food.resolver.ts:114` — mobilde çağrılmıyor. `diet-plan.generateDietPlan` kullanılıyor. Eski denemeden kalmış olabilir. Silinmeli mi?
@@ -941,9 +1020,43 @@ erDiagram
 ### 8.9 🔴 Apple Health → Backend sync
 - [lib/services/health_service.dart](lib/services/health_service.dart) HealthKit'ten veri alıyor ama backend'e push edilmiyor. Steps + active cal, günlük stats hesabına girmeli mi? Ürün kararı
 
+### 8.10 🟡 Diet type multi-select — BE-blocked
+- **Mobil:** [EAT-155](https://baseflowtech.atlassian.net/browse/EAT-155) ready, blocked. UI hâlâ single-select.
+- **Backend:** [EAT-175](https://baseflowtech.atlassian.net/browse/EAT-175) açık. `dietType: DietType` scalar enum → `dietTypes: DietType[]` array kolonu lazım. AI prompt + recommendation service downstream güncellemesi gerekiyor.
+
+### 8.11 🟡 Diet plan concrete foods + I-ate-this UI — BE-blocked
+- **Mobil:** [EAT-171](https://baseflowtech.atlassian.net/browse/EAT-171) (food list render) + [EAT-173](https://baseflowtech.atlassian.net/browse/EAT-173) (I-ate-this toggle) blocked.
+- **Backend:** [EAT-170](https://baseflowtech.atlassian.net/browse/EAT-170) (DietPlanMeal'a foods array'i ekle) + [EAT-172](https://baseflowtech.atlassian.net/browse/EAT-172) (`uncompleteMeal` mutation + Home/History deletion auto-revert linkage).
+
+### 8.12 🟡 Auth & Token Stability — BE investigation
+- **Backend:** [EAT-174](https://baseflowtech.atlassian.net/browse/EAT-174) — Spurious `UNAUTHENTICATED` errors on `dietPlanWeeklyLimit` / `myDietPlan` resolvers (200 OK + GraphQL errors[]). JWT validation race / refresh-token rotation hipotezleri.
+- **Mobil:** Defensive token-refresh + retry-once gerekirse follow-up.
+
+### 8.13 🟡 L10n — Inline TR/EN follow-up
+- 2026-04-24 ve 2026-04-26 oturumlarında eklenen UI string'leri inline `_t(ctx, tr, en)` helper kullanıyor (`blood_test_upload_screen`, `dietary_anamnesis_screen` DislikedFoods page, `pdf_viewer_screen`, `webview_screen`, `settings_screen` Logout, Privacy/Terms title yer yer ARB). Pre-launch son aşamada 8 dil (FR/ES/DE/AR/JA/ZH/PT/KA) için ARB migrate'i toplu yapılacak.
+
+### 8.14 🟡 saveAnamnesisProfile BE şema temizliği
+- BE `cuisines`, `budget`, `notes` parametrelerini hâlâ required tutuyor; mobile UI bunları kaldırdı (EAT-165/166/168) ve boş değer geçiyor (`const []`, `'medium'`, `''`). BE temizliği [EAT-170](https://baseflowtech.atlassian.net/browse/EAT-170) sırasında veya ayrı task'la yapılabilir.
+
 ---
 
-## ⑨ Pull Sonrası Yenilikler (son ~22 commit)
+## ⑨ Pull Sonrası Yenilikler
+
+### 2026-04-26 — Pre-Launch Polish (commit `91f26b3`)
+17 mobile task tek committe:
+- **Native splash** (flutter_native_splash) — iOS storyboard + Android styles + Void bg + app_icon_dark logo
+- **Onboarding 11 step** — Name + Summary + Cuisine + Budget + Notes kaldırıldı, optional blood-test step eklendi
+- **Diet anamnesis 4 step** — Cuisines + Notes + Budget kaldırıldı, swipe-back PopScope intercept
+- **Splash routing 4-case matrix** — logged-in/out × onboarded/not, premium/free; `setOnboardingDone` setter; BE-source-of-truth (height>0 && weight>0 → flag set)
+- **Settings ACCOUNT** — Logout button + Delete Account verified, Privacy/Terms in-app WebView linkleri
+- **Restore Purchases** — `RestoreResult` enum, 3-branch UX (success/noEntitlement/error)
+- **Min 3 chars search guard** — food_search + dietary_anamnesis disliked-foods
+- **Hide favorites button** — favorited item'larda "Add to favorites" görünmez
+- **Global keyboard dismisser** — MaterialApp.builder
+- **In-app PDF/Image viewer** — pdfrx + InteractiveViewer
+- **Dependency'ler:** flutter_native_splash ^2.4.4, webview_flutter ^4.7.0, pdfrx ^1.0.0
+
+### 2026-04-23 — Backend Sprint (önceki)
 
 Son güncel commit'ler (eski BACKEND_ARCHITECTURE.md'de yok):
 - **e6ce8c0** `EAT-131` — `todayStats/weeklyStats/monthlyStats/remainingScans` artık `timezoneOffsetMinutes` alıyor → TR kullanıcısı için "bugün" doğru (mobil tarafta geçirilmeli, test: Progress ekranı gece yarısı civarında doğru gün mü gösteriyor)
@@ -968,11 +1081,15 @@ Son güncel commit'ler (eski BACKEND_ARCHITECTURE.md'de yok):
 ## ⑩ Referanslar
 
 **Mobil kritik dosyalar**
-- [lib/main.dart](lib/main.dart) — bootstrap, 10 dil, navigatorKey
-- [lib/services/app_provider.dart](lib/services/app_provider.dart) — ~1177 satır merkezi state
-- [lib/services/api/api_client.dart](lib/services/api/api_client.dart) — GraphQL client, 401 retry, logout guard
+- [lib/main.dart](lib/main.dart) — bootstrap, 10 dil, navigatorKey, KeyboardDismisser builder, fresh-install secure-storage purge
+- [lib/services/app_provider.dart](lib/services/app_provider.dart) — ~1180+ satır merkezi state; `setOnboardingDone`, `restorePurchases→RestoreResult`
+- [lib/services/api/api_client.dart](lib/services/api/api_client.dart) — GraphQL client, 401 retry, logout guard, dotenv runtime fallback
 - [lib/services/api/token_storage.dart](lib/services/api/token_storage.dart) — secure storage wrapper
-- [pubspec.yaml](pubspec.yaml) — provider 6, http 1.2, flutter_secure_storage 9, purchases_flutter 8, health 12
+- [lib/services/purchase_service.dart](lib/services/purchase_service.dart) — RevenueCat + `RestoreResult` enum (success/noEntitlement/error)
+- [lib/widgets/keyboard_dismisser.dart](lib/widgets/keyboard_dismisser.dart) — app-wide tap-to-dismiss
+- [lib/widgets/webview_screen.dart](lib/widgets/webview_screen.dart) — generic WebView wrapper (Privacy/Terms)
+- [lib/screens/pdf_viewer_screen.dart](lib/screens/pdf_viewer_screen.dart) — PDF/image agnostic viewer
+- [pubspec.yaml](pubspec.yaml) — provider 6, http 1.2, flutter_secure_storage 9, purchases_flutter 8, health 12; **yeni:** flutter_native_splash 2.4.4, webview_flutter 4.7.0, pdfrx 1.0.0
 
 **Backend kritik dosyalar**
 - [eatiq_backend/src/app.module.ts](eatiq_backend/src/app.module.ts) — 14 modül registrasyonu
@@ -995,22 +1112,37 @@ Son güncel commit'ler (eski BACKEND_ARCHITECTURE.md'de yok):
 |----------|-------|
 | Auth akışı (email + Google + Apple) | 🟢 Tam |
 | Auth Facebook | 🔴 Planned |
-| Profil + onboarding | 🟢 Tam |
+| Profil + onboarding (11 step) | 🟢 Tam (Pre-Launch Polish 2026-04-26) |
+| Diet anamnesis (4 step, swipe-back fixed) | 🟢 Tam |
+| Native splash (cold-start gap) | 🟢 Tam (EAT-152) |
+| Splash routing 4-case matrix | 🟢 Tam (EAT-164) |
 | Kameradan AI analiz | 🟢 Tam |
-| Barkod + manuel + arama | 🟢 Tam |
+| Barkod + manuel + arama (min 3 chars) | 🟢 Tam |
 | History / Progress | 🟢 Tam |
 | Water + Weight | 🟢 Tam |
 | Diet Plan (anamnez + haftalık + limit) | 🟢 Tam |
+| Diet Plan concrete foods + I-ate-this | 🟡 BE-blocked (EAT-170/172) |
+| Diet type multi-select | 🟡 BE-blocked (EAT-175) |
 | Blood Test upload + AI interpret | 🟢 Tam |
+| Blood Test in-app PDF viewer | 🟢 Tam (EAT-169) |
+| Privacy Policy + Terms (in-app WebView) | 🟢 Tam (EAT-158) |
+| Settings: Logout + Delete Account | 🟢 Tam (EAT-160/161) |
 | Premium / paywall (RevenueCat + webhook) | 🟢 Tam |
-| Timezone-aware stats | 🟢 Tam (mobil tarafta param geçişi teyit gerekli) |
+| Restore Purchases UX (3-branch) | 🟢 Tam (EAT-159) |
+| Global tap-to-dismiss keyboard | 🟢 Tam (EAT-154) |
+| Hide favorites button when favorited | 🟢 Tam (EAT-162) |
+| Timezone-aware stats | 🟢 Tam |
+| L10n — 10 dil ARB | 🟡 Yeni Pre-Launch string'leri inline TR/EN (8 dil son aşamada migrate) |
 | Notification — local reminder | 🟡 Local |
-| Notification — backend-triggered push | 🔴 Planned |
-| AI Dietitian chat | ⚫ Stub (en büyük boşluk) |
-| Offline queue | 🔴 Planned |
-| Apple Health entegrasyonu | 🟡 Device-only, BE'ye yazılmıyor |
+| Notification — backend-triggered push | 🔴 Planned (EAT-144 blocked by EAT-115 IDEA) |
+| AI Dietitian chat | ⚫ Stub / 🔴 Planned (EAT-143 blocked by EAT-114 IDEA) |
+| Offline queue | 🟢 Local (EAT-141 mevcut) |
+| Apple Health entegrasyonu | 🟡 Device-only, BE sync planlı (EAT-142) |
+| Auth & Token Stability | 🟡 BE investigation (EAT-174) |
 
-**En büyük gap:** AI Dietitian chat (hem UI stub hem backend endpoint yok). İkinci: push notifications. Geri kalan her şey production-ready.
+**En büyük gap'ler (sırayla):** (1) AI Dietitian chat — UI stub + BE endpoint yok, (2) Push notifications — BE servisi yok, (3) Apple Health → BE sync, (4) Diet plan multi-select & concrete foods (BE'de Kürşat'ta).
+
+**Pre-launch ready:** 2026-04-26 itibarıyla mobile mainline temiz; pre-launch polish 17 task DONE. Geri kalan blocked task'lar BE bağımlı, mobile follow-up'lar BE bittikçe yapılacak.
 </script>
 
 <script type="module">
