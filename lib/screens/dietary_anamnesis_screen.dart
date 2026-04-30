@@ -40,12 +40,14 @@ class DietaryAnamnesisScreen extends StatefulWidget {
 
 class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
   int _page = 0;
-  static const int _totalPages = 4;
+  static const int _totalPages = 3;
 
   // Form state
   final Set<String> _selectedRestrictions = {};
   int _mealsPerDay = 4;
-  String _cookingTime = 'medium'; // quick / medium / relaxed
+  // BE şeması alanı zorunlu tuttuğu için default 'medium' yolluyoruz.
+  // Kullanıcı isterse diet_profile_edit_screen üzerinden değiştirebilir.
+  static const String _cookingTime = 'medium';
 
   // EAT-135: disliked foods (id, display name) — generateDietPlan'a iletiliyor.
   final List<({String id, String name})> _dislikedFoods = [];
@@ -192,16 +194,8 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
           onChanged: (v) => setState(() => _mealsPerDay = v),
         );
       case 2:
-        return _PageCookingTime(
-          key: const ValueKey(2),
-          isDark: isDark,
-          accent: accent,
-          selected: _cookingTime,
-          onSelected: (v) => setState(() => _cookingTime = v),
-        );
-      case 3:
         return _PageDislikedFoods(
-          key: const ValueKey(3),
+          key: const ValueKey(2),
           isDark: isDark,
           accent: accent,
           selected: _dislikedFoods,
@@ -501,65 +495,6 @@ class _StepperBtn extends StatelessWidget {
               ? (isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary).withValues(alpha: 0.4)
               : (isDark ? AppColors.darkText : AppColors.lightText),
         ),
-      ),
-    );
-  }
-}
-
-// ── Page 2: Cooking Time ──────────────────────────────────────────────────────
-class _PageCookingTime extends StatelessWidget {
-  final bool isDark;
-  final Color accent;
-  final String selected;
-  final void Function(String) onSelected;
-
-  const _PageCookingTime({
-    super.key,
-    required this.isDark,
-    required this.accent,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-
-    const cookOptions = [
-      ('quick', '⚡', 'Quick', '< 15 min'),
-      ('medium', '🍳', 'Moderate', '15–30 min'),
-      ('relaxed', '👨‍🍳', 'Relaxed', '30–60 min'),
-    ];
-
-    return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 32.h),
-          Text('Cooking time', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w800, color: textPrimary)),
-          SizedBox(height: 8.h),
-          Text('We\'ll keep your meals practical', style: TextStyle(fontSize: 14.sp, color: textMuted)),
-          SizedBox(height: 28.h),
-          Text('Cooking time per meal', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textMuted, letterSpacing: 0.5)),
-          SizedBox(height: 12.h),
-          Column(
-            children: cookOptions.map((opt) {
-              final isSelected = selected == opt.$1;
-              return _OptionRow(
-                emoji: opt.$2,
-                title: opt.$3,
-                subtitle: opt.$4,
-                isSelected: isSelected,
-                isDark: isDark,
-                accent: accent,
-                onTap: () => onSelected(opt.$1),
-              );
-            }).toList(),
-          ),
-          SizedBox(height: 32.h),
-        ],
       ),
     );
   }
@@ -866,63 +801,3 @@ class _MultiPill extends StatelessWidget {
   }
 }
 
-class _OptionRow extends StatelessWidget {
-  final String emoji, title, subtitle;
-  final bool isSelected, isDark;
-  final Color accent;
-  final VoidCallback onTap;
-
-  const _OptionRow({
-    required this.emoji,
-    required this.title,
-    required this.subtitle,
-    required this.isSelected,
-    required this.isDark,
-    required this.accent,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
-
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.selectionClick();
-        onTap();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        margin: EdgeInsets.only(bottom: 10.h),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          color: isSelected ? accent.withValues(alpha: isDark ? 0.12 : 0.08) : cardBg,
-          borderRadius: BorderRadius.circular(14.r),
-          border: Border.all(
-            color: isSelected ? accent : (isDark ? AppColors.darkSurface : AppColors.lightBorder),
-            width: isSelected ? 1.5 : 0.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Text(emoji, style: TextStyle(fontSize: 24.sp)),
-            SizedBox(width: 14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary)),
-                  Text(subtitle, style: TextStyle(fontSize: 12.sp, color: textMuted)),
-                ],
-              ),
-            ),
-            if (isSelected)
-              Icon(Icons.check_circle_rounded, color: accent, size: 20.sp),
-          ],
-        ),
-      ),
-    );
-  }
-}

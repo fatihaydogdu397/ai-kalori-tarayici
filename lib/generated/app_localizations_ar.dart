@@ -287,7 +287,159 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorGeneric => 'حدث خطأ';
 
   @override
+  String get errorAuthInvalidCredentials =>
+      'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+
+  @override
+  String get errorAuthSignInAgain => 'يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
+  String get errorAuthOauthFailed => 'تعذّر تسجيل الدخول. حاول مرة أخرى.';
+
+  @override
+  String get errorAuthEmailInUse =>
+      'هذا البريد مسجّل بالفعل. حاول تسجيل الدخول.';
+
+  @override
+  String get errorAuthEmailProviderConflict =>
+      'سجّل الدخول بالطريقة التي استخدمتها أصلًا لهذا البريد.';
+
+  @override
+  String get errorAuthInvalidOtp => 'الرمز غير صالح أو منتهي الصلاحية.';
+
+  @override
+  String get errorAuthTooManyAttempts =>
+      'محاولات فاشلة كثيرة. اطلب رمزًا جديدًا.';
+
+  @override
+  String get errorPremiumRequired => 'اشتراك بريميوم مطلوب.';
+
+  @override
+  String get errorFoodScanLimit =>
+      'تم الوصول إلى الحد اليومي للمسح. ترقَّ إلى بريميوم لمسح غير محدود.';
+
+  @override
+  String get errorFoodNotFound => 'لم نعثر على هذه الوجبة.';
+
+  @override
+  String get errorNotOwner => 'ليس لديك صلاحية الوصول لهذا العنصر.';
+
+  @override
+  String get errorFoodDeleteOnlyToday => 'يمكنك حذف وجبات اليوم فقط.';
+
+  @override
+  String get errorFoodInvalidBarcode => 'الباركود يبدو غير صحيح.';
+
+  @override
+  String get errorFoodMacroLimit => 'يجب أن يكون كل ماكرو 1000 أو أقل.';
+
+  @override
+  String get errorDietPlanWeeklyLimit => 'استخدمت جميع خططك هذا الأسبوع.';
+
+  @override
+  String get errorDietPlanMacrosNotSet => 'حدد أهداف الماكرو اليومية أولًا.';
+
+  @override
+  String get errorDietPlanNotActive => 'ليس لديك خطة نشطة.';
+
+  @override
+  String get errorDietPlanMealNotFound => 'لم نعثر على هذه الوجبة.';
+
+  @override
+  String get errorBloodTestInvalidFile => 'الملف تالف.';
+
+  @override
+  String get errorBloodTestTooLarge =>
+      'يجب أن تكون الملفات 10 ميجابايت أو أقل.';
+
+  @override
+  String get errorBloodTestMimeMismatch => 'تنسيق الملف غير مدعوم.';
+
+  @override
+  String get errorBloodTestNotFound => 'لم نعثر على فحص الدم.';
+
+  @override
+  String get errorNutritionNoCandidates =>
+      'تعذّر إنشاء توصية. عدّل تفضيلاتك الغذائية.';
+
+  @override
+  String get errorWaterInvalid => 'يجب أن يكون الماء بين 0 و3 لتر.';
+
+  @override
+  String get errorWeightInvalid => 'يجب أن يكون الوزن بين 30 و300 كجم.';
+
+  @override
+  String get errorRateLimited => 'طلبات كثيرة جدًا. حاول بعد قليل.';
+
+  @override
+  String get errorInvalidInput => 'يرجى التحقق من المدخلات.';
+
+  @override
+  String get errorNetwork => 'لا يوجد اتصال بالإنترنت. تحقق من الشبكة.';
+
+  @override
   String get retry => 'إعادة المحاولة';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get healthDataSection => 'بيانات الصحة';
+
+  @override
+  String get bloodTestTitle => 'تحليل دم';
+
+  @override
+  String get bloodTestHeadline => 'ارفع تقريرك الصحي';
+
+  @override
+  String get bloodTestSubtitle =>
+      'رفع تقرير الفحص يساعدنا في تخصيص خطتك ونصائحنا بشكل أفضل. اختياري — يمكنك إضافته في أي وقت من ملفك الشخصي.';
+
+  @override
+  String get bloodTestPickFile => 'اختر ملفًا';
+
+  @override
+  String get bloodTestReplaceFile => 'انقر للاستبدال';
+
+  @override
+  String get bloodTestFileTypesHint => 'PDF أو صورة (JPG/PNG)';
+
+  @override
+  String get bloodTestDateOptional => 'تاريخ الفحص (اختياري)';
+
+  @override
+  String get bloodTestUpload => 'رفع';
+
+  @override
+  String get bloodTestUploadAndContinue => 'رفع ومتابعة';
+
+  @override
+  String get bloodTestsScreenTitle => 'تحليلاتي';
+
+  @override
+  String get bloodTestAdd => 'إضافة';
+
+  @override
+  String get bloodTestEmptyTitle => 'لا توجد تحليلات دم مرفوعة بعد';
+
+  @override
+  String get bloodTestEmptyBody => 'اضغط زر + لإضافة PDF أو صورة.';
+
+  @override
+  String get bloodTestDeleteTitle => 'حذف تحليل الدم';
+
+  @override
+  String get bloodTestDeleteBody => 'سيتم حذف هذا السجل نهائيًا.';
+
+  @override
+  String get bloodTestStatusPending => 'تحليل الذكاء الاصطناعي قيد الانتظار';
+
+  @override
+  String get bloodTestStatusCompleted => 'تم التحليل';
+
+  @override
+  String get bloodTestStatusFailed => 'فشل التحليل';
 
   @override
   String get mealBreakfast => 'إفطار';
@@ -684,6 +836,20 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get dailySummaryEmptyTitle => 'لا توجد سجلات اليوم';
+
+  @override
+  String get dailySummaryEmptyBody => 'مسح سريع؟ اضغط لتسجيل وجبتك الأولى.';
+
+  @override
+  String get dailySummaryUnderTitle => 'تقدم اليوم';
+
+  @override
+  String dailySummaryUnderBody(String cal, String goal) {
+    return '$cal/$goal سعرة — استمر في التسجيل';
+  }
+
+  @override
   String get goalAchievement => 'تحقيق الهدف';
 
   @override
@@ -732,6 +898,19 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get onboardingDietTypeSub =>
       'We will calculate your ideal macro ratios';
+
+  @override
+  String get onboardingDietTypeRequired =>
+      'يرجى اختيار نوع نظام غذائي واحد على الأقل';
+
+  @override
+  String get dietPlanIAteThis => 'تناولت هذا';
+
+  @override
+  String get dietPlanMarkNotEaten => 'تعليم كغير متناول';
+
+  @override
+  String get dietPlanEatenLabel => 'تم تناوله';
 
   @override
   String get onboardingAllergiesTitle => 'Allergies & Restrictions';

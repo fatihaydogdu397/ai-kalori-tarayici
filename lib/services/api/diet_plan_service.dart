@@ -5,10 +5,8 @@ import 'api_exception.dart';
 /// Backend `diet-plan` modülünü saran servis (EAT-96).
 ///
 /// BE artık tablo bazlı bir plan üretiyor: DietPlan → days[] → meals[] ile
-/// **target makrolar + completed flag** tutar. Meal adı / foods listesi BE'de
-/// yok; FE'de kategori adı ve default slot metadata (saat + emoji) ile
-/// zenginleştiriyoruz. İleride BE'ye öneri (name + foods) eklenirse burada
-/// override edilir.
+/// target makrolar + completed flag + concrete foods (EAT-170) tutar. Meal
+/// kategori adı ve default slot metadata (saat + emoji) FE'de tanımlanır.
 class DietPlanService {
   DietPlanService._();
   static final DietPlanService instance = DietPlanService._();
@@ -23,6 +21,7 @@ class DietPlanService {
         id mealCategory
         targetCalories targetProtein targetCarbs targetFat
         completed
+        foods { id position name portionDescription quantity unit foodId }
       }
     }
   ''';
@@ -96,12 +95,28 @@ class DietPlanService {
     return _parse(Map<String, dynamic>.from(data['regenerateDay'] as Map));
   }
 
-  /// Bir öğünü "tamamlandı" olarak işaretler (BE completed=true).
+  /// Bir öğünü "tamamlandı" olarak işaretler. EAT-172: BE artık completeMeal
+  /// çağrısında otomatik FoodAnalysis entry oluşturur (dietPlanMealId link'i
+  /// ile); deleteMeal ile o entry silinince DietPlanMeal otomatik uncomplete
+  /// olur.
   Future<void> completeMeal(String mealId) async {
     await _api.mutate(
       r'''
       mutation CompleteMeal($mealId: ID!) {
         completeMeal(mealId: $mealId) { id completed }
+      }
+      ''',
+      variables: {'mealId': mealId},
+    );
+  }
+
+  /// EAT-172: Tamamlanan öğünü geri alır. BE linked FoodAnalysis entry'i siler
+  /// ve DietPlanMeal.completed = false yapar.
+  Future<void> uncompleteMeal(String mealId) async {
+    await _api.mutate(
+      r'''
+      mutation UncompleteMeal($mealId: ID!) {
+        uncompleteMeal(mealId: $mealId) { id completed }
       }
       ''',
       variables: {'mealId': mealId},
@@ -137,9 +152,11 @@ class DietPlanService {
 
     final dayNumber = day['dayNumber'] as int;
     final totalCals = meals.fold<int>(0, (s, m) => s + m.calories);
+    final isoDate = (day['date'] ?? '') as String;
 
     return DietDay(
-      dayName: _dayLabel(dayNumber, (day['date'] ?? '') as String),
+      dayName: _dayLabel(dayNumber, isoDate),
+      date: DateTime.tryParse(isoDate),
       meals: meals,
       totalCalories: totalCals,
     );
@@ -148,7 +165,22 @@ class DietPlanService {
   DietMeal _parseMeal(Map<String, dynamic> meal) {
     final categoryRaw = ((meal['mealCategory'] ?? '') as String).toLowerCase();
     final slot = _slotFor(categoryRaw);
+    final foodsRaw = (meal['foods'] as List?) ?? const [];
+    final foods = foodsRaw
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .map((f) => DietMealFood(
+              id: (f['id'] ?? '') as String,
+              position: (f['position'] as num?)?.toInt() ?? 0,
+              name: (f['name'] ?? '') as String,
+              portionDescription: (f['portionDescription'] ?? '') as String,
+              quantity: (f['quantity'] as num?)?.toDouble() ?? 0,
+              unit: (f['unit'] ?? '') as String,
+              foodId: f['foodId'] as String?,
+            ))
+        .toList(growable: false)
+      ..sort((a, b) => a.position.compareTo(b.position));
     return DietMeal(
+      id: (meal['id'] ?? '') as String,
       name: slot.label,
       category: slot.label,
       calories: (meal['targetCalories'] as num?)?.toInt() ?? 0,
@@ -157,6 +189,8 @@ class DietPlanService {
       fat: (meal['targetFat'] as num?)?.toInt() ?? 0,
       time: slot.time,
       emoji: slot.emoji,
+      foods: foods,
+      completed: (meal['completed'] as bool?) ?? false,
     );
   }
 

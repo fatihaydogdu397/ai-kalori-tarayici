@@ -396,3 +396,19 @@ Gemini diğer 9 dile çevirir: `app_en`, `app_de`, `app_fr`, `app_es`, `app_ar`,
 flutter: 
 flutter: [ApiClient] ← anonymous [200] 530ms {"errors":[{"message":"Unauthorized","locations":[{"line":2,"column":9}],"path":["myDietPlan"],"extensions":{"code":"UNAUTHENTICATED","stacktrace":["GraphQLError: Unauthorized","    at GraphqlExceptionFilter.catch (/app/dist/common/filters/graphql-exception.filter.js:51:20)","    at ExternalExceptionsHandler.invokeCustomFilters (/app/node_modules/@nestjs/core/exceptions/external-exceptions-handler.js:31:32)","    at ExternalExceptionsHandler.next (/app/node_modules/@nestjs/core/exceptions/external-exceptions-handler.js:14:29)","    at Object.myDietPlan (/app/node_modules/@nestjs/core/helpers/external-proxy.js:14:42)","    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"]}}],"data":{"myDietPlan":null}}"
 
+
+
+
+- hataları user friendly gösterecek bir yapı kurmamız lazım ve localizationlu olması lazım bu konuda backendin bana dönebilecek tüm hataların adını key olarak vermesi lazım benim de hataları bizim localizationumuzla eşleştirip kullanıcıya o şekilde backendden dönen hataları göstermem lazım bu konuda backende ve bana aynı epic altında task aç
+- progress sayfasındaki today this week 30 days tabının tasarımını light modda seçili tabın arkaplan rengini siyah text rengini beyaz yapacağız taskını aç ve yap
+- uygulamanın bottom navigation barındaki iconların boyutları ok ama tıklama alanları biraz dar kullanıcı biraz daha geniş bir alana bastığında da tabı seçebilmesi lazım tıklama alanına padding vererek çözebilirsin diye umuyorum sen karar ver 
+- + butonuna bastığımızda çıkan bottomsheet içindeki camera gallery search ve barcode iconlarını light modda siyah beyaz yapsak güzel olacak ya da farklı farklı daha koyu renkler seçebilirsin dark mode güzel ama orayı düzeltmemize gerek yok
+- onboardinglerdeki cooking time sayfasını kaldıralım öyle bir data backendden de dönmüyor
+- diyet listesini gördüğümüz ekranda ayarlara bastığımızda share plan ve regenerate plan seçeneklerini kaldıralım kalan butondaki icon arkaplanını siyah beyaz yapalım light moda uygun olsun dark modeu ellemeyelim
+- settings sayfasındaki switchler light modda siyah beyaz olsun, healtdata, subsctiptions and legal, ve account kısımlarındaki widgetların boyutları küçük burayı daha farklı bir tasarlayalım bu şekilde küçük duruyor butonlar seçimi sana bırakıyorum.
+- profil sayfasındaki ideal weight kısmını nereden hesaplıyoruz backendden almamız lazım gerekirse iki tarafa da task aç backendden gelmiyorsa
+- bottom navbardaki diyet planını gördüğüm sayfada eğer diyet planım var ise direkt diyet planımı açsın diyet planını gör diye butonu olan sayfayı istemiyorum diyet sayfasının önünde
+- faceid ile login eklemek güzel olabilir bu konuda ne yapabiliriz bakalım analiz çıkaralım ,
+- uygulamada yediğin öğünü veya tamamladığın diyeti paylaşma gibi bir feature eklemek istiyoruz fakat bu konuyu henüz olgunlaştıramadık dolayısıyla bu fikri task açıp idea kolonuna kaydedelim
+- anasayfadaki ve diyet listesindeki gün seçimi konusunda değişikliğe gidilecek bu konu da kürşatla konuşulacak taskını açıp idea kolonuna kaydedelim
+- bildirimlerde gün sonu raporunu gösterdiğimiz bildirim gün boyunca bişey eklemesem de çıkıyor eğer kullanıcı hedefini tamamlamadıysa great job lu bildirim çıkmasın

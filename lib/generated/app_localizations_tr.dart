@@ -288,7 +288,161 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errorGeneric => 'Bir hata oluştu';
 
   @override
+  String get errorAuthInvalidCredentials => 'E-posta veya şifre hatalı.';
+
+  @override
+  String get errorAuthSignInAgain => 'Lütfen tekrar giriş yap.';
+
+  @override
+  String get errorAuthOauthFailed => 'Giriş yapılamadı. Tekrar dene.';
+
+  @override
+  String get errorAuthEmailInUse =>
+      'Bu e-posta zaten kayıtlı. Giriş yapmayı dene.';
+
+  @override
+  String get errorAuthEmailProviderConflict =>
+      'Bu e-posta için ilk kullandığın yöntemle giriş yap.';
+
+  @override
+  String get errorAuthInvalidOtp => 'Kod geçersiz veya süresi dolmuş.';
+
+  @override
+  String get errorAuthTooManyAttempts =>
+      'Çok fazla başarısız deneme. Yeni bir kod iste.';
+
+  @override
+  String get errorPremiumRequired => 'Bu özellik için Premium gerekli.';
+
+  @override
+  String get errorFoodScanLimit =>
+      'Günlük tarama limitine ulaştın. Sınırsız tarama için Premium\'a geç.';
+
+  @override
+  String get errorFoodNotFound => 'Yemek bulunamadı.';
+
+  @override
+  String get errorNotOwner => 'Bu öğeye erişimin yok.';
+
+  @override
+  String get errorFoodDeleteOnlyToday =>
+      'Sadece bugün eklenen yemekleri silebilirsin.';
+
+  @override
+  String get errorFoodInvalidBarcode => 'Bu barkod geçersiz görünüyor.';
+
+  @override
+  String get errorFoodMacroLimit => 'Her makro değeri 1000\'den az olmalı.';
+
+  @override
+  String get errorDietPlanWeeklyLimit =>
+      'Bu hafta için tüm planlarını kullandın.';
+
+  @override
+  String get errorDietPlanMacrosNotSet =>
+      'Önce günlük makro hedeflerini ayarla.';
+
+  @override
+  String get errorDietPlanNotActive => 'Aktif bir planın yok.';
+
+  @override
+  String get errorDietPlanMealNotFound => 'Öğün bulunamadı.';
+
+  @override
+  String get errorBloodTestInvalidFile => 'Dosya bozuk.';
+
+  @override
+  String get errorBloodTestTooLarge => 'Dosya 10 MB\'den küçük olmalı.';
+
+  @override
+  String get errorBloodTestMimeMismatch => 'Bu dosya türü desteklenmiyor.';
+
+  @override
+  String get errorBloodTestNotFound => 'Kan tahlili bulunamadı.';
+
+  @override
+  String get errorNutritionNoCandidates =>
+      'Öneri oluşturulamadı. Beslenme tercihlerini gözden geçir.';
+
+  @override
+  String get errorWaterInvalid => 'Su miktarı 0–3 litre arasında olmalı.';
+
+  @override
+  String get errorWeightInvalid => 'Kilo 30–300 kg arasında olmalı.';
+
+  @override
+  String get errorRateLimited => 'Çok fazla istek. Biraz sonra dene.';
+
+  @override
+  String get errorInvalidInput => 'Lütfen girdileri kontrol et.';
+
+  @override
+  String get errorNetwork => 'İnternet bağlantısı yok.';
+
+  @override
   String get retry => 'Tekrar dene';
+
+  @override
+  String get delete => 'Sil';
+
+  @override
+  String get healthDataSection => 'SAĞLIK VERİLERİ';
+
+  @override
+  String get bloodTestTitle => 'Kan Tahlili';
+
+  @override
+  String get bloodTestHeadline => 'Sağlık raporunu yükle';
+
+  @override
+  String get bloodTestSubtitle =>
+      'Kan tahlilini yüklersen diyet planın ve önerilerimiz sana daha özel olur. Opsiyoneldir, istediğin zaman profilinden ekleyebilirsin.';
+
+  @override
+  String get bloodTestPickFile => 'Dosya seç';
+
+  @override
+  String get bloodTestReplaceFile => 'Değiştirmek için dokun';
+
+  @override
+  String get bloodTestFileTypesHint => 'PDF veya görsel (JPG/PNG)';
+
+  @override
+  String get bloodTestDateOptional => 'Test tarihi (opsiyonel)';
+
+  @override
+  String get bloodTestUpload => 'Yükle';
+
+  @override
+  String get bloodTestUploadAndContinue => 'Yükle ve devam et';
+
+  @override
+  String get bloodTestsScreenTitle => 'Kan Tahlillerim';
+
+  @override
+  String get bloodTestAdd => 'Ekle';
+
+  @override
+  String get bloodTestEmptyTitle => 'Henüz yüklenmiş kan tahlili yok';
+
+  @override
+  String get bloodTestEmptyBody =>
+      'Sağ alttaki + ile PDF veya görsel olarak ekleyebilirsin.';
+
+  @override
+  String get bloodTestDeleteTitle => 'Kan tahlilini sil';
+
+  @override
+  String get bloodTestDeleteBody => 'Bu kayıt kalıcı olarak silinecek.';
+
+  @override
+  String get bloodTestStatusPending => 'AI analiz bekliyor';
+
+  @override
+  String get bloodTestStatusCompleted => 'Analiz tamamlandı';
+
+  @override
+  String get bloodTestStatusFailed => 'Analiz başarısız';
 
   @override
   String get mealBreakfast => 'Kahvaltı';
@@ -687,6 +841,21 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get dailySummaryEmptyTitle => 'Bugün hiç giriş yok';
+
+  @override
+  String get dailySummaryEmptyBody =>
+      'Hızlı tarama? İlk öğününü kaydetmek için dokun.';
+
+  @override
+  String get dailySummaryUnderTitle => 'Bugünkü ilerleme';
+
+  @override
+  String dailySummaryUnderBody(String cal, String goal) {
+    return '$cal/$goal kcal — kaydetmeye devam';
+  }
+
+  @override
   String get goalAchievement => 'Hedef Başarımı';
 
   @override
@@ -736,6 +905,19 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get onboardingDietTypeSub =>
       'Size uygun makro oranlarını hesaplayalım';
+
+  @override
+  String get onboardingDietTypeRequired =>
+      'Lütfen en az bir beslenme türü seçin';
+
+  @override
+  String get dietPlanIAteThis => 'Bunu yedim';
+
+  @override
+  String get dietPlanMarkNotEaten => 'Yenmedi olarak işaretle';
+
+  @override
+  String get dietPlanEatenLabel => 'Yendi';
 
   @override
   String get onboardingAllergiesTitle => 'Alerjiler & Kısıtlamalar';

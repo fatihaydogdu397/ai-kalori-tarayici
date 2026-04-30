@@ -2,11 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_theme.dart';
+import '../generated/app_localizations.dart';
+import '../services/api/diet_plan_service.dart';
 import '../services/api/nutrition_service.dart';
+import '../utils/error_messages.dart';
 import 'diet_profile_edit_screen.dart';
 
 // ── Data models ───────────────────────────────────────────────────────────────
+class DietMealFood {
+  final String id;
+  final int position;
+  final String name;
+  final String portionDescription;
+  final double quantity;
+  final String unit;
+  final String? foodId;
+
+  const DietMealFood({
+    required this.id,
+    required this.position,
+    required this.name,
+    required this.portionDescription,
+    required this.quantity,
+    required this.unit,
+    this.foodId,
+  });
+}
+
 class DietMeal {
+  final String id;
   final String name;
   final String category;
   final int calories;
@@ -15,8 +39,11 @@ class DietMeal {
   final int fat;
   final String time;
   final String emoji;
+  final List<DietMealFood> foods;
+  final bool completed;
 
   const DietMeal({
+    this.id = '',
     required this.name,
     required this.category,
     required this.calories,
@@ -25,15 +52,32 @@ class DietMeal {
     required this.fat,
     required this.time,
     required this.emoji,
+    this.foods = const [],
+    this.completed = false,
   });
+
+  DietMeal copyWith({bool? completed}) => DietMeal(
+        id: id,
+        name: name,
+        category: category,
+        calories: calories,
+        protein: protein,
+        carbs: carbs,
+        fat: fat,
+        time: time,
+        emoji: emoji,
+        foods: foods,
+        completed: completed ?? this.completed,
+      );
 }
 
 class DietDay {
   final String dayName;
+  final DateTime? date;
   final List<DietMeal> meals;
   final int totalCalories;
 
-  const DietDay({required this.dayName, required this.meals, required this.totalCalories});
+  const DietDay({required this.dayName, this.date, required this.meals, required this.totalCalories});
 }
 
 class DietPlan {
@@ -48,8 +92,15 @@ class DietPlan {
 class WeeklyDietPlanScreen extends StatefulWidget {
   final DietPlan plan;
   final Map<String, dynamic> anamnesisData;
+  // EAT-188: Bottom-nav embed durumunda back arrow gizlenir.
+  final bool showBackButton;
 
-  const WeeklyDietPlanScreen({super.key, required this.plan, required this.anamnesisData});
+  const WeeklyDietPlanScreen({
+    super.key,
+    required this.plan,
+    required this.anamnesisData,
+    this.showBackButton = true,
+  });
 
   @override
   State<WeeklyDietPlanScreen> createState() => _WeeklyDietPlanScreenState();
@@ -75,10 +126,80 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
       final total = newMeals.fold<int>(0, (s, m) => s + m.calories);
       _days[dayIndex] = DietDay(
         dayName: day.dayName,
+        date: day.date,
         meals: newMeals,
         totalCalories: total,
       );
     });
+  }
+
+  bool _isToday(DateTime? date) {
+    if (date == null) return false;
+    final now = DateTime.now();
+    return date.year == now.year && date.month == now.month && date.day == now.day;
+  }
+
+  // EAT-172: BE auto-revert plan'da değişiklik yapmış olabilir (linked food
+  // entry silindiyse meal.completed = false). Pull-to-refresh ve
+  // complete/uncomplete sonrası planın tamamı yeniden çekilir.
+  Future<void> _refreshPlan() async {
+    try {
+      final fresh = await DietPlanService.instance.getActivePlan();
+      if (!mounted || fresh == null) return;
+      setState(() => _days = fresh.days.toList());
+    } catch (_) {
+      // Sessiz düş — UI bozulmasın.
+    }
+  }
+
+  Future<void> _toggleMealEaten(int dayIndex, int mealIndex) async {
+    final meal = _days[dayIndex].meals[mealIndex];
+    if (meal.id.isEmpty) return;
+    final wasCompleted = meal.completed;
+
+    // Optimistic update.
+    setState(() {
+      final day = _days[dayIndex];
+      final newMeals = List<DietMeal>.from(day.meals);
+      newMeals[mealIndex] = meal.copyWith(completed: !wasCompleted);
+      _days[dayIndex] = DietDay(
+        dayName: day.dayName,
+        date: day.date,
+        meals: newMeals,
+        totalCalories: day.totalCalories,
+      );
+    });
+    HapticFeedback.lightImpact();
+
+    try {
+      if (wasCompleted) {
+        await DietPlanService.instance.uncompleteMeal(meal.id);
+      } else {
+        await DietPlanService.instance.completeMeal(meal.id);
+      }
+      // BE otomatik FoodAnalysis link'lerini günceller; planı yeniden çek.
+      await _refreshPlan();
+    } catch (e) {
+      if (!mounted) return;
+      // Rollback.
+      setState(() {
+        final day = _days[dayIndex];
+        final newMeals = List<DietMeal>.from(day.meals);
+        newMeals[mealIndex] = meal.copyWith(completed: wasCompleted);
+        _days[dayIndex] = DietDay(
+          dayName: day.dayName,
+          date: day.date,
+          meals: newMeals,
+          totalCalories: day.totalCalories,
+        );
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).errorGeneric),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -102,20 +223,22 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 36.w,
-                      height: 36.w,
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.darkCard : AppColors.lightCard,
-                        borderRadius: BorderRadius.circular(10.r),
-                        border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+                  if (widget.showBackButton) ...[
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: 36.w,
+                        height: 36.w,
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                          borderRadius: BorderRadius.circular(10.r),
+                          border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+                        ),
+                        child: Icon(Icons.arrow_back_ios_new_rounded, size: 16.sp, color: textPrimary),
                       ),
-                      child: Icon(Icons.arrow_back_ios_new_rounded, size: 16.sp, color: textPrimary),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
+                    SizedBox(width: 12.w),
+                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,29 +333,34 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
 
             // Meals list
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                itemCount: selectedDayPlan.meals.length + 1, // +1 for summary
-                itemBuilder: (context, i) {
-                  if (i == selectedDayPlan.meals.length) {
-                    return _DaySummaryCard(day: selectedDayPlan, isDark: isDark, accent: accent, accentFg: accentFg);
-                  }
-                  final meal = selectedDayPlan.meals[i];
-                  return _MealCard(
-                    meal: meal,
-                    isDark: isDark,
-                    accent: accent,
-                    onTap: () => _showMealDetail(
-                      context,
-                      meal,
-                      _selectedDay,
-                      i,
-                      isDark,
-                      accent,
-                      accentFg,
-                    ),
-                  );
-                },
+              child: RefreshIndicator(
+                onRefresh: _refreshPlan,
+                color: accent,
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  itemCount: selectedDayPlan.meals.length + 1, // +1 for summary
+                  itemBuilder: (context, i) {
+                    if (i == selectedDayPlan.meals.length) {
+                      return _DaySummaryCard(day: selectedDayPlan, isDark: isDark, accent: accent, accentFg: accentFg);
+                    }
+                    final meal = selectedDayPlan.meals[i];
+                    return _MealCard(
+                      meal: meal,
+                      isToday: _isToday(selectedDayPlan.date),
+                      isDark: isDark,
+                      accent: accent,
+                      onTap: () => _showMealDetail(
+                        context,
+                        meal,
+                        _selectedDay,
+                        i,
+                        isDark,
+                        accent,
+                        accentFg,
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],
@@ -244,6 +372,8 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
   void _showMealDetail(BuildContext context, DietMeal meal, int dayIndex, int mealIndex, bool isDark, Color accent, Color accentFg) {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
+    final isToday = _isToday(_days[dayIndex].date);
+    final l = AppLocalizations.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -337,6 +467,31 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                 _MacroBox(label: 'Fat', value: '${meal.fat}g', color: isDark ? AppColors.coral : AppColors.coralDark, isDark: isDark),
               ],
             ),
+            if (meal.foods.isNotEmpty) ...[
+              SizedBox(height: 24.h),
+              Text(
+                Localizations.localeOf(context).languageCode == 'tr' ? 'Önerilen yemekler' : 'Suggested foods',
+                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: 0.4),
+              ),
+              SizedBox(height: 10.h),
+              ...meal.foods.map(
+                (f) => Padding(
+                  padding: EdgeInsets.only(bottom: 6.h),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('•  ', style: TextStyle(fontSize: 14.sp, color: accent, fontWeight: FontWeight.w800)),
+                      Expanded(
+                        child: Text(
+                          _formatFood(f),
+                          style: TextStyle(fontSize: 13.sp, color: textPrimary, height: 1.45),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             SizedBox(height: 24.h),
             Row(
               children: [
@@ -362,20 +517,44 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accent,
-                      foregroundColor: accentFg,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      Localizations.localeOf(context).languageCode == 'tr' ? 'Tamam' : 'Got it',
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
-                    ),
-                  ),
+                  child: isToday
+                      ? ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _toggleMealEaten(dayIndex, mealIndex);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: meal.completed
+                                ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
+                                : accent,
+                            foregroundColor: meal.completed ? textPrimary : accentFg,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            elevation: 0,
+                          ),
+                          icon: Icon(
+                            meal.completed ? Icons.undo_rounded : Icons.restaurant_menu_rounded,
+                            size: 16.sp,
+                          ),
+                          label: Text(
+                            meal.completed ? l.dietPlanMarkNotEaten : l.dietPlanIAteThis,
+                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                          ),
+                        )
+                      : ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: accent,
+                            foregroundColor: accentFg,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            Localizations.localeOf(context).languageCode == 'tr' ? 'Tamam' : 'Got it',
+                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -383,6 +562,14 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
         ),
       ),
     );
+  }
+
+  String _formatFood(DietMealFood f) {
+    final qty = f.quantity > 0
+        ? '${f.quantity == f.quantity.roundToDouble() ? f.quantity.toInt() : f.quantity.toStringAsFixed(1)}${f.unit.isNotEmpty ? ' ${f.unit}' : ''} '
+        : '';
+    final desc = f.portionDescription.isNotEmpty ? ' · ${f.portionDescription}' : '';
+    return '$qty${f.name}$desc';
   }
 
   /// EAT-138: `nutrition.recommendMeal` ile alternatif öneri al ve lokalde swap et.
@@ -421,7 +608,7 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                   setS(() => rec = r);
                 } catch (e) {
                   if (!sheetCtx.mounted) return;
-                  setS(() => errorMsg = e.toString());
+                  setS(() => errorMsg = localizedError(sheetCtx, e));
                 }
               });
             }
@@ -659,28 +846,9 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
             ),
             SizedBox(height: 20.h),
             _BottomSheetOption(
-              icon: Icons.refresh_rounded,
-              label: 'Regenerate Plan',
-              color: isDark ? AppColors.lime : AppColors.void_,
-              textColor: textPrimary,
-              isDark: isDark,
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pop(context); // back to program screen
-              },
-            ),
-            _BottomSheetOption(
-              icon: Icons.share_rounded,
-              label: 'Share Plan',
-              color: isDark ? AppColors.violet : AppColors.violetDark,
-              textColor: textPrimary,
-              isDark: isDark,
-              onTap: () => Navigator.pop(context),
-            ),
-            _BottomSheetOption(
               icon: Icons.edit_rounded,
               label: 'Edit Preferences',
-              color: isDark ? AppColors.amber : AppColors.amberDark,
+              color: isDark ? AppColors.amber : AppColors.void_,
               textColor: textPrimary,
               isDark: isDark,
               onTap: () {
@@ -698,17 +866,19 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
 // ── Meal Card ─────────────────────────────────────────────────────────────────
 class _MealCard extends StatelessWidget {
   final DietMeal meal;
+  final bool isToday;
   final bool isDark;
   final Color accent;
   final VoidCallback onTap;
 
-  const _MealCard({required this.meal, required this.isDark, required this.accent, required this.onTap});
+  const _MealCard({required this.meal, required this.isToday, required this.isDark, required this.accent, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
+    final showEatenBadge = isToday && meal.completed;
 
     return GestureDetector(
       onTap: onTap,
@@ -718,7 +888,9 @@ class _MealCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: cardBg,
           borderRadius: BorderRadius.circular(14.r),
-          border: isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5),
+          border: showEatenBadge
+              ? Border.all(color: accent.withValues(alpha: 0.5), width: 1.2)
+              : (isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5)),
         ),
         child: Row(
           children: [
@@ -738,11 +910,38 @@ class _MealCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    meal.name,
-                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textPrimary),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          meal.name,
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textPrimary),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (showEatenBadge) ...[
+                        SizedBox(width: 6.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_rounded, size: 11.sp, color: accent),
+                              SizedBox(width: 2.w),
+                              Text(
+                                AppLocalizations.of(context).dietPlanEatenLabel,
+                                style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w800, color: accent),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   SizedBox(height: 3.h),
                   Row(

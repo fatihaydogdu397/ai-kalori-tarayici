@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/app_provider.dart';
+import '../../utils/error_messages.dart';
 import 'reset_password_screen.dart';
 
 class ForgotPasswordOtpScreen extends StatefulWidget {
@@ -76,7 +77,7 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString().replaceAll('Exception: ', '')), backgroundColor: AppColors.coral),
+        SnackBar(content: Text(localizedError(context, e)), backgroundColor: AppColors.coral),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

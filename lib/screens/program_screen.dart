@@ -80,6 +80,22 @@ class _ProgramScreenState extends State<ProgramScreen> {
     final accent = isDark ? AppColors.lime : AppColors.void_;
     final accentFg = isDark ? AppColors.void_ : AppColors.snow;
 
+    // EAT-188: Aktif plan varsa intermediate landing'i atla, doğrudan
+    // weekly plan ekranını embed et. Back arrow gizli — bottom nav ile döner.
+    if (_loading) {
+      return Scaffold(
+        backgroundColor: bg,
+        body: Center(child: CircularProgressIndicator(color: accent)),
+      );
+    }
+    if (_activePlan != null) {
+      return WeeklyDietPlanScreen(
+        plan: _activePlan!,
+        anamnesisData: const {},
+        showBackButton: false,
+      );
+    }
+
     final hasPlan = _activePlan != null;
     final title = hasPlan
         ? 'Aktif Diyet Programınız Hazır'

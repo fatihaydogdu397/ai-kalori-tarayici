@@ -45,17 +45,43 @@ class NotificationService {
     );
   }
 
-  static Future<void> updateDailySummary(AppLocalizations l, {required double calories, required double goal, required double water}) async {
+  static Future<void> updateDailySummary(
+    AppLocalizations l, {
+    required double calories,
+    required double goal,
+    required double water,
+    required bool hasAnyLog,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final isEnabled = prefs.getBool(kPrefNotifSummaryEnabled) ?? true;
-    if (!isEnabled) return;
+    if (!isEnabled) {
+      await cancel(kNotifSummary);
+      return;
+    }
 
-    final title = l.dailySummaryTitle;
-    final body = l.dailySummaryBody(
-      calories.toStringAsFixed(0),
-      goal.toStringAsFixed(0),
-      (water / 1000).toStringAsFixed(1),
-    );
+    // EAT-189: Conditional copy.
+    // - Hiç log yok → "no logs" copy (motive et, "Great job!" gösterme).
+    // - Log var ama goal altında → neutral progress copy.
+    // - Goal'a ulaşıldı → mevcut celebratory copy.
+    final String title;
+    final String body;
+    if (!hasAnyLog) {
+      title = l.dailySummaryEmptyTitle;
+      body = l.dailySummaryEmptyBody;
+    } else if (goal > 0 && calories < goal) {
+      title = l.dailySummaryUnderTitle;
+      body = l.dailySummaryUnderBody(
+        calories.toStringAsFixed(0),
+        goal.toStringAsFixed(0),
+      );
+    } else {
+      title = l.dailySummaryTitle;
+      body = l.dailySummaryBody(
+        calories.toStringAsFixed(0),
+        goal.toStringAsFixed(0),
+        (water / 1000).toStringAsFixed(1),
+      );
+    }
 
     await scheduleDaily(kNotifSummary, const TimeOfDay(hour: 20, minute: 0), title, body);
   }

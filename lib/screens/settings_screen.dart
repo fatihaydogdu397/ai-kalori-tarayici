@@ -124,8 +124,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           trailing: Switch(
                             value: isDark,
                             onChanged: (_) => provider.toggleTheme(),
-                            activeColor: AppColors.lime,
-                            activeTrackColor: AppColors.lime.withOpacity(0.3),
+                            activeThumbColor: isDark ? AppColors.lime : AppColors.void_,
+                            activeTrackColor: (isDark ? AppColors.lime : AppColors.void_).withValues(alpha: 0.3),
                           ),
                           divColor: divColor,
                           textPrimary: textPrimary,
@@ -242,8 +242,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 );
                               }
                             },
-                            activeColor: AppColors.lime,
-                            activeTrackColor: AppColors.lime.withOpacity(0.3),
+                            activeThumbColor: isDark ? AppColors.lime : AppColors.void_,
+                            activeTrackColor: (isDark ? AppColors.lime : AppColors.void_).withValues(alpha: 0.3),
                           ),
                           divColor: divColor,
                           textPrimary: textPrimary,
@@ -276,10 +276,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   _notifSettings.copyWith(enabled: v),
                                   provider,
                                 ),
-                                activeColor: AppColors.lime,
-                                activeTrackColor: AppColors.lime.withOpacity(
-                                  0.3,
-                                ),
+                                activeThumbColor: isDark ? AppColors.lime : AppColors.void_,
+                                activeTrackColor: (isDark ? AppColors.lime : AppColors.void_).withValues(alpha: 0.3),
                               ),
                               divColor: divColor,
                               textPrimary: textPrimary,
@@ -382,9 +380,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                       // ── Health data ───────────────────────────────────────
                       _SectionLabel(
-                        label: Localizations.localeOf(context).languageCode == 'tr'
-                            ? 'SAĞLIK VERİLERİ'
-                            : 'HEALTH DATA',
+                        label: l.healthDataSection,
                         textMuted: textMuted,
                       ),
                       const SizedBox(height: 8),
@@ -404,9 +400,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: _SettingRow(
                             icon: Icons.bloodtype_rounded,
                             iconColor: AppColors.coral,
-                            label: Localizations.localeOf(context).languageCode == 'tr'
-                                ? 'Kan Tahlillerim'
-                                : 'My Blood Tests',
+                            label: l.bloodTestsScreenTitle,
                             trailing: Icon(Icons.chevron_right_rounded, size: 18, color: textMuted),
                             divColor: divColor,
                             textPrimary: textPrimary,
@@ -965,23 +959,26 @@ class _SettingRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        child: Row(
-          children: [
-            Icon(icon, color: iconColor, size: 18),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: AppTypography.bodyLarge.copyWith(color: textPrimary),
+      ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          child: Row(
+            children: [
+              Icon(icon, color: iconColor, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: AppTypography.bodyLarge.copyWith(color: textPrimary),
+                ),
               ),
-            ),
-            trailing,
-          ],
+              trailing,
+            ],
+          ),
         ),
       ),
-      if (showDivider) Divider(height: 1, indent: 44, color: divColor),
+      if (showDivider) Divider(height: 1, indent: 46, color: divColor),
     ],
   );
 }
@@ -1053,8 +1050,8 @@ class _ReminderRow extends StatelessWidget {
               Switch(
                 value: enabled,
                 onChanged: onToggle,
-                activeColor: AppColors.lime,
-                activeTrackColor: AppColors.lime.withOpacity(0.3),
+                activeThumbColor: isDark ? AppColors.lime : AppColors.void_,
+                activeTrackColor: (isDark ? AppColors.lime : AppColors.void_).withValues(alpha: 0.3),
               ),
             ],
           ),

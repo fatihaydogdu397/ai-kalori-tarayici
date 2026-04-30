@@ -6,9 +6,7 @@ import '../services/app_provider.dart';
 import '../theme/app_theme.dart';
 import 'blood_test_upload_screen.dart';
 import 'pdf_viewer_screen.dart';
-
-String _t(BuildContext ctx, String tr, String en) =>
-    Localizations.localeOf(ctx).languageCode == 'tr' ? tr : en;
+import '../generated/app_localizations.dart';
 
 /// Kullanıcının yüklediği kan tahlillerini listeleyen ekran — Settings altında.
 /// Kart üzerine tıklayınca dosyayı tarayıcıda açar; uzun basınca silme sorar.
@@ -41,20 +39,23 @@ class _BloodTestsScreenState extends State<BloodTestsScreen> {
   Future<void> _confirmDelete(BloodTest test) async {
     final ok = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(_t(ctx, 'Kan tahlilini sil', 'Delete blood test')),
-        content: Text(_t(ctx, 'Bu kayıt kalıcı olarak silinecek.', 'This record will be permanently deleted.')),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(_t(ctx, 'İptal', 'Cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(_t(ctx, 'Sil', 'Delete')),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final l = AppLocalizations.of(ctx);
+        return AlertDialog(
+          title: Text(l.bloodTestDeleteTitle),
+          content: Text(l.bloodTestDeleteBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l.delete),
+            ),
+          ],
+        );
+      },
     );
     if (ok == true && mounted) {
       try {
@@ -63,7 +64,7 @@ class _BloodTestsScreenState extends State<BloodTestsScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(_t(context, 'Bir şeyler ters gitti', 'Something went wrong')),
+              content: Text(AppLocalizations.of(context).errorGeneric),
               backgroundColor: AppColors.coral,
             ),
           );
@@ -80,20 +81,21 @@ class _BloodTestsScreenState extends State<BloodTestsScreen> {
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final accent = isDark ? AppColors.lime : AppColors.void_;
+    final l = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        title: Text(_t(context, 'Kan Tahlillerim', 'My Blood Tests'),
+        title: Text(l.bloodTestsScreenTitle,
             style: AppTypography.titleLarge.copyWith(color: textPrimary)),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: accent,
         foregroundColor: isDark ? AppColors.void_ : Colors.white,
         icon: const Icon(Icons.add_rounded),
-        label: Text(_t(context, 'Ekle', 'Add'),
+        label: Text(l.bloodTestAdd,
             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.sp)),
         onPressed: () {
           Navigator.push(
@@ -156,13 +158,14 @@ class _BloodTestCard extends StatelessWidget {
   });
 
   String _statusLabel(BuildContext context) {
+    final l = AppLocalizations.of(context);
     switch (test.status) {
       case BloodTestStatus.pending:
-        return _t(context, 'AI analiz bekliyor', 'AI analysis pending');
+        return l.bloodTestStatusPending;
       case BloodTestStatus.completed:
-        return _t(context, 'Analiz tamamlandı', 'Analysis completed');
+        return l.bloodTestStatusCompleted;
       case BloodTestStatus.failed:
-        return _t(context, 'Analiz başarısız', 'Analysis failed');
+        return l.bloodTestStatusFailed;
     }
   }
 
@@ -231,6 +234,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 32.w),
@@ -240,16 +244,12 @@ class _EmptyState extends StatelessWidget {
             Icon(Icons.bloodtype_outlined, size: 60, color: textMuted),
             SizedBox(height: 12.h),
             Text(
-              _t(context, 'Henüz yüklenmiş kan tahlili yok', 'No blood tests uploaded yet'),
+              l.bloodTestEmptyTitle,
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700, color: textPrimary),
             ),
             SizedBox(height: 6.h),
             Text(
-              _t(
-                context,
-                'Sağ alttaki + ile PDF veya görsel olarak ekleyebilirsin.',
-                'Tap the + button to add a PDF or an image.',
-              ),
+              l.bloodTestEmptyBody,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13.sp, color: textMuted),
             ),

@@ -87,6 +87,8 @@ class AppProvider extends ChangeNotifier {
   List<FoodAnalysis> _history = [];
   Map<String, double> _todayStats = {};
   String _errorMessage = '';
+  // EAT-179: ApiException.code (BE error catalog).
+  String _errorCode = '';
   double _dailyCalorieGoal = 2000;
 
   AnalysisState get state => _state;
@@ -96,6 +98,7 @@ class AppProvider extends ChangeNotifier {
       _history.where((a) => a.isFavorite).toList();
   Map<String, double> get todayStats => _todayStats;
   String get errorMessage => _errorMessage;
+  String get errorCode => _errorCode;
   double get dailyCalorieGoal => _dailyCalorieGoal;
 
   DateTime _selectedDate = DateTime.now();
@@ -194,7 +197,14 @@ class AppProvider extends ChangeNotifier {
       );
       _state = AnalysisState.success;
     } catch (e) {
-      _errorMessage = e.toString();
+      // EAT-179: raw mesaj yerine BE code'u tut; UI tarafında localizedError().
+      if (e is ApiException) {
+        _errorCode = e.code ?? 'common.unknown';
+        _errorMessage = e.message;
+      } else {
+        _errorCode = 'common.unknown';
+        _errorMessage = '';
+      }
       _state = AnalysisState.error;
     }
 
@@ -409,6 +419,10 @@ class AppProvider extends ChangeNotifier {
   double _targetWeight = 0;
   double _weeklyPace = 0.5;
   String _dietType = 'standard';
+  List<String> _dietTypes = const [];
+  // EAT-181: BE-computed (kg, BMI 18.5–24.9). Null → height yok / FE fallback.
+  double? _idealWeightMin;
+  double? _idealWeightMax;
 
   // Dietary anamnesis (program tab)
   List<String> _dietRestrictions = [];
@@ -432,6 +446,9 @@ class AppProvider extends ChangeNotifier {
   double get targetWeight => _targetWeight;
   double get weeklyPace => _weeklyPace;
   String get dietType => _dietType;
+  List<String> get dietTypes => _dietTypes;
+  double? get idealWeightMin => _idealWeightMin;
+  double? get idealWeightMax => _idealWeightMax;
 
   List<String> get dietRestrictions => _dietRestrictions;
   List<String> get dietCuisines => _dietCuisines;
@@ -654,6 +671,7 @@ class AppProvider extends ChangeNotifier {
     double? targetWeight,
     double? weeklyPace,
     String? dietType,
+    List<String>? dietTypes,
     List<String>? allergens,
     List<String>? dietRestrictions,
   }) async {
@@ -670,6 +688,7 @@ class AppProvider extends ChangeNotifier {
       goal: goal,
       activityLevel: actLevel,
       dietType: dietType,
+      dietTypes: dietTypes,
       allergens: allergens,
       dietRestrictions: dietRestrictions,
     );
@@ -734,11 +753,17 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> syncNotification(AppLocalizations l) async {
+    final calories = _todayStats['calories'] ?? 0;
+    // EAT-189: hasAnyLog = bugün için anlamlı bir aktivite var mı?
+    // Sadece bugünün stats'ine baktığımız için _history (tüm geçmiş) burada
+    // yanıltıcı olur.
+    final hasAnyLog = calories > 0 || _waterToday > 0;
     await NotificationService.updateDailySummary(
       l,
-      calories: _todayStats['calories'] ?? 0,
+      calories: calories,
       goal: _dailyCalorieGoal,
       water: _waterToday,
+      hasAnyLog: hasAnyLog,
     );
   }
 
@@ -959,6 +984,14 @@ class AppProvider extends ChangeNotifier {
     if (act != null && act.isNotEmpty) _activityLevel = act;
     final diet = (user['dietType'] as String?)?.toLowerCase();
     if (diet != null && diet.isNotEmpty) _dietType = diet;
+    final dietTypesRaw = user['dietTypes'];
+    if (dietTypesRaw is List) {
+      _dietTypes = dietTypesRaw
+          .map((e) => e.toString().toLowerCase())
+          .toList(growable: false);
+    }
+    _idealWeightMin = (user['idealWeightMin'] as num?)?.toDouble();
+    _idealWeightMax = (user['idealWeightMax'] as num?)?.toDouble();
     final mealsPerDay = (user['mealsPerDay'] as num?)?.toInt();
     if (mealsPerDay != null) _dietMealsPerDay = mealsPerDay;
 

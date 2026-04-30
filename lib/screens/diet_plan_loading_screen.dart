@@ -7,6 +7,7 @@ import '../services/api/api_exception.dart';
 import '../services/api/diet_plan_service.dart';
 import '../services/app_provider.dart';
 import '../generated/app_localizations.dart';
+import '../utils/error_messages.dart';
 import 'weekly_diet_plan_screen.dart';
 import 'paywall_screen.dart';
 
@@ -103,15 +104,16 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
         return;
       }
       // EAT-128: 7 gün içinde 3 plan limiti doldu → dedicated dialog.
-      if (e.code == 'WEEKLY_LIMIT_EXCEEDED') {
+      if (e.code == 'WEEKLY_LIMIT_EXCEEDED' ||
+          e.code == 'diet_plan.weekly_limit_exceeded') {
         await _showWeeklyLimitDialog();
         return;
       }
-      _showError(e.message);
+      _showError(localizedError(context, e));
     } catch (e) {
       _stepTimer?.cancel();
       if (!mounted) return;
-      _showError(e.toString());
+      _showError(localizedError(context, e));
     }
   }
 

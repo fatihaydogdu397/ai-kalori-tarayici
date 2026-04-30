@@ -5,13 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../services/app_provider.dart';
-import '../services/api/api_exception.dart';
 import '../theme/app_theme.dart';
-
-/// Full l10n migration is tracked in a follow-up task; for now we ship TR/EN
-/// inline so the feature is usable immediately.
-String _t(BuildContext ctx, String tr, String en) =>
-    Localizations.localeOf(ctx).languageCode == 'tr' ? tr : en;
+import '../utils/error_messages.dart';
+import '../generated/app_localizations.dart';
 
 /// Kan tahlili / sağlık raporu yükleme ekranı. İki yerden çağrılır:
 ///   - Onboarding (`isOnboarding: true`): skip + devam butonu.
@@ -53,7 +49,7 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = e.toString());
+      setState(() => _errorMessage = localizedError(context, e));
     }
   }
 
@@ -111,12 +107,9 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
       } else {
         Navigator.pop(context, true);
       }
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      setState(() => _errorMessage = e.message);
     } catch (e) {
       if (!mounted) return;
-      setState(() => _errorMessage = e.toString());
+      setState(() => _errorMessage = localizedError(context, e));
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -130,20 +123,21 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final accent = isDark ? AppColors.lime : AppColors.void_;
+    final l = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        title: Text(_t(context, 'Kan Tahlili', 'Blood Test'),
+        title: Text(l.bloodTestTitle,
             style: AppTypography.titleLarge.copyWith(color: textPrimary)),
         actions: [
           if (widget.isOnboarding)
             TextButton(
               onPressed: _uploading ? null : () => widget.onCompleted?.call(),
               child: Text(
-                _t(context, 'Atla', 'Skip'),
+                l.skip,
                 style: TextStyle(color: textMuted, fontSize: 14.sp),
               ),
             ),
@@ -156,16 +150,12 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _t(context, 'Sağlık raporunu yükle', 'Upload your health report'),
+                l.bloodTestHeadline,
                 style: AppTypography.headlineLarge.copyWith(color: textPrimary),
               ),
               SizedBox(height: 8.h),
               Text(
-                _t(
-                  context,
-                  'Kan tahlilini yüklersen diyet planın ve önerilerimiz sana daha özel olur. Opsiyoneldir, istediğin zaman profilinden ekleyebilirsin.',
-                  'Uploading your lab report lets us personalize your plan and advice. Optional — you can add it any time from your profile.',
-                ),
+                l.bloodTestSubtitle,
                 style: TextStyle(fontSize: 13.sp, color: textMuted, height: 1.4),
               ),
               SizedBox(height: 24.h),
@@ -197,16 +187,14 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _picked?.name ?? _t(context, 'Dosya seç', 'Pick a file'),
+                              _picked?.name ?? l.bloodTestPickFile,
                               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             SizedBox(height: 2.h),
                             Text(
-                              _picked != null
-                                  ? _t(context, 'Değiştirmek için dokun', 'Tap to replace')
-                                  : _t(context, 'PDF veya görsel (JPG/PNG)', 'PDF or image (JPG/PNG)'),
+                              _picked != null ? l.bloodTestReplaceFile : l.bloodTestFileTypesHint,
                               style: TextStyle(fontSize: 11.sp, color: textMuted),
                             ),
                           ],
@@ -235,7 +223,7 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
                       SizedBox(width: 12.w),
                       Text(
                         _testDate == null
-                            ? _t(context, 'Test tarihi (opsiyonel)', 'Test date (optional)')
+                            ? l.bloodTestDateOptional
                             : _testDate!.toIso8601String().substring(0, 10),
                         style: TextStyle(
                           fontSize: 14.sp,
@@ -284,9 +272,7 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
                           ),
                         )
                       : Text(
-                          widget.isOnboarding
-                              ? _t(context, 'Yükle ve devam et', 'Upload & continue')
-                              : _t(context, 'Yükle', 'Upload'),
+                          widget.isOnboarding ? l.bloodTestUploadAndContinue : l.bloodTestUpload,
                           style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800),
                         ),
                 ),

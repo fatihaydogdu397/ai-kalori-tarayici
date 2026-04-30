@@ -289,7 +289,163 @@ class AppLocalizationsIt extends AppLocalizations {
   String get errorGeneric => 'Si è verificato un errore';
 
   @override
+  String get errorAuthInvalidCredentials => 'E-mail o password errata.';
+
+  @override
+  String get errorAuthSignInAgain => 'Per favore, accedi di nuovo.';
+
+  @override
+  String get errorAuthOauthFailed => 'Accesso non riuscito. Riprova.';
+
+  @override
+  String get errorAuthEmailInUse =>
+      'Questa e-mail è già registrata. Prova ad accedere.';
+
+  @override
+  String get errorAuthEmailProviderConflict =>
+      'Accedi con il metodo che hai usato originariamente per questa e-mail.';
+
+  @override
+  String get errorAuthInvalidOtp => 'Il codice non è valido o è scaduto.';
+
+  @override
+  String get errorAuthTooManyAttempts =>
+      'Troppi tentativi falliti. Richiedi un nuovo codice.';
+
+  @override
+  String get errorPremiumRequired => 'Abbonamento Premium richiesto.';
+
+  @override
+  String get errorFoodScanLimit =>
+      'Limite giornaliero di scansioni raggiunto. Passa a Premium per scansioni illimitate.';
+
+  @override
+  String get errorFoodNotFound => 'Pasto non trovato.';
+
+  @override
+  String get errorNotOwner => 'Non hai accesso a questo elemento.';
+
+  @override
+  String get errorFoodDeleteOnlyToday =>
+      'Puoi eliminare solo i pasti registrati oggi.';
+
+  @override
+  String get errorFoodInvalidBarcode => 'Questo codice a barre sembra errato.';
+
+  @override
+  String get errorFoodMacroLimit => 'Ogni macro deve essere 1000 o meno.';
+
+  @override
+  String get errorDietPlanWeeklyLimit =>
+      'Hai usato tutti i tuoi piani questa settimana.';
+
+  @override
+  String get errorDietPlanMacrosNotSet =>
+      'Imposta prima i tuoi obiettivi giornalieri di macro.';
+
+  @override
+  String get errorDietPlanNotActive => 'Non hai un piano attivo.';
+
+  @override
+  String get errorDietPlanMealNotFound => 'Pasto non trovato.';
+
+  @override
+  String get errorBloodTestInvalidFile => 'Il file è danneggiato.';
+
+  @override
+  String get errorBloodTestTooLarge => 'I file devono essere 10 MB o meno.';
+
+  @override
+  String get errorBloodTestMimeMismatch =>
+      'Questo formato di file non è supportato.';
+
+  @override
+  String get errorBloodTestNotFound => 'Esame del sangue non trovato.';
+
+  @override
+  String get errorNutritionNoCandidates =>
+      'Impossibile generare un consiglio. Modifica le tue preferenze alimentari.';
+
+  @override
+  String get errorWaterInvalid => 'L\'acqua deve essere tra 0 e 3 litri.';
+
+  @override
+  String get errorWeightInvalid => 'Il peso deve essere tra 30 e 300 kg.';
+
+  @override
+  String get errorRateLimited => 'Troppe richieste. Riprova tra un momento.';
+
+  @override
+  String get errorInvalidInput => 'Controlla i tuoi dati.';
+
+  @override
+  String get errorNetwork => 'Nessuna connessione internet. Controlla la rete.';
+
+  @override
   String get retry => 'Riprova';
+
+  @override
+  String get delete => 'Elimina';
+
+  @override
+  String get healthDataSection => 'DATI SANITARI';
+
+  @override
+  String get bloodTestTitle => 'Esame del sangue';
+
+  @override
+  String get bloodTestHeadline => 'Carica il tuo referto medico';
+
+  @override
+  String get bloodTestSubtitle =>
+      'Caricando il tuo referto, possiamo personalizzare meglio il tuo piano e i nostri consigli. Opzionale — puoi aggiungerlo in qualsiasi momento dal profilo.';
+
+  @override
+  String get bloodTestPickFile => 'Scegli file';
+
+  @override
+  String get bloodTestReplaceFile => 'Tocca per sostituire';
+
+  @override
+  String get bloodTestFileTypesHint => 'PDF o immagine (JPG/PNG)';
+
+  @override
+  String get bloodTestDateOptional => 'Data del test (opzionale)';
+
+  @override
+  String get bloodTestUpload => 'Carica';
+
+  @override
+  String get bloodTestUploadAndContinue => 'Carica e continua';
+
+  @override
+  String get bloodTestsScreenTitle => 'I miei esami del sangue';
+
+  @override
+  String get bloodTestAdd => 'Aggiungi';
+
+  @override
+  String get bloodTestEmptyTitle => 'Nessun esame del sangue caricato';
+
+  @override
+  String get bloodTestEmptyBody =>
+      'Tocca il pulsante + per aggiungere un PDF o un\'immagine.';
+
+  @override
+  String get bloodTestDeleteTitle => 'Elimina esame del sangue';
+
+  @override
+  String get bloodTestDeleteBody =>
+      'Questo record verrà eliminato definitivamente.';
+
+  @override
+  String get bloodTestStatusPending => 'Analisi IA in attesa';
+
+  @override
+  String get bloodTestStatusCompleted => 'Analisi completata';
+
+  @override
+  String get bloodTestStatusFailed => 'Analisi fallita';
 
   @override
   String get mealBreakfast => 'Colazione';
@@ -688,6 +844,21 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get dailySummaryEmptyTitle => 'Nessun registro oggi';
+
+  @override
+  String get dailySummaryEmptyBody =>
+      'Scansione rapida? Tocca per registrare il tuo primo pasto.';
+
+  @override
+  String get dailySummaryUnderTitle => 'Progresso di oggi';
+
+  @override
+  String dailySummaryUnderBody(String cal, String goal) {
+    return '$cal/$goal kcal — continua a registrare';
+  }
+
+  @override
   String get goalAchievement => 'Raggiungimento obiettivo';
 
   @override
@@ -736,6 +907,18 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get onboardingDietTypeSub =>
       'We will calculate your ideal macro ratios';
+
+  @override
+  String get onboardingDietTypeRequired => 'Seleziona almeno un tipo di dieta';
+
+  @override
+  String get dietPlanIAteThis => 'L\'ho mangiato';
+
+  @override
+  String get dietPlanMarkNotEaten => 'Segna come non mangiato';
+
+  @override
+  String get dietPlanEatenLabel => 'Mangiato';
 
   @override
   String get onboardingAllergiesTitle => 'Allergies & Restrictions';

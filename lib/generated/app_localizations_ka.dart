@@ -288,7 +288,161 @@ class AppLocalizationsKa extends AppLocalizations {
   String get errorGeneric => 'შეცდომა მოხდა';
 
   @override
+  String get errorAuthInvalidCredentials => 'ელფოსტა ან პაროლი არასწორია.';
+
+  @override
+  String get errorAuthSignInAgain => 'გთხოვთ, ხელახლა შეხვიდეთ.';
+
+  @override
+  String get errorAuthOauthFailed => 'ვერ შეხვედით. სცადეთ ისევ.';
+
+  @override
+  String get errorAuthEmailInUse =>
+      'ეს ელფოსტა უკვე რეგისტრირებულია. სცადეთ შესვლა.';
+
+  @override
+  String get errorAuthEmailProviderConflict =>
+      'შედით იმ მეთოდით, რომელიც თავდაპირველად გამოიყენეთ ამ ელფოსტისთვის.';
+
+  @override
+  String get errorAuthInvalidOtp => 'კოდი არასწორია ან ვადაგასულია.';
+
+  @override
+  String get errorAuthTooManyAttempts =>
+      'ბევრი წარუმატებელი მცდელობა. მოითხოვეთ ახალი კოდი.';
+
+  @override
+  String get errorPremiumRequired => 'საჭიროა Premium გამოწერა.';
+
+  @override
+  String get errorFoodScanLimit =>
+      'ყოველდღიური სკანირების ლიმიტი ამოიწურა. გადადით Premium-ზე შეუზღუდავი სკანირებისთვის.';
+
+  @override
+  String get errorFoodNotFound => 'კერძი ვერ მოიძებნა.';
+
+  @override
+  String get errorNotOwner => 'ამ ელემენტთან წვდომა არ გაქვთ.';
+
+  @override
+  String get errorFoodDeleteOnlyToday =>
+      'შეგიძლიათ წაშალოთ მხოლოდ დღეს ჩაწერილი კერძები.';
+
+  @override
+  String get errorFoodInvalidBarcode => 'ეს ბარკოდი არასწორად გამოიყურება.';
+
+  @override
+  String get errorFoodMacroLimit => 'თითოეული მაკრო უნდა იყოს 1000 ან ნაკლები.';
+
+  @override
+  String get errorDietPlanWeeklyLimit => 'ამ კვირის ყველა გეგმა გამოიყენე.';
+
+  @override
+  String get errorDietPlanMacrosNotSet =>
+      'ჯერ დააყენე ყოველდღიური მაკრო მიზნები.';
+
+  @override
+  String get errorDietPlanNotActive => 'აქტიური გეგმა არ გაქვს.';
+
+  @override
+  String get errorDietPlanMealNotFound => 'კერძი ვერ მოიძებნა.';
+
+  @override
+  String get errorBloodTestInvalidFile => 'ფაილი დაზიანებულია.';
+
+  @override
+  String get errorBloodTestTooLarge => 'ფაილები უნდა იყოს 10 მბ ან ნაკლები.';
+
+  @override
+  String get errorBloodTestMimeMismatch =>
+      'ეს ფაილის ფორმატი არ არის მხარდაჭერილი.';
+
+  @override
+  String get errorBloodTestNotFound => 'სისხლის ანალიზი ვერ მოიძებნა.';
+
+  @override
+  String get errorNutritionNoCandidates =>
+      'რეკომენდაცია ვერ შეიქმნა. შეცვალე დიეტური პრეფერენციები.';
+
+  @override
+  String get errorWaterInvalid => 'წყალი უნდა იყოს 0-დან 3 ლიტრამდე.';
+
+  @override
+  String get errorWeightInvalid => 'წონა უნდა იყოს 30-დან 300 კგ-მდე.';
+
+  @override
+  String get errorRateLimited => 'ძალიან ბევრი მოთხოვნა. სცადე ცოტა ხანში.';
+
+  @override
+  String get errorInvalidInput => 'გთხოვთ, შეამოწმოთ შენატანი.';
+
+  @override
+  String get errorNetwork => 'ინტერნეტი არ არის. შეამოწმე ქსელი.';
+
+  @override
   String get retry => 'სცადე თავიდან';
+
+  @override
+  String get delete => 'წაშლა';
+
+  @override
+  String get healthDataSection => 'ჯანდაცვის მონაცემები';
+
+  @override
+  String get bloodTestTitle => 'სისხლის ანალიზი';
+
+  @override
+  String get bloodTestHeadline => 'ატვირთე ჯანდაცვის ანგარიში';
+
+  @override
+  String get bloodTestSubtitle =>
+      'ლაბორატორიული ანგარიშის ატვირთვა საშუალებას გვაძლევს გეგმა და რჩევები უკეთ შევარგოთ. არ არის სავალდებულო — შეგიძლია ნებისმიერ დროს დაამატო პროფილიდან.';
+
+  @override
+  String get bloodTestPickFile => 'ფაილის არჩევა';
+
+  @override
+  String get bloodTestReplaceFile => 'შეცვლისთვის შეახე';
+
+  @override
+  String get bloodTestFileTypesHint => 'PDF ან გამოსახულება (JPG/PNG)';
+
+  @override
+  String get bloodTestDateOptional => 'ტესტის თარიღი (არასავალდებულო)';
+
+  @override
+  String get bloodTestUpload => 'ატვირთვა';
+
+  @override
+  String get bloodTestUploadAndContinue => 'ატვირთვა და გაგრძელება';
+
+  @override
+  String get bloodTestsScreenTitle => 'ჩემი სისხლის ანალიზები';
+
+  @override
+  String get bloodTestAdd => 'დამატება';
+
+  @override
+  String get bloodTestEmptyTitle => 'ჯერ ატვირთული სისხლის ანალიზი არ არის';
+
+  @override
+  String get bloodTestEmptyBody =>
+      'PDF ან გამოსახულების დასამატებლად შეახე + ღილაკი.';
+
+  @override
+  String get bloodTestDeleteTitle => 'სისხლის ანალიზის წაშლა';
+
+  @override
+  String get bloodTestDeleteBody => 'ეს ჩანაწერი სამუდამოდ წაიშლება.';
+
+  @override
+  String get bloodTestStatusPending => 'AI ანალიზი მოლოდინშია';
+
+  @override
+  String get bloodTestStatusCompleted => 'ანალიზი დასრულდა';
+
+  @override
+  String get bloodTestStatusFailed => 'ანალიზი ვერ მოხერხდა';
 
   @override
   String get mealBreakfast => 'საუზმე';
@@ -687,6 +841,21 @@ class AppLocalizationsKa extends AppLocalizations {
   }
 
   @override
+  String get dailySummaryEmptyTitle => 'დღეს ჩანაწერი არ არის';
+
+  @override
+  String get dailySummaryEmptyBody =>
+      'სწრაფი სკანი? შეახეთ პირველი კერძის ჩასაწერად.';
+
+  @override
+  String get dailySummaryUnderTitle => 'დღევანდელი პროგრესი';
+
+  @override
+  String dailySummaryUnderBody(String cal, String goal) {
+    return '$cal/$goal კკალ — განაგრძე ჩაწერა';
+  }
+
+  @override
   String get goalAchievement => 'მიზნის მიღწევა';
 
   @override
@@ -735,6 +904,19 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get onboardingDietTypeSub =>
       'We will calculate your ideal macro ratios';
+
+  @override
+  String get onboardingDietTypeRequired =>
+      'გთხოვთ, აირჩიოთ მინიმუმ ერთი დიეტის ტიპი';
+
+  @override
+  String get dietPlanIAteThis => 'ეს მე ვჭამე';
+
+  @override
+  String get dietPlanMarkNotEaten => 'მონიშნე არ ნაჭამად';
+
+  @override
+  String get dietPlanEatenLabel => 'ნაჭამი';
 
   @override
   String get onboardingAllergiesTitle => 'Allergies & Restrictions';

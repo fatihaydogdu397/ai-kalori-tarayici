@@ -289,7 +289,165 @@ class AppLocalizationsRu extends AppLocalizations {
   String get errorGeneric => 'Произошла ошибка';
 
   @override
+  String get errorAuthInvalidCredentials => 'Неверный email или пароль.';
+
+  @override
+  String get errorAuthSignInAgain => 'Пожалуйста, войдите снова.';
+
+  @override
+  String get errorAuthOauthFailed => 'Не удалось войти. Попробуйте снова.';
+
+  @override
+  String get errorAuthEmailInUse =>
+      'Этот email уже зарегистрирован. Попробуйте войти.';
+
+  @override
+  String get errorAuthEmailProviderConflict =>
+      'Войдите тем способом, который вы использовали изначально для этого email.';
+
+  @override
+  String get errorAuthInvalidOtp => 'Код недействителен или истёк.';
+
+  @override
+  String get errorAuthTooManyAttempts =>
+      'Слишком много неудачных попыток. Запросите новый код.';
+
+  @override
+  String get errorPremiumRequired => 'Требуется подписка Premium.';
+
+  @override
+  String get errorFoodScanLimit =>
+      'Дневной лимит сканирований исчерпан. Перейдите на Premium для безлимитных сканирований.';
+
+  @override
+  String get errorFoodNotFound => 'Блюдо не найдено.';
+
+  @override
+  String get errorNotOwner => 'У вас нет доступа к этому элементу.';
+
+  @override
+  String get errorFoodDeleteOnlyToday =>
+      'Можно удалять только блюда, записанные сегодня.';
+
+  @override
+  String get errorFoodInvalidBarcode => 'Этот штрихкод выглядит неверным.';
+
+  @override
+  String get errorFoodMacroLimit =>
+      'Каждый макронутриент должен быть 1000 или меньше.';
+
+  @override
+  String get errorDietPlanWeeklyLimit =>
+      'Вы использовали все планы на этой неделе.';
+
+  @override
+  String get errorDietPlanMacrosNotSet =>
+      'Сначала установите дневные цели по макронутриентам.';
+
+  @override
+  String get errorDietPlanNotActive => 'У вас нет активного плана.';
+
+  @override
+  String get errorDietPlanMealNotFound => 'Блюдо не найдено.';
+
+  @override
+  String get errorBloodTestInvalidFile => 'Файл повреждён.';
+
+  @override
+  String get errorBloodTestTooLarge => 'Файлы должны быть не более 10 МБ.';
+
+  @override
+  String get errorBloodTestMimeMismatch =>
+      'Этот формат файла не поддерживается.';
+
+  @override
+  String get errorBloodTestNotFound => 'Анализ крови не найден.';
+
+  @override
+  String get errorNutritionNoCandidates =>
+      'Не удалось создать рекомендацию. Настройте свои диетические предпочтения.';
+
+  @override
+  String get errorWaterInvalid =>
+      'Количество воды должно быть от 0 до 3 литров.';
+
+  @override
+  String get errorWeightInvalid => 'Вес должен быть от 30 до 300 кг.';
+
+  @override
+  String get errorRateLimited =>
+      'Слишком много запросов. Попробуйте через мгновение.';
+
+  @override
+  String get errorInvalidInput => 'Пожалуйста, проверьте введённые данные.';
+
+  @override
+  String get errorNetwork => 'Нет подключения к интернету. Проверьте сеть.';
+
+  @override
   String get retry => 'Повторить';
+
+  @override
+  String get delete => 'Удалить';
+
+  @override
+  String get healthDataSection => 'ДАННЫЕ О ЗДОРОВЬЕ';
+
+  @override
+  String get bloodTestTitle => 'Анализ крови';
+
+  @override
+  String get bloodTestHeadline => 'Загрузите ваш медицинский отчёт';
+
+  @override
+  String get bloodTestSubtitle =>
+      'Загрузка отчёта позволит нам лучше адаптировать план и рекомендации. По желанию — можно добавить в любое время из профиля.';
+
+  @override
+  String get bloodTestPickFile => 'Выбрать файл';
+
+  @override
+  String get bloodTestReplaceFile => 'Нажмите, чтобы заменить';
+
+  @override
+  String get bloodTestFileTypesHint => 'PDF или изображение (JPG/PNG)';
+
+  @override
+  String get bloodTestDateOptional => 'Дата теста (необязательно)';
+
+  @override
+  String get bloodTestUpload => 'Загрузить';
+
+  @override
+  String get bloodTestUploadAndContinue => 'Загрузить и продолжить';
+
+  @override
+  String get bloodTestsScreenTitle => 'Мои анализы крови';
+
+  @override
+  String get bloodTestAdd => 'Добавить';
+
+  @override
+  String get bloodTestEmptyTitle => 'Анализы крови ещё не загружены';
+
+  @override
+  String get bloodTestEmptyBody =>
+      'Нажмите кнопку +, чтобы добавить PDF или изображение.';
+
+  @override
+  String get bloodTestDeleteTitle => 'Удалить анализ крови';
+
+  @override
+  String get bloodTestDeleteBody => 'Эта запись будет удалена навсегда.';
+
+  @override
+  String get bloodTestStatusPending => 'Ожидание ИИ-анализа';
+
+  @override
+  String get bloodTestStatusCompleted => 'Анализ завершён';
+
+  @override
+  String get bloodTestStatusFailed => 'Анализ не удался';
 
   @override
   String get mealBreakfast => 'Завтрак';
@@ -686,6 +844,21 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get dailySummaryEmptyTitle => 'Сегодня нет записей';
+
+  @override
+  String get dailySummaryEmptyBody =>
+      'Быстрое сканирование? Нажмите, чтобы записать первое блюдо.';
+
+  @override
+  String get dailySummaryUnderTitle => 'Прогресс за сегодня';
+
+  @override
+  String dailySummaryUnderBody(String cal, String goal) {
+    return '$cal/$goal ккал — продолжайте записывать';
+  }
+
+  @override
   String get goalAchievement => 'Достижение цели';
 
   @override
@@ -734,6 +907,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get onboardingDietTypeSub =>
       'We will calculate your ideal macro ratios';
+
+  @override
+  String get onboardingDietTypeRequired =>
+      'Пожалуйста, выберите хотя бы один тип диеты';
+
+  @override
+  String get dietPlanIAteThis => 'Я это съел';
+
+  @override
+  String get dietPlanMarkNotEaten => 'Отметить как не съеденное';
+
+  @override
+  String get dietPlanEatenLabel => 'Съедено';
 
   @override
   String get onboardingAllergiesTitle => 'Allergies & Restrictions';

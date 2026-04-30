@@ -35,7 +35,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   double _targetWeightKg = 65;
   double _weeklyPace = 0.5;
   String _activityLevel = 'active';
-  String _dietType = 'standard';
+  final Set<String> _dietTypes = <String>{};
 
   // Allergies & restrictions (BE keys; writeTokens expanded at finish).
   final Set<String> _restrictionKeys = {};
@@ -53,6 +53,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _next() {
+    if (_page == 7 && _dietTypes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).onboardingDietTypeRequired),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
     if (_page < _totalPages - 1) {
       _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
@@ -87,7 +96,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       activityLevel: _activityLevel,
       targetWeight: _targetWeightKg,
       weeklyPace: _weeklyPace,
-      dietType: _dietType,
+      dietTypes: _dietTypes.toList(growable: false),
       allergens: allergenTokens,
       dietRestrictions: restrictionTokens,
     );
@@ -230,8 +239,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     isDark: isDark,
                     textPrimary: textPrimary,
                     textMuted: textMuted,
-                    dietType: _dietType,
-                    onDietType: (v) => setState(() => _dietType = v),
+                    selected: _dietTypes,
+                    onToggle: (v) => setState(() {
+                      if (_dietTypes.contains(v)) {
+                        _dietTypes.remove(v);
+                      } else if (_dietTypes.length < 5) {
+                        _dietTypes.add(v);
+                      }
+                    }),
                   ),
                   // 8: Allergies & Restrictions
                   _PageAllergiesRestrictions(
@@ -1165,10 +1180,10 @@ class _PageActivity extends StatelessWidget {
 class _PageDietType extends StatefulWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
-  final String dietType;
-  final ValueChanged<String> onDietType;
+  final Set<String> selected;
+  final ValueChanged<String> onToggle;
 
-  const _PageDietType({required this.isDark, required this.textPrimary, required this.textMuted, required this.dietType, required this.onDietType});
+  const _PageDietType({required this.isDark, required this.textPrimary, required this.textMuted, required this.selected, required this.onToggle});
 
   @override
   State<_PageDietType> createState() => _PageDietTypeState();
@@ -1206,6 +1221,7 @@ class _PageDietTypeState extends State<_PageDietType> {
   String _emojiFor(String key) {
     switch (key) {
       case 'standard':
+      case 'balanced':
         return '🍽️';
       case 'low_carb':
         return '🥬';
@@ -1233,6 +1249,7 @@ class _PageDietTypeState extends State<_PageDietType> {
   String _labelFor(String key, String defaultLabel, AppLocalizations l) {
     switch (key) {
       case 'standard':
+      case 'balanced':
         return l.dietStandard;
       case 'low_carb':
         return l.dietLowCarb;
@@ -1253,10 +1270,14 @@ class _PageDietTypeState extends State<_PageDietType> {
 
     // BE yanıtı geldiyse onu, gelmediyse (loading / error) statik fallback'i kullan.
     final options = _remoteOptions ?? const [
-      (key: 'standard', defaultLabel: 'Standard'),
+      (key: 'balanced', defaultLabel: 'Balanced'),
+      (key: 'mediterranean', defaultLabel: 'Mediterranean'),
+      (key: 'high_protein', defaultLabel: 'High-protein'),
       (key: 'low_carb', defaultLabel: 'Low-carb'),
       (key: 'keto', defaultLabel: 'Keto'),
-      (key: 'high_protein', defaultLabel: 'High-protein'),
+      (key: 'vegetarian', defaultLabel: 'Vegetarian'),
+      (key: 'vegan', defaultLabel: 'Vegan'),
+      (key: 'pescatarian', defaultLabel: 'Pescatarian'),
       (key: 'custom', defaultLabel: 'Custom'),
     ];
 
@@ -1274,9 +1295,9 @@ class _PageDietTypeState extends State<_PageDietType> {
               padding: const EdgeInsets.only(bottom: 12),
               child: _PillButton(
                 label: '${_emojiFor(opt.key)}  ${_labelFor(opt.key, opt.defaultLabel, l)}',
-                selected: widget.dietType == opt.key,
+                selected: widget.selected.contains(opt.key),
                 isDark: widget.isDark,
-                onTap: () => widget.onDietType(opt.key),
+                onTap: () => widget.onToggle(opt.key),
               ),
             ),
           ),

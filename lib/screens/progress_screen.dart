@@ -1084,7 +1084,9 @@ class _PillTabBar extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
                 decoration: BoxDecoration(
-                  color: selected ? accent : Colors.transparent,
+                  color: selected
+                      ? (isDark ? accent : AppColors.void_)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(18.r),
                 ),
                 alignment: Alignment.center,

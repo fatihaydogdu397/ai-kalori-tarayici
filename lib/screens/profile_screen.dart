@@ -338,12 +338,17 @@ class _BodyStatsCard extends StatelessWidget {
           }()
         : '${provider.height.toStringAsFixed(0)} cm';
 
-    // İdeal kilo aralığı (BMI 18.5–24.9)
+    // EAT-181: BE artık idealWeightMin/Max computed field'ları döndürüyor
+    // (kg). Fallback: BE null döndürürse local BMI 18.5–24.9 hesabı.
     String idealStr = '';
-    if (provider.height > 0) {
+    double? minIdeal = provider.idealWeightMin;
+    double? maxIdeal = provider.idealWeightMax;
+    if ((minIdeal == null || maxIdeal == null) && provider.height > 0) {
       final h = provider.height / 100;
-      final minIdeal = 18.5 * h * h;
-      final maxIdeal = 24.9 * h * h;
+      minIdeal = 18.5 * h * h;
+      maxIdeal = 24.9 * h * h;
+    }
+    if (minIdeal != null && maxIdeal != null) {
       if (isImperial) {
         idealStr = '${(minIdeal * 2.20462).toStringAsFixed(0)}–${(maxIdeal * 2.20462).toStringAsFixed(0)} lb';
       } else {

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/app_provider.dart';
+import '../services/api/api_exception.dart';
 import '../theme/app_theme.dart';
+import '../utils/error_messages.dart';
 import '../models/food_analysis.dart';
 import '../generated/app_localizations.dart';
 import '../widgets/portion_picker_sheet.dart';
@@ -69,13 +71,21 @@ class _HomeScreenState extends State<HomeScreen> {
         _pickImage(source);
       }
     } else if (provider.state == AnalysisState.error) {
-      final l = AppLocalizations.of(context);
-      if (provider.errorMessage == 'limit_reached') {
+      // EAT-179: provider'da `errorCode` BE catalog'undan geliyor; UI burada
+      // localize ediyor. 'limit_reached' eski sentinel değer için backward-compat.
+      if (provider.errorMessage == 'limit_reached' ||
+          provider.errorCode == 'food.daily_scan_limit_reached') {
         _showPaywall();
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('${l.errorGeneric}: ${provider.errorMessage}'), backgroundColor: AppColors.coral));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(localizedError(
+              context,
+              ApiException(provider.errorMessage, code: provider.errorCode),
+            )),
+            backgroundColor: AppColors.coral,
+          ),
+        );
       }
     }
   }
@@ -104,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.camera_alt_rounded,
                   label: l.camera,
                   isDark: isDark,
+                  iconColor: isDark ? AppColors.lime : AppColors.void_,
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
@@ -114,6 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.photo_library_rounded,
                   label: l.gallery,
                   isDark: isDark,
+                  iconColor: isDark ? AppColors.lime : AppColors.void_,
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.gallery);
@@ -124,7 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.search_rounded,
                   label: 'Search',
                   isDark: isDark,
-                  iconColor: isDark ? AppColors.lime : AppColors.limeDark,
+                  iconColor: isDark ? AppColors.lime : AppColors.void_,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const FoodSearchScreen()));
@@ -135,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.qr_code_scanner_rounded,
                   label: l.barcode,
                   isDark: isDark,
-                  iconColor: isDark ? AppColors.amber : AppColors.amberDark,
+                  iconColor: isDark ? AppColors.amber : AppColors.void_,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()));
@@ -1051,31 +1063,33 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(items.length, (i) {
-              final isActive = _tab == i;
-              return GestureDetector(
+        child: Row(
+          children: List.generate(items.length, (i) {
+            final isActive = _tab == i;
+            return Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () => setState(() => _tab = i),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(items[i].$1, color: isActive ? iconActive : iconInactive, size: 22),
-                    const SizedBox(height: 3),
-                    Text(
-                      items[i].$2,
-                      style: AppTypography.labelSmall.copyWith(
-                        fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                        color: isActive ? labelActive : iconInactive,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(items[i].$1, color: isActive ? iconActive : iconInactive, size: 22),
+                      const SizedBox(height: 3),
+                      Text(
+                        items[i].$2,
+                        style: AppTypography.labelSmall.copyWith(
+                          fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                          color: isActive ? labelActive : iconInactive,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              );
-            }),
-          ),
+              ),
+            );
+          }),
         ),
       ),
     );

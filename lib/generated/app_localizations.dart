@@ -648,11 +648,299 @@ abstract class AppLocalizations {
   /// **'Bir hata oluştu'**
   String get errorGeneric;
 
+  /// No description provided for @errorAuthInvalidCredentials.
+  ///
+  /// In tr, this message translates to:
+  /// **'E-posta veya şifre hatalı.'**
+  String get errorAuthInvalidCredentials;
+
+  /// No description provided for @errorAuthSignInAgain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen tekrar giriş yap.'**
+  String get errorAuthSignInAgain;
+
+  /// No description provided for @errorAuthOauthFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Giriş yapılamadı. Tekrar dene.'**
+  String get errorAuthOauthFailed;
+
+  /// No description provided for @errorAuthEmailInUse.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta zaten kayıtlı. Giriş yapmayı dene.'**
+  String get errorAuthEmailInUse;
+
+  /// No description provided for @errorAuthEmailProviderConflict.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu e-posta için ilk kullandığın yöntemle giriş yap.'**
+  String get errorAuthEmailProviderConflict;
+
+  /// No description provided for @errorAuthInvalidOtp.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kod geçersiz veya süresi dolmuş.'**
+  String get errorAuthInvalidOtp;
+
+  /// No description provided for @errorAuthTooManyAttempts.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok fazla başarısız deneme. Yeni bir kod iste.'**
+  String get errorAuthTooManyAttempts;
+
+  /// No description provided for @errorPremiumRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu özellik için Premium gerekli.'**
+  String get errorPremiumRequired;
+
+  /// No description provided for @errorFoodScanLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Günlük tarama limitine ulaştın. Sınırsız tarama için Premium\'a geç.'**
+  String get errorFoodScanLimit;
+
+  /// No description provided for @errorFoodNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yemek bulunamadı.'**
+  String get errorFoodNotFound;
+
+  /// No description provided for @errorNotOwner.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu öğeye erişimin yok.'**
+  String get errorNotOwner;
+
+  /// No description provided for @errorFoodDeleteOnlyToday.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sadece bugün eklenen yemekleri silebilirsin.'**
+  String get errorFoodDeleteOnlyToday;
+
+  /// No description provided for @errorFoodInvalidBarcode.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu barkod geçersiz görünüyor.'**
+  String get errorFoodInvalidBarcode;
+
+  /// No description provided for @errorFoodMacroLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her makro değeri 1000\'den az olmalı.'**
+  String get errorFoodMacroLimit;
+
+  /// No description provided for @errorDietPlanWeeklyLimit.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hafta için tüm planlarını kullandın.'**
+  String get errorDietPlanWeeklyLimit;
+
+  /// No description provided for @errorDietPlanMacrosNotSet.
+  ///
+  /// In tr, this message translates to:
+  /// **'Önce günlük makro hedeflerini ayarla.'**
+  String get errorDietPlanMacrosNotSet;
+
+  /// No description provided for @errorDietPlanNotActive.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif bir planın yok.'**
+  String get errorDietPlanNotActive;
+
+  /// No description provided for @errorDietPlanMealNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öğün bulunamadı.'**
+  String get errorDietPlanMealNotFound;
+
+  /// No description provided for @errorBloodTestInvalidFile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya bozuk.'**
+  String get errorBloodTestInvalidFile;
+
+  /// No description provided for @errorBloodTestTooLarge.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya 10 MB\'den küçük olmalı.'**
+  String get errorBloodTestTooLarge;
+
+  /// No description provided for @errorBloodTestMimeMismatch.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu dosya türü desteklenmiyor.'**
+  String get errorBloodTestMimeMismatch;
+
+  /// No description provided for @errorBloodTestNotFound.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kan tahlili bulunamadı.'**
+  String get errorBloodTestNotFound;
+
+  /// No description provided for @errorNutritionNoCandidates.
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneri oluşturulamadı. Beslenme tercihlerini gözden geçir.'**
+  String get errorNutritionNoCandidates;
+
+  /// No description provided for @errorWaterInvalid.
+  ///
+  /// In tr, this message translates to:
+  /// **'Su miktarı 0–3 litre arasında olmalı.'**
+  String get errorWaterInvalid;
+
+  /// No description provided for @errorWeightInvalid.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kilo 30–300 kg arasında olmalı.'**
+  String get errorWeightInvalid;
+
+  /// No description provided for @errorRateLimited.
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok fazla istek. Biraz sonra dene.'**
+  String get errorRateLimited;
+
+  /// No description provided for @errorInvalidInput.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen girdileri kontrol et.'**
+  String get errorInvalidInput;
+
+  /// No description provided for @errorNetwork.
+  ///
+  /// In tr, this message translates to:
+  /// **'İnternet bağlantısı yok.'**
+  String get errorNetwork;
+
   /// No description provided for @retry.
   ///
   /// In tr, this message translates to:
   /// **'Tekrar dene'**
   String get retry;
+
+  /// No description provided for @delete.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sil'**
+  String get delete;
+
+  /// No description provided for @healthDataSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'SAĞLIK VERİLERİ'**
+  String get healthDataSection;
+
+  /// No description provided for @bloodTestTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kan Tahlili'**
+  String get bloodTestTitle;
+
+  /// No description provided for @bloodTestHeadline.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sağlık raporunu yükle'**
+  String get bloodTestHeadline;
+
+  /// No description provided for @bloodTestSubtitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kan tahlilini yüklersen diyet planın ve önerilerimiz sana daha özel olur. Opsiyoneldir, istediğin zaman profilinden ekleyebilirsin.'**
+  String get bloodTestSubtitle;
+
+  /// No description provided for @bloodTestPickFile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya seç'**
+  String get bloodTestPickFile;
+
+  /// No description provided for @bloodTestReplaceFile.
+  ///
+  /// In tr, this message translates to:
+  /// **'Değiştirmek için dokun'**
+  String get bloodTestReplaceFile;
+
+  /// No description provided for @bloodTestFileTypesHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'PDF veya görsel (JPG/PNG)'**
+  String get bloodTestFileTypesHint;
+
+  /// No description provided for @bloodTestDateOptional.
+  ///
+  /// In tr, this message translates to:
+  /// **'Test tarihi (opsiyonel)'**
+  String get bloodTestDateOptional;
+
+  /// No description provided for @bloodTestUpload.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yükle'**
+  String get bloodTestUpload;
+
+  /// No description provided for @bloodTestUploadAndContinue.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yükle ve devam et'**
+  String get bloodTestUploadAndContinue;
+
+  /// No description provided for @bloodTestsScreenTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kan Tahlillerim'**
+  String get bloodTestsScreenTitle;
+
+  /// No description provided for @bloodTestAdd.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get bloodTestAdd;
+
+  /// No description provided for @bloodTestEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Henüz yüklenmiş kan tahlili yok'**
+  String get bloodTestEmptyTitle;
+
+  /// No description provided for @bloodTestEmptyBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sağ alttaki + ile PDF veya görsel olarak ekleyebilirsin.'**
+  String get bloodTestEmptyBody;
+
+  /// No description provided for @bloodTestDeleteTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kan tahlilini sil'**
+  String get bloodTestDeleteTitle;
+
+  /// No description provided for @bloodTestDeleteBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu kayıt kalıcı olarak silinecek.'**
+  String get bloodTestDeleteBody;
+
+  /// No description provided for @bloodTestStatusPending.
+  ///
+  /// In tr, this message translates to:
+  /// **'AI analiz bekliyor'**
+  String get bloodTestStatusPending;
+
+  /// No description provided for @bloodTestStatusCompleted.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz tamamlandı'**
+  String get bloodTestStatusCompleted;
+
+  /// No description provided for @bloodTestStatusFailed.
+  ///
+  /// In tr, this message translates to:
+  /// **'Analiz başarısız'**
+  String get bloodTestStatusFailed;
 
   /// No description provided for @mealBreakfast.
   ///
@@ -1410,6 +1698,30 @@ abstract class AppLocalizations {
   /// **'Bugün {cal}/{goal} kcal ve {water}L su tükettin. Harika gidiyorsun!'**
   String dailySummaryBody(String cal, String goal, String water);
 
+  /// No description provided for @dailySummaryEmptyTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugün hiç giriş yok'**
+  String get dailySummaryEmptyTitle;
+
+  /// No description provided for @dailySummaryEmptyBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'Hızlı tarama? İlk öğününü kaydetmek için dokun.'**
+  String get dailySummaryEmptyBody;
+
+  /// No description provided for @dailySummaryUnderTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bugünkü ilerleme'**
+  String get dailySummaryUnderTitle;
+
+  /// No description provided for @dailySummaryUnderBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'{cal}/{goal} kcal — kaydetmeye devam'**
+  String dailySummaryUnderBody(String cal, String goal);
+
   /// No description provided for @goalAchievement.
   ///
   /// In tr, this message translates to:
@@ -1505,6 +1817,30 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Size uygun makro oranlarını hesaplayalım'**
   String get onboardingDietTypeSub;
+
+  /// No description provided for @onboardingDietTypeRequired.
+  ///
+  /// In tr, this message translates to:
+  /// **'Lütfen en az bir beslenme türü seçin'**
+  String get onboardingDietTypeRequired;
+
+  /// No description provided for @dietPlanIAteThis.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bunu yedim'**
+  String get dietPlanIAteThis;
+
+  /// No description provided for @dietPlanMarkNotEaten.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yenmedi olarak işaretle'**
+  String get dietPlanMarkNotEaten;
+
+  /// No description provided for @dietPlanEatenLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yendi'**
+  String get dietPlanEatenLabel;
 
   /// No description provided for @onboardingAllergiesTitle.
   ///
