@@ -31,17 +31,48 @@ class _FoodItem {
   });
 
   factory _FoodItem.fromBackend(Map<String, dynamic> raw) {
+    final category = (raw['category'] ?? '') as String;
     return _FoodItem(
       id: (raw['id'] ?? '') as String,
       name: (raw['name'] ?? '') as String,
-      emoji: '🍽️',
+      emoji: emojiForCategory(category),
       cal: (raw['calories'] as num?)?.toDouble() ?? 0,
       protein: (raw['protein'] as num?)?.toDouble() ?? 0,
       carbs: (raw['carbs'] as num?)?.toDouble() ?? 0,
       fat: (raw['fat'] as num?)?.toDouble() ?? 0,
-      category: (raw['category'] ?? '') as String,
+      category: category,
     );
   }
+}
+
+/// USDA FDC food category string'lerini görünür emojilere map'ler. Tek bir
+/// `🍽️` yerine kategoriye uygun simge → liste daha okunabilir.
+String emojiForCategory(String raw) {
+  final c = raw.toLowerCase();
+  if (c.contains('beverage')) return '🥤';
+  if (c.contains('dairy') || c.contains('milk') || c.contains('egg')) return '🥛';
+  if (c.contains('beef')) return '🥩';
+  if (c.contains('pork')) return '🥓';
+  if (c.contains('lamb') || c.contains('veal') || c.contains('game')) return '🥩';
+  if (c.contains('poultry') || c.contains('chicken') || c.contains('turkey')) return '🍗';
+  if (c.contains('fish') || c.contains('seafood') || c.contains('shellfish')) return '🐟';
+  if (c.contains('sausage') || c.contains('luncheon') || c.contains('cured')) return '🌭';
+  if (c.contains('vegetable')) return '🥦';
+  if (c.contains('fruit')) return '🍎';
+  if (c.contains('legume') || c.contains('bean')) return '🫘';
+  if (c.contains('nut') || c.contains('seed')) return '🥜';
+  if (c.contains('cereal') || c.contains('grain') || c.contains('rice')) return '🌾';
+  if (c.contains('pasta') || c.contains('noodle')) return '🍝';
+  if (c.contains('baked') || c.contains('bread')) return '🍞';
+  if (c.contains('sweet') || c.contains('candy') || c.contains('dessert')) return '🍰';
+  if (c.contains('fat') || c.contains('oil')) return '🫒';
+  if (c.contains('spice') || c.contains('herb') || c.contains('sauce')) return '🌿';
+  if (c.contains('soup') || c.contains('stew') || c.contains('broth')) return '🍲';
+  if (c.contains('snack')) return '🍿';
+  if (c.contains('fast food') || c.contains('burger')) return '🍔';
+  if (c.contains('breakfast')) return '🥞';
+  if (c.contains('meal') || c.contains('entree')) return '🍽️';
+  return '🍽️';
 }
 
 /// "All" sentinel + BE'den dinamik gelen USDA kategorileri. Kategoriler
@@ -219,6 +250,9 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
     final accent = isDark ? AppColors.lime : AppColors.limeDark;
+    // Light modda primary CTA/selected state'ler siyah-beyaz; dark modda lime kalır.
+    final ctaBg = isDark ? accent : AppColors.void_;
+    final ctaFg = isDark ? AppColors.void_ : Colors.white;
     final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
 
     final results = _filtered;
@@ -353,7 +387,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       duration: const Duration(milliseconds: 180),
                       padding: EdgeInsets.symmetric(horizontal: 14.w),
                       decoration: BoxDecoration(
-                        color: selected ? accent : cardBg,
+                        color: selected ? ctaBg : cardBg,
                         borderRadius: BorderRadius.circular(17.r),
                         border: selected
                             ? null
@@ -365,7 +399,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                          color: selected ? (isDark ? AppColors.void_ : Colors.white) : textMuted,
+                          color: selected ? ctaFg : textMuted,
                         ),
                       ),
                     ),
@@ -387,7 +421,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
             // ── Food List ─────────────────────────────────────────────────
             Expanded(
               child: _loading
-                  ? Center(child: CircularProgressIndicator(color: accent))
+                  ? const Center(child: CircularProgressIndicator())
                   : results.isEmpty
                   ? Center(
                       child: Column(
@@ -413,8 +447,10 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         textPrimary: textPrimary,
                         textMuted: textMuted,
                         accent: accent,
+                        ctaBg: ctaBg,
+                        ctaFg: ctaFg,
                         isDark: isDark,
-                        onAdd: () => _showAddSheet(context, results[i], isDark, cardBg, textPrimary, textMuted, accent, l),
+                        onAdd: () => _showAddSheet(context, results[i], isDark, cardBg, textPrimary, textMuted, accent, ctaBg, ctaFg, l),
                       ),
                     ),
             ),
@@ -424,7 +460,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     );
   }
 
-  void _showAddSheet(BuildContext context, _FoodItem food, bool isDark, Color cardBg, Color textPrimary, Color textMuted, Color accent, AppLocalizations l) {
+  void _showAddSheet(BuildContext context, _FoodItem food, bool isDark, Color cardBg, Color textPrimary, Color textMuted, Color accent, Color ctaBg, Color ctaFg, AppLocalizations l) {
     double grams = 100;
     showModalBottomSheet(
       context: context,
@@ -506,8 +542,9 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                   min: 10,
                   max: 500,
                   divisions: 49,
-                  activeColor: accent,
-                  inactiveColor: accent.withValues(alpha: 0.2),
+                  activeColor: ctaBg,
+                  inactiveColor: ctaBg.withValues(alpha: 0.2),
+                  thumbColor: ctaBg,
                   onChanged: (v) => setS(() => grams = v),
                 ),
                 SizedBox(height: 8.h),
@@ -515,15 +552,19 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                 // Log button
                 SizedBox(
                   width: double.infinity,
-                  height: 50.h,
+                  height: 52.h,
                   child: ElevatedButton(
-                    onPressed: () {
-                      _logFood(context, food, grams);
+                    onPressed: () async {
+                      // Sheet'i hemen kapat ki UI takılı kalmasın.
                       Navigator.pop(ctx);
+                      await _logFood(context, food, grams);
+                      // Search ekranını da kapat → home'a dön. saveManualEntry
+                      // provider'da loadTodayStats çağırıyor, home rebuild olur.
+                      if (context.mounted) Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: accent,
-                      foregroundColor: isDark ? AppColors.void_ : Colors.white,
+                      backgroundColor: ctaBg,
+                      foregroundColor: ctaFg,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                       elevation: 0,
                     ),
@@ -541,7 +582,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     );
   }
 
-  void _logFood(BuildContext context, _FoodItem food, double grams) {
+  Future<void> _logFood(BuildContext context, _FoodItem food, double grams) async {
     final factor = grams / 100;
     final provider = context.read<AppProvider>();
     final l = AppLocalizations.of(context);
@@ -578,7 +619,8 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       advice: '',
       analyzedAt: DateTime.now(),
     );
-    provider.saveManualEntry(analysis);
+    await provider.saveManualEntry(analysis);
+    if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(l.foodAddedToLog(food.name)),
@@ -595,7 +637,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
 
 class _FoodCard extends StatelessWidget {
   final _FoodItem item;
-  final Color cardBg, textPrimary, textMuted, accent;
+  final Color cardBg, textPrimary, textMuted, accent, ctaBg, ctaFg;
   final Border? border;
   final bool isDark;
   final VoidCallback onAdd;
@@ -606,6 +648,8 @@ class _FoodCard extends StatelessWidget {
     required this.textPrimary,
     required this.textMuted,
     required this.accent,
+    required this.ctaBg,
+    required this.ctaFg,
     this.border,
     required this.isDark,
     required this.onAdd,
@@ -650,17 +694,17 @@ class _FoodCard extends StatelessWidget {
             ),
           ),
 
-          // Add button
+          // Add button — light modda siyah zemin/beyaz "+", dark modda lime tint
           GestureDetector(
             onTap: onAdd,
             child: Container(
               width: 32.w,
               height: 32.w,
               decoration: BoxDecoration(
-                color: accent.withValues(alpha: isDark ? 0.15 : 0.1),
+                color: isDark ? accent.withValues(alpha: 0.15) : ctaBg,
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(Icons.add_rounded, color: accent, size: 20.sp),
+              child: Icon(Icons.add_rounded, color: isDark ? accent : ctaFg, size: 20.sp),
             ),
           ),
         ],

@@ -208,7 +208,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 SizedBox(height: 48.h),
                 
                 if (_isLoading)
-                  Center(child: CircularProgressIndicator(color: AppColors.lime))
+                  const Center(child: CircularProgressIndicator())
                 else
                   ElevatedButton(
                     onPressed: _handleReset,

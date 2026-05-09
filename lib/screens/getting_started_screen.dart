@@ -111,6 +111,7 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> with Single
                       SizedBox(height: 32.h),
                       SizedBox(
                         width: double.infinity,
+                        height: 52.h,
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AuthScreen()));
@@ -121,7 +122,6 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> with Single
                             shadowColor: AppColors.lime.withOpacity(0.3),
                             elevation: 8,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100.r)),
-                            padding: EdgeInsets.symmetric(vertical: 18.h),
                           ),
                           child: Text(
                             l.getStarted,

@@ -380,6 +380,22 @@ class AppLocalizationsKa extends AppLocalizations {
   String get errorNetwork => 'ინტერნეტი არ არის. შეამოწმე ქსელი.';
 
   @override
+  String get errorTryAgain => 'Bir sorun oluştu. Lütfen tekrar dene.';
+
+  @override
+  String get onboardingAvoidFoodsTitle => 'Kaçınılacak yiyecekler';
+
+  @override
+  String get onboardingAvoidFoodsSub =>
+      'Bu yiyecekler diyet planı önerilerinde kullanılmaz.';
+
+  @override
+  String get onboardingAvoidFoodsHint => 'Yiyecek yaz (ör. mantar)';
+
+  @override
+  String get onboardingAvoidFoodsAdd => 'Ekle';
+
+  @override
   String get retry => 'სცადე თავიდან';
 
   @override
@@ -397,6 +413,9 @@ class AppLocalizationsKa extends AppLocalizations {
   @override
   String get bloodTestSubtitle =>
       'ლაბორატორიული ანგარიშის ატვირთვა საშუალებას გვაძლევს გეგმა და რჩევები უკეთ შევარგოთ. არ არის სავალდებულო — შეგიძლია ნებისმიერ დროს დაამატო პროფილიდან.';
+
+  @override
+  String get bloodTestUploadedListTitle => 'Yüklenenler';
 
   @override
   String get bloodTestPickFile => 'ფაილის არჩევა';

@@ -412,3 +412,46 @@ flutter: [ApiClient] ← anonymous [200] 530ms {"errors":[{"message":"Unauthoriz
 - uygulamada yediğin öğünü veya tamamladığın diyeti paylaşma gibi bir feature eklemek istiyoruz fakat bu konuyu henüz olgunlaştıramadık dolayısıyla bu fikri task açıp idea kolonuna kaydedelim
 - anasayfadaki ve diyet listesindeki gün seçimi konusunda değişikliğe gidilecek bu konu da kürşatla konuşulacak taskını açıp idea kolonuna kaydedelim
 - bildirimlerde gün sonu raporunu gösterdiğimiz bildirim gün boyunca bişey eklemesem de çıkıyor eğer kullanıcı hedefini tamamlamadıysa great job lu bildirim çıkmasın
+
+
+
+
+ 
+
+
+- hata mesajlarını gösterme formatları düzenlenecek backend-mobil
+- haftada kaç kilo vermeyi hedeflediğim sayfada tam ortadaki emojinin altında olacak değer
+- how active are you yazılar biraz daha okunabilir yapılacak
+- diet type custom kaldıralım backendden mi geliyor bizde mi bakalım 
+- alergies and restrctions kısmının altına arama kısmı koyalım listeden diyet listesi oluştururken de seçebileceği şekilde ayarlayalım
+- upload blood testteki alttaki butonla üstteki buton yüksekliği genişliği borderdan kaynaklı muhtemel boyut aynı değil
+
+- analiz et butonunun rengi yeşil kalmış beyaz olacak light temada
+- search food ekranı düzenlenecek
+- anasayfada üstteki günleri seçtiğimizde o günün calories today ve makroları ve apple health dataları gösterilsin şuan hangi tarihi seçersem seçeyim bugünde kalıyor
+- öğünü favoriye ekleme kurgusu tekrardan baştan yapılacak en mantıklısı neyse o şekilde sıfırdan mantıksal kurgusunu ve kodlamasını yap
+- onboarding ekranında yüklenen bloodtestleri de diyet listesi onboardinginde liste olarak göster ve iki sayfanın adını da blood test olarak kaydet "healt report"u sil
+- searhten yemek yediğimizi eklediğimizde anasayfaya dönsün ve anasayfa güncellesin 
+- eklenen yemeklerin resmi ve anasayfadaki iconlarına adam akıllı bişey bulunması lazım şuanki iconlar güzel değil
+- yemek yüklerken portion amount değeri gönderilmiyor yapılacak
+- grafiklerde yatay ve dikey sayılar gösterilmiyor ve hepsi bar chart gibi olacak line değil
+- meals logged yok data güncel değil
+- apple healhten kilo datası grafiklere yazılıyor mu kontrol edilecek
+- diyet listesinden eklediğim öğünün ismi anasayfada dandik saçma görünüyor
+- diyet listesinden bir öğünü yiyince anasayfaya yönlendirsin ve güncellesin
+- barkod ekranında barkodu okuyunca geri ekrana gelsin ve ürünü bulamadıysa bulamadığına dair hatayı geri basıp versin sürekli istek atıp durmasın bulduysa zaten süreç devam etsin
+- profil sayfasında bir alan açalım ve apple healthtan çektiği tüm dataları göstersin
+- ayarlar sayfasındaki bildirimlerdeki saat seçme light temada siyah üzerine lime var beyaz olması gerekiyor dark zaten güzel
+- daily summary bildirimleri silinecek sen bu işi beceremiyorsun çünkü
+- edit diet profile ekranında cooking time çıkarılacak ve food search ile restrictions arama barı eklenecek
+- auth error alındığında loginden önceki giriş yapma yöntemlerinin olduğu sayfaya yönlendireceğiz kullanıcıyı ve route geçmişini temizleyeceğiz
+- backendden food search food datasetini daha düzgün almamız lazım bunu nasıl yapabiliriz backendi pull edip bizimle kıyaslayarak bakalım bu bir spike işi olsun
+- diyet listesini tekrardan düzenleyince geri basılacak yeni bir sayfaya yönlenirmiş gibi yapılmayacak ayrıca meals per day parametresi kaç gönderilirse gönderilsin 4 öğün dönüyor
+- loadingler lightta siyah olacak darkta lime yeşili uygulama genelinde
+- diyet listesi ekranında swap diyince öğünü öğün kartlarında ve bottomsheette ismi yerine öğün içeriği yazılıyor öğün içeriği kısmı ise boş görünüyor sebebini bul ve çöz
+- genel olarak yaptığımız tasklarda backende açmamız gereken taskları araştıralım 
+
+
+
+
+

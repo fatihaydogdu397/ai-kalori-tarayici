@@ -179,7 +179,17 @@ class ApiClient {
       final ext = first['extensions'] as Map<String, dynamic>?;
       final code = ext?['code']?.toString();
 
-      if (code == 'UNAUTHENTICATED' && requiresAuth && !isRetry) {
+      // Token-bazlı hatalar: refresh dene, başarısızsa logout.
+      final isTokenError = code == 'UNAUTHENTICATED' ||
+          code == 'auth.unauthenticated' ||
+          code == 'auth.token_expired';
+      // Refresh ile çözülemeyecek session-fatal hatalar: kullanıcıyı doğrudan
+      // social login ekranına at (örn. account deleted on BE, account
+      // disabled). Refresh denenmez.
+      final isSessionFatal = code == 'profile.user_not_found' ||
+          code == 'auth.user_disabled' ||
+          code == 'auth.account_locked';
+      if (isTokenError && requiresAuth && !isRetry) {
         if (await _tryRefreshToken()) {
           return _execute(
             document: document,
@@ -189,6 +199,8 @@ class ApiClient {
             isRetry: true,
           );
         }
+        await _handleAuthFailure();
+      } else if (isSessionFatal && requiresAuth) {
         await _handleAuthFailure();
       }
 

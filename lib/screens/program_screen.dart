@@ -182,6 +182,7 @@ class _ProgramScreenState extends State<ProgramScreen> {
               const Spacer(),
               SizedBox(
                 width: double.infinity,
+                height: 52.h,
                 child: ElevatedButton(
                   onPressed: _loading ? null : _onPrimaryPressed,
                   style: ElevatedButton.styleFrom(
@@ -192,7 +193,6 @@ class _ProgramScreenState extends State<ProgramScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14.r),
                     ),
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
                     elevation: 0,
                   ),
                   child: _loading

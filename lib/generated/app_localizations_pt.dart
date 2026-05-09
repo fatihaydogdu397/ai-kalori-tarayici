@@ -384,6 +384,22 @@ class AppLocalizationsPt extends AppLocalizations {
   String get errorNetwork => 'Sem conexão com a internet. Verifique sua rede.';
 
   @override
+  String get errorTryAgain => 'Bir sorun oluştu. Lütfen tekrar dene.';
+
+  @override
+  String get onboardingAvoidFoodsTitle => 'Kaçınılacak yiyecekler';
+
+  @override
+  String get onboardingAvoidFoodsSub =>
+      'Bu yiyecekler diyet planı önerilerinde kullanılmaz.';
+
+  @override
+  String get onboardingAvoidFoodsHint => 'Yiyecek yaz (ör. mantar)';
+
+  @override
+  String get onboardingAvoidFoodsAdd => 'Ekle';
+
+  @override
   String get retry => 'Tentar novamente';
 
   @override
@@ -401,6 +417,9 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get bloodTestSubtitle =>
       'Enviar seu laudo nos permite personalizar melhor seu plano e nossas recomendações. Opcional — você pode adicionar a qualquer momento pelo seu perfil.';
+
+  @override
+  String get bloodTestUploadedListTitle => 'Yüklenenler';
 
   @override
   String get bloodTestPickFile => 'Escolher arquivo';

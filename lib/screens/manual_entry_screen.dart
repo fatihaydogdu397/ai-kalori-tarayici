@@ -315,6 +315,7 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
 
                       SizedBox(
                         width: double.infinity,
+                        height: 52,
                         child: ElevatedButton(
                           onPressed: _saving ? null : _save,
                           style: ElevatedButton.styleFrom(
@@ -322,7 +323,6 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
                             foregroundColor: accentFg,
                             disabledBackgroundColor: accent.withOpacity(0.5),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: _saving
                               ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: accentFg, strokeWidth: 2))

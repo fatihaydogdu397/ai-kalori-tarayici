@@ -14,7 +14,6 @@ class SettingsService {
     reminderBreakfastEnabled reminderBreakfastTime
     reminderLunchEnabled reminderLunchTime
     reminderDinnerEnabled reminderDinnerTime
-    dailySummaryEnabled
   ''';
 
   Future<Map<String, dynamic>> getAppSettings() async {
@@ -35,7 +34,6 @@ class SettingsService {
     String? reminderLunchTime,
     bool? reminderDinnerEnabled,
     String? reminderDinnerTime,
-    bool? dailySummaryEnabled,
   }) async {
     final input = <String, dynamic>{};
     if (theme != null) input['theme'] = theme.toUpperCase();
@@ -59,9 +57,6 @@ class SettingsService {
     }
     if (reminderDinnerTime != null) {
       input['reminderDinnerTime'] = reminderDinnerTime;
-    }
-    if (dailySummaryEnabled != null) {
-      input['dailySummaryEnabled'] = dailySummaryEnabled;
     }
 
     final data = await _api.mutate(

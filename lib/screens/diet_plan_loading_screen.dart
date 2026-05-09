@@ -89,12 +89,12 @@ class _DietPlanLoadingScreenState extends State<DietPlanLoadingScreen>
     } on ApiException catch (e) {
       _stepTimer?.cancel();
       if (!mounted) return;
-      if (e.code == 'PREMIUM_REQUIRED') {
+      if (e.code == 'PREMIUM_REQUIRED' || e.code == 'premium.required') {
         // DEV-BYPASS-PAYWALL: fake-premium kullanıcıda paywall'a yönlendirmek
-        // yerine BE'nin error mesajını gösteriyoruz (gerçek abonelik yok, BE
-        // reddetti). Gerçek free kullanıcı normal paywall'a yönlendirilir.
+        // yerine localized premium-required mesajını gösteriyoruz (gerçek
+        // abonelik yok, BE reddetti). Gerçek free kullanıcı paywall'a gider.
         if (context.read<AppProvider>().isPremium) {
-          _showError(e.message);
+          _showError(localizedError(context, e));
           return;
         }
         Navigator.pushReplacement(

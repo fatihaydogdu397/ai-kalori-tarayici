@@ -380,6 +380,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           children: [
             SizedBox(
               width: double.infinity,
+              height: 52.h,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _purchase,
                 style: ElevatedButton.styleFrom(
@@ -387,7 +388,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   foregroundColor: accentFg,
                   disabledBackgroundColor: accent.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   elevation: 0,
                 ),
                 child: _isLoading

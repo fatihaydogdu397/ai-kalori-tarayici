@@ -381,6 +381,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'No internet connection. Please check your network.';
 
   @override
+  String get errorTryAgain => 'Something went wrong. Please try again.';
+
+  @override
+  String get onboardingAvoidFoodsTitle => 'Foods to avoid';
+
+  @override
+  String get onboardingAvoidFoodsSub =>
+      'We\'ll exclude these from your diet plan recommendations.';
+
+  @override
+  String get onboardingAvoidFoodsHint => 'Type a food (e.g. mushrooms)';
+
+  @override
+  String get onboardingAvoidFoodsAdd => 'Add';
+
+  @override
   String get retry => 'Retry';
 
   @override
@@ -393,11 +409,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bloodTestTitle => 'Blood Test';
 
   @override
-  String get bloodTestHeadline => 'Upload your health report';
+  String get bloodTestHeadline => 'Upload your blood test';
 
   @override
   String get bloodTestSubtitle =>
-      'Uploading your lab report lets us personalize your plan and advice. Optional — you can add it any time from your profile.';
+      'Uploading your blood test lets us personalize your plan and advice. Optional — you can add it any time from your profile.';
+
+  @override
+  String get bloodTestUploadedListTitle => 'Already uploaded';
 
   @override
   String get bloodTestPickFile => 'Pick a file';

@@ -50,7 +50,6 @@ class _ResultScreenState extends State<ResultScreen> {
     if (_portionChanged) {
       await provider.saveManualEntry(_currentAnalysis);
     }
-    await provider.syncNotification(AppLocalizations.of(context));
     if (mounted) Navigator.pop(context, false);
   }
 
@@ -64,7 +63,7 @@ class _ResultScreenState extends State<ResultScreen> {
     final textSecondary = isDark ? const Color(0xFFCCCCCC) : const Color(0xFF555555);
     final divider = isDark ? AppColors.darkSurface : AppColors.lightBorder;
     final btnBg = isDark ? AppColors.lime : AppColors.void_;
-    final btnText = isDark ? AppColors.void_ : AppColors.lime;
+    final btnText = isDark ? AppColors.void_ : AppColors.snow;
     final aiBg = isDark ? AppColors.lime : AppColors.void_;
     final aiText = isDark ? AppColors.void_ : AppColors.lime;
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
@@ -278,13 +277,17 @@ class _ResultScreenState extends State<ResultScreen> {
                                       inactiveTrackColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
                                       thumbColor: btnBg,
                                     ),
-                                    child: Slider(
-                                      value: _currentPortion,
-                                      min: 10,
-                                      max: _originalPortion > 500 ? _originalPortion * 2 : 1000,
-                                      divisions: 100,
-                                      onChanged: _onPortionChanged,
-                                    ),
+                                    child: Builder(builder: (_) {
+                                      final sliderMin = _originalPortion < 10 ? 0.0 : 10.0;
+                                      final sliderMax = _originalPortion > 500 ? _originalPortion * 2 : 1000.0;
+                                      return Slider(
+                                        value: _currentPortion.clamp(sliderMin, sliderMax),
+                                        min: sliderMin,
+                                        max: sliderMax,
+                                        divisions: 100,
+                                        onChanged: _onPortionChanged,
+                                      );
+                                    }),
                                   ),
                                 ),
                               ],
@@ -403,13 +406,13 @@ class _ResultScreenState extends State<ResultScreen> {
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
+                    height: 52,
                     child: ElevatedButton(
                       onPressed: _saveChanges,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: btnBg,
                         foregroundColor: btnText,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                       ),
                       child: Row(
@@ -429,11 +432,11 @@ class _ResultScreenState extends State<ResultScreen> {
                     const SizedBox(height: 8),
                     SizedBox(
                       width: double.infinity,
+                      height: 52,
                       child: TextButton(
                         onPressed: () => Navigator.pop(context, true),
                         style: TextButton.styleFrom(
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -619,8 +619,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             },
                           ),
                         ),
-                        leftTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 36.w,
+                            getTitlesWidget: (val, meta) => Padding(
+                              padding: EdgeInsets.only(right: 4.w),
+                              child: Text(
+                                val.toInt().toString(),
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: textMuted,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         topTitles: const AxisTitles(
                           sideTitles: SideTitles(showTitles: false),
@@ -704,15 +718,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
     bool isDark,
   ) {
     final monthly = provider.monthlyStats;
-    final spots = List.generate(
-      monthly.length,
-      (i) => FlSpot(i.toDouble(), (monthly[i]['calories'] as num).toDouble()),
+    final maxCal = monthly.fold<double>(
+      0,
+      (m, d) {
+        final v = (d['calories'] as num).toDouble();
+        return v > m ? v : m;
+      },
     );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Line chart
+        // M7: Bar chart standardı (line yerine), axis label'lı.
         _ChartCard(
           title: 'Calories',
           cardBg: cardBg,
@@ -722,8 +739,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ? _EmptyChart(textMuted: textMuted)
               : SizedBox(
                   height: 160.h,
-                  child: LineChart(
-                    LineChartData(
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: maxCal * 1.3 + 100,
+                      barTouchData: BarTouchData(enabled: false),
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: false,
@@ -766,8 +786,22 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             },
                           ),
                         ),
-                        leftTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 36.w,
+                            getTitlesWidget: (val, meta) => Padding(
+                              padding: EdgeInsets.only(right: 4.w),
+                              child: Text(
+                                val.toInt().toString(),
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  color: textMuted,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                         rightTitles: const AxisTitles(
                           sideTitles: SideTitles(showTitles: false),
@@ -777,20 +811,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         ),
                       ),
                       borderData: FlBorderData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          color: accent,
-                          barWidth: 3,
-                          isStrokeCapRound: true,
-                          dotData: const FlDotData(show: false),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: accent.withValues(alpha: 0.15),
-                          ),
-                        ),
-                      ],
+                      barGroups: List.generate(monthly.length, (i) {
+                        final calVal =
+                            (monthly[i]['calories'] as num).toDouble();
+                        return BarChartGroupData(
+                          x: i,
+                          barRods: [
+                            BarChartRodData(
+                              toY: calVal,
+                              color: calVal > 0
+                                  ? accent
+                                  : (isDark
+                                      ? AppColors.darkSurface
+                                      : AppColors.lightBorder),
+                              width: 6,
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(2.r),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
                     ),
                   ),
                 ),
@@ -860,7 +901,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       );
     }
 
-    final spots = <FlSpot>[];
+    // M7: weight grafiği BarChart standardına çevrildi.
     double minW = double.infinity;
     double maxW = 0.0;
 
@@ -868,16 +909,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
       final w = (logs[i]['weight'] as num).toDouble();
       if (w < minW) minW = w;
       if (w > maxW) maxW = w;
-      spots.add(FlSpot(i.toDouble(), w));
     }
     if (minW == double.infinity) minW = 50;
-    minW = (minW - 5).clamp(20.0, 300.0);
-    maxW = maxW + 5;
+    // BarChart Y baseline 0'dan değil, min - 5'ten başlasın diye baseline kaydır.
+    final baseline = (minW - 5).clamp(0.0, 300.0);
+    final ceiling = maxW + 5;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Line chart
         Container(
           height: 250.h,
           padding: EdgeInsets.fromLTRB(16.w, 24.h, 24.w, 16.h),
@@ -886,8 +926,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
             borderRadius: BorderRadius.circular(16.r),
             border: border,
           ),
-          child: LineChart(
-            LineChartData(
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              minY: baseline,
+              maxY: ceiling,
+              barTouchData: BarTouchData(enabled: false),
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
@@ -953,36 +997,23 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
               ),
               borderData: FlBorderData(show: false),
-              minX: 0,
-              maxX: (logs.length - 1).toDouble() > 0
-                  ? (logs.length - 1).toDouble()
-                  : 1,
-              minY: minW,
-              maxY: maxW,
-              lineBarsData: [
-                LineChartBarData(
-                  spots: spots,
-                  isCurved: true,
-                  color: AppColors.violet,
-                  barWidth: 3,
-                  isStrokeCapRound: true,
-                  dotData: FlDotData(
-                    show: true,
-                    getDotPainter: (spot, percent, barData, index) {
-                      return FlDotCirclePainter(
-                        radius: 4,
-                        color: AppColors.violet,
-                        strokeWidth: 2,
-                        strokeColor: cardBg,
-                      );
-                    },
-                  ),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    color: AppColors.violet.withValues(alpha: 0.15),
-                  ),
-                ),
-              ],
+              barGroups: List.generate(logs.length, (i) {
+                final w = (logs[i]['weight'] as num).toDouble();
+                return BarChartGroupData(
+                  x: i,
+                  barRods: [
+                    BarChartRodData(
+                      fromY: baseline,
+                      toY: w,
+                      color: AppColors.violet,
+                      width: (logs.length > 30 ? 4.0 : 8.0),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(2.r),
+                      ),
+                    ),
+                  ],
+                );
+              }),
             ),
           ),
         ),

@@ -12,5 +12,9 @@
 	<array>
 		<string>group.com.fatihaydogdu.eatiq</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.fatihaydogdu.eatiq</string>
+	</array>
 </dict>
 </plist>

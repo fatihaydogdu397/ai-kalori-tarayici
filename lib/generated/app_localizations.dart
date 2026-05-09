@@ -816,6 +816,36 @@ abstract class AppLocalizations {
   /// **'İnternet bağlantısı yok.'**
   String get errorNetwork;
 
+  /// No description provided for @errorTryAgain.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bir sorun oluştu. Lütfen tekrar dene.'**
+  String get errorTryAgain;
+
+  /// No description provided for @onboardingAvoidFoodsTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaçınılacak yiyecekler'**
+  String get onboardingAvoidFoodsTitle;
+
+  /// No description provided for @onboardingAvoidFoodsSub.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu yiyecekler diyet planı önerilerinde kullanılmaz.'**
+  String get onboardingAvoidFoodsSub;
+
+  /// No description provided for @onboardingAvoidFoodsHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yiyecek yaz (ör. mantar)'**
+  String get onboardingAvoidFoodsHint;
+
+  /// No description provided for @onboardingAvoidFoodsAdd.
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekle'**
+  String get onboardingAvoidFoodsAdd;
+
   /// No description provided for @retry.
   ///
   /// In tr, this message translates to:
@@ -843,7 +873,7 @@ abstract class AppLocalizations {
   /// No description provided for @bloodTestHeadline.
   ///
   /// In tr, this message translates to:
-  /// **'Sağlık raporunu yükle'**
+  /// **'Kan tahlilini yükle'**
   String get bloodTestHeadline;
 
   /// No description provided for @bloodTestSubtitle.
@@ -851,6 +881,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Kan tahlilini yüklersen diyet planın ve önerilerimiz sana daha özel olur. Opsiyoneldir, istediğin zaman profilinden ekleyebilirsin.'**
   String get bloodTestSubtitle;
+
+  /// No description provided for @bloodTestUploadedListTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklenenler'**
+  String get bloodTestUploadedListTitle;
 
   /// No description provided for @bloodTestPickFile.
   ///

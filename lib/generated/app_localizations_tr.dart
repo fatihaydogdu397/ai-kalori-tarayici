@@ -380,6 +380,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errorNetwork => 'İnternet bağlantısı yok.';
 
   @override
+  String get errorTryAgain => 'Bir sorun oluştu. Lütfen tekrar dene.';
+
+  @override
+  String get onboardingAvoidFoodsTitle => 'Kaçınılacak yiyecekler';
+
+  @override
+  String get onboardingAvoidFoodsSub =>
+      'Bu yiyecekler diyet planı önerilerinde kullanılmaz.';
+
+  @override
+  String get onboardingAvoidFoodsHint => 'Yiyecek yaz (ör. mantar)';
+
+  @override
+  String get onboardingAvoidFoodsAdd => 'Ekle';
+
+  @override
   String get retry => 'Tekrar dene';
 
   @override
@@ -392,11 +408,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get bloodTestTitle => 'Kan Tahlili';
 
   @override
-  String get bloodTestHeadline => 'Sağlık raporunu yükle';
+  String get bloodTestHeadline => 'Kan tahlilini yükle';
 
   @override
   String get bloodTestSubtitle =>
       'Kan tahlilini yüklersen diyet planın ve önerilerimiz sana daha özel olur. Opsiyoneldir, istediğin zaman profilinden ekleyebilirsin.';
+
+  @override
+  String get bloodTestUploadedListTitle => 'Yüklenenler';
 
   @override
   String get bloodTestPickFile => 'Dosya seç';

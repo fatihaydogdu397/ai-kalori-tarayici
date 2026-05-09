@@ -1,10 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
-import 'diet_plan_loading_screen.dart';
+import '../services/api/nutrition_service.dart';
+
+/// DietProfileEditScreen pop dönüş değerleri. Caller bu sentinel'leri okuyup
+/// "kaydedildi" / "regenerate" akışlarını inline tetikler.
+const String kDietEditSaved = '__diet_edit_saved__';
+const String kDietEditRegenerate = '__diet_edit_regenerate__';
 
 // ── Pill & option data (mirrors dietary_anamnesis_screen.dart) ────────────────
 const _restrictionOptions = [
@@ -18,11 +24,6 @@ const _restrictionOptions = [
   ('halal', '☪️', 'Halal'),
 ];
 
-const _cookOptions = [
-  ('quick', '⚡', 'Quick', '< 15 min'),
-  ('medium', '🍳', 'Moderate', '15–30 min'),
-  ('relaxed', '👨‍🍳', 'Relaxed', '30–60 min'),
-];
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 class DietProfileEditScreen extends StatefulWidget {
@@ -35,8 +36,20 @@ class DietProfileEditScreen extends StatefulWidget {
 class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
   late Set<String> _restrictions;
   late int _mealsPerDay;
-  late String _cookingTime;
+  late String _cookingTime; // M16: UI'dan kaldırıldı, default 'medium' BE'ye gider
   bool _saving = false;
+
+  // M16: filter restriction list
+  String _restrictionQuery = '';
+  final TextEditingController _restrictionFilterCtrl = TextEditingController();
+
+  // M16: disliked foods (BE food id'leri tutulur, label lookup için ayrı map)
+  late Set<String> _dislikedIds;
+  final Map<String, String> _dislikedLabels = {};
+  final TextEditingController _foodSearchCtrl = TextEditingController();
+  Timer? _foodSearchDebounce;
+  List<({String id, String name})> _foodResults = const [];
+  bool _foodSearching = false;
 
   @override
   void initState() {
@@ -45,6 +58,15 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
     _restrictions = Set.from(p.dietRestrictions.isEmpty ? ['none'] : p.dietRestrictions);
     _mealsPerDay = p.dietMealsPerDay;
     _cookingTime = p.dietCookingTime;
+    _dislikedIds = Set.from(p.dislikedFoodIds);
+  }
+
+  @override
+  void dispose() {
+    _restrictionFilterCtrl.dispose();
+    _foodSearchCtrl.dispose();
+    _foodSearchDebounce?.cancel();
+    super.dispose();
   }
 
   Future<void> _save({bool regenerate = false}) async {
@@ -58,25 +80,61 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
       cookingTime: _cookingTime,
       budget: 'medium',
       notes: '',
+      dislikedFoodIds: _dislikedIds.toList(),
     );
     if (!mounted) return;
+    // Yeni sayfa push etmiyoruz; pop sonucu sentinel ile dönüyor. Çağıran
+    // (weekly diet plan ekranı) regenerate isteğini inline overlay loader ile
+    // işliyor — kullanıcı "geri" basmış gibi hisseder.
+    Navigator.pop(context, regenerate ? kDietEditRegenerate : kDietEditSaved);
+  }
 
-    if (regenerate) {
-      final data = {
-        'restrictions': _restrictions.toList(),
-        'cuisines': const <String>[],
-        'mealsPerDay': _mealsPerDay,
-        'cookingTime': _cookingTime,
-        'budget': 'medium',
-        'notes': '',
-      };
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => DietPlanLoadingScreen(anamnesisData: data)),
-      );
-    } else {
-      Navigator.pop(context);
+  void _onFoodSearchChanged(String v) {
+    _foodSearchDebounce?.cancel();
+    final q = v.trim();
+    if (q.length < 3) {
+      setState(() {
+        _foodResults = const [];
+        _foodSearching = false;
+      });
+      return;
     }
+    setState(() => _foodSearching = true);
+    _foodSearchDebounce = Timer(const Duration(milliseconds: 350), () async {
+      try {
+        final rows = await NutritionService.instance.foods(search: q, limit: 15);
+        if (!mounted) return;
+        setState(() {
+          _foodResults = rows
+              .map((r) => (
+                    id: (r['id'] ?? '') as String,
+                    name: (r['name'] ?? '') as String,
+                  ))
+              .where((e) => e.id.isNotEmpty && e.name.isNotEmpty)
+              .toList(growable: false);
+          _foodSearching = false;
+        });
+      } catch (_) {
+        if (!mounted) return;
+        setState(() {
+          _foodResults = const [];
+          _foodSearching = false;
+        });
+      }
+    });
+  }
+
+  void _addDislike(({String id, String name}) item) {
+    setState(() {
+      _dislikedIds.add(item.id);
+      _dislikedLabels[item.id] = item.name;
+      _foodSearchCtrl.clear();
+      _foodResults = const [];
+    });
+  }
+
+  void _removeDislike(String id) {
+    setState(() => _dislikedIds.remove(id));
   }
 
   void _toggleRestriction(String id) {
@@ -149,11 +207,21 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
 
                     // ── Restrictions ──────────────────────────────────
                     _SectionTitle(title: 'Food Restrictions', isDark: isDark),
+                    SizedBox(height: 10.h),
+                    _SearchField(
+                      controller: _restrictionFilterCtrl,
+                      hint: 'Filter restrictions...',
+                      isDark: isDark,
+                      onChanged: (v) => setState(() => _restrictionQuery = v.trim().toLowerCase()),
+                    ),
                     SizedBox(height: 12.h),
                     Wrap(
                       spacing: 8.w,
                       runSpacing: 8.h,
-                      children: _restrictionOptions.map((opt) {
+                      children: _restrictionOptions.where((opt) {
+                        if (_restrictionQuery.isEmpty) return true;
+                        return opt.$3.toLowerCase().contains(_restrictionQuery);
+                      }).map((opt) {
                         final isSelected = _restrictions.contains(opt.$1);
                         return _EditPill(
                           label: '${opt.$2} ${opt.$3}',
@@ -179,28 +247,81 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
 
                     SizedBox(height: 28.h),
 
-                    // ── Cooking time ──────────────────────────────────
-                    _SectionTitle(title: 'Cooking Time', isDark: isDark),
-                    SizedBox(height: 12.h),
-                    ..._cookOptions.map((opt) => _OptionRow(
-                      id: opt.$1,
-                      emoji: opt.$2,
-                      title: opt.$3,
-                      subtitle: opt.$4,
-                      isSelected: _cookingTime == opt.$1,
+                    // ── Foods to avoid (dislikes) ─────────────────────
+                    _SectionTitle(title: 'Foods to Avoid', isDark: isDark),
+                    SizedBox(height: 10.h),
+                    _SearchField(
+                      controller: _foodSearchCtrl,
+                      hint: 'Search foods (e.g. mushroom)',
                       isDark: isDark,
-                      accent: accent,
-                      onTap: () {
-                        setState(() => _cookingTime = opt.$1);
-                        HapticFeedback.selectionClick();
-                      },
-                    )),
+                      onChanged: _onFoodSearchChanged,
+                    ),
+                    if (_foodSearching) ...[
+                      SizedBox(height: 12.h),
+                      const Center(child: CircularProgressIndicator()),
+                    ] else if (_foodResults.isNotEmpty) ...[
+                      SizedBox(height: 8.h),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.darkCard : AppColors.lightCard,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            for (final r in _foodResults)
+                              InkWell(
+                                onTap: () => _addDislike(r),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          r.name,
+                                          style: TextStyle(fontSize: 13.sp, color: textPrimary),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      Icon(Icons.add_rounded, size: 18.sp, color: accent),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (_dislikedIds.isNotEmpty) ...[
+                      SizedBox(height: 12.h),
+                      Wrap(
+                        spacing: 8.w,
+                        runSpacing: 8.h,
+                        children: _dislikedIds.map((id) {
+                          final label = _dislikedLabels[id] ?? id;
+                          return Chip(
+                            label: Text(label, style: TextStyle(fontSize: 12.sp)),
+                            backgroundColor: isDark ? AppColors.darkCard : AppColors.lightCard,
+                            side: BorderSide(
+                              color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                              width: 0.8,
+                            ),
+                            deleteIcon: Icon(Icons.close_rounded, size: 14.sp, color: textMuted),
+                            onDeleted: () => _removeDislike(id),
+                          );
+                        }).toList(),
+                      ),
+                    ],
 
                     SizedBox(height: 32.h),
 
                     // ── Regenerate CTA ────────────────────────────────
                     SizedBox(
                       width: double.infinity,
+                      height: 52.h,
                       child: ElevatedButton.icon(
                         onPressed: _saving ? null : () => _save(regenerate: true),
                         icon: _saving
@@ -221,7 +342,6 @@ class _DietProfileEditScreenState extends State<DietProfileEditScreen> {
                           backgroundColor: accent,
                           foregroundColor: accentFg,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                          padding: EdgeInsets.symmetric(vertical: 16.h),
                           elevation: 0,
                         ),
                       ),
@@ -387,60 +507,53 @@ class _MealsStepper extends StatelessWidget {
   }
 }
 
-// ── Option row ────────────────────────────────────────────────────────────────
-class _OptionRow extends StatelessWidget {
-  final String id, emoji, title, subtitle;
-  final bool isSelected, isDark;
-  final Color accent;
-  final VoidCallback onTap;
+// ── Search field (M16) ────────────────────────────────────────────────────────
+class _SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final bool isDark;
+  final ValueChanged<String> onChanged;
 
-  const _OptionRow({
-    required this.id,
-    required this.emoji,
-    required this.title,
-    required this.subtitle,
-    required this.isSelected,
+  const _SearchField({
+    required this.controller,
+    required this.hint,
     required this.isDark,
-    required this.accent,
-    required this.onTap,
+    required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 140),
-        margin: EdgeInsets.only(bottom: 8.h),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: isSelected ? accent.withValues(alpha: isDark ? 0.12 : 0.08) : (isDark ? AppColors.darkCard : AppColors.lightCard),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: isSelected ? accent : (isDark ? AppColors.darkSurface : AppColors.lightBorder),
-            width: isSelected ? 1.5 : 0.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Text(emoji, style: TextStyle(fontSize: 20.sp)),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: textPrimary)),
-                  Text(subtitle, style: TextStyle(fontSize: 11.sp, color: textMuted)),
-                ],
+    final fg = isDark ? AppColors.darkText : AppColors.lightText;
+    final muted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final fieldBg = isDark ? AppColors.darkCard : AppColors.lightCard;
+    final border = isDark ? AppColors.darkSurface : AppColors.lightBorder;
+    return Container(
+      height: 44.h,
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: fieldBg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: border, width: 0.8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.search_rounded, color: muted, size: 18.sp),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              onChanged: onChanged,
+              style: TextStyle(fontSize: 13.sp, color: fg),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(fontSize: 13.sp, color: muted),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.zero,
               ),
             ),
-            if (isSelected)
-              Icon(Icons.check_circle_rounded, color: accent, size: 18.sp),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

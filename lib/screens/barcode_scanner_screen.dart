@@ -7,6 +7,10 @@ import '../generated/app_localizations.dart';
 import 'result_screen.dart';
 import 'package:provider/provider.dart';
 
+/// BarcodeScannerScreen.pop dönüş değeri olarak kullanılır. Caller bunu
+/// görünce kullanıcıya "barkod bulunamadı" snackbar'ı gösterir.
+const String kBarcodeNotFound = '__barcode_not_found__';
+
 class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
 
@@ -31,28 +35,22 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     final barcode = capture.barcodes.firstOrNull?.rawValue;
     if (barcode == null) return;
 
+    // Tek-shot: barkod okunduğu anda scanner durur. Bulunsa da bulunmasa da
+    // ekran kapanır — kullanıcı sürekli istek atan bir loop'ta sıkışmaz.
     setState(() { _scanning = false; _loading = true; });
     await _controller.stop();
 
-    final l = AppLocalizations.of(context);
     final analysis = await _api.fetchByBarcode(barcode);
 
     if (!mounted) return;
 
     if (analysis == null) {
-      setState(() { _loading = false; _scanning = true; });
-      _controller.start();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l.barcodeNotFound),
-          backgroundColor: AppColors.coral,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      // Bulamadık: caller'a sentinel sonuç bırak ve geri dön. Snackbar'ı
+      // home gösterir; bu ekran kapanırken snackbar kaybolmasın diye.
+      Navigator.pop(context, kBarcodeNotFound);
       return;
     }
 
-    // DB'ye kaydet
     await context.read<AppProvider>().saveManualEntry(analysis);
 
     if (!mounted) return;

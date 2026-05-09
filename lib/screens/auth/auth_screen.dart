@@ -148,7 +148,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   const Spacer(),
                   
                   if (_isLoading)
-                    Center(child: CircularProgressIndicator(color: AppColors.lime))
+                    const Center(child: CircularProgressIndicator())
                   else ...[
                     // Social Buttons
                     _SocialButton(

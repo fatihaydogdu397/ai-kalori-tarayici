@@ -257,7 +257,7 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
 
               // Action Button
               if (_isLoading)
-                Center(child: CircularProgressIndicator(color: AppColors.lime))
+                const Center(child: CircularProgressIndicator())
               else
                 ElevatedButton(
                   onPressed: _secondsLeft > 0 ? _verifyOtp : null,

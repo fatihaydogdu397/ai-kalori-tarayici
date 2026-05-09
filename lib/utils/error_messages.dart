@@ -33,9 +33,13 @@ String localizedError(BuildContext context, Object error) {
       return l.errorAuthInvalidOtp;
     case 'auth.too_many_otp_attempts':
       return l.errorAuthTooManyAttempts;
+    // profile
+    case 'profile.user_not_found':
+      return l.errorAuthSignInAgain;
     // premium
     case 'premium.required':
     case 'premium.authentication_required':
+    case 'PREMIUM_REQUIRED':
       return l.errorPremiumRequired;
     // food
     case 'food.daily_scan_limit_reached':
@@ -52,9 +56,16 @@ String localizedError(BuildContext context, Object error) {
       return l.errorFoodInvalidBarcode;
     case 'food.macro_limit_exceeded':
       return l.errorFoodMacroLimit;
+    case 'food.invalid_date':
+      return l.errorGeneric;
+    case 'food.duplicate_client_request_id':
+      return l.errorTryAgain;
     // diet plan
     case 'diet_plan.weekly_limit_exceeded':
+    case 'WEEKLY_LIMIT_EXCEEDED':
       return l.errorDietPlanWeeklyLimit;
+    case 'diet_plan.not_found_after_generation':
+      return l.errorTryAgain;
     case 'diet_plan.macros_not_set':
       return l.errorDietPlanMacrosNotSet;
     case 'diet_plan.not_active':
@@ -86,10 +97,16 @@ String localizedError(BuildContext context, Object error) {
     case 'RATE_LIMITED':
       return l.errorRateLimited;
     case 'common.invalid_input':
+    case 'common.invalid_timezone_offset':
     case 'BAD_USER_INPUT':
       return l.errorInvalidInput;
+    case 'common.unknown':
+    case 'INTERNAL_SERVER_ERROR':
+      return l.errorGeneric;
     case 'NETWORK_ERROR':
       return l.errorNetwork;
+    case 'QUEUED':
+      return l.errorTryAgain;
     default:
       return l.errorGeneric;
   }

@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(*)",
-      "Read(//Users/fatihaydogdu/Claude/devforge/production/sync/**)"
+      "Read(//Users/fatihaydogdu/Claude/devforge/production/sync/**)",
+      "Read(//private/tmp/**)",
+      "mcp__claude_ai_Atlassian_Rovo__getAccessibleAtlassianResources",
+      "mcp__claude_ai_Atlassian_Rovo__createJiraIssue",
+      "mcp__claude_ai_Atlassian_Rovo__createIssueLink"
     ]
   }
 }

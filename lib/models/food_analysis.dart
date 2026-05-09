@@ -210,14 +210,32 @@ class FoodAnalysis {
   /// then its canonical name, then the summary. `summary` is already cleaned
   /// of the BE `Manuel giriş:` / `Manual entry:` prefix at parse time
   /// (see [_stripManualPrefix]).
+  ///
+  /// M10: Diet-plan'dan oluşturulan FoodAnalysis kayıtlarında BE bazen tek
+  /// food.name içinde tüm öğün içeriğini "Yulaf + Yumurta + Süt" formatında
+  /// birleştirip yolluyor. Bu hem uzun hem dağınık görünüyor; burada split
+  /// edip max 2 öğeyle "+N" eki olarak normalize ediyoruz.
   String get displayName {
-    if (foods.isNotEmpty) {
-      final nameTr = foods.first.nameTr.trim();
-      if (nameTr.isNotEmpty) return nameTr;
-      final name = foods.first.name.trim();
-      if (name.isNotEmpty) return name;
-    }
-    return summary.trim();
+    if (foods.isEmpty) return summary.trim();
+    final raw = foods.first.nameTr.trim().isNotEmpty
+        ? foods.first.nameTr.trim()
+        : foods.first.name.trim();
+    if (raw.isEmpty) return summary.trim();
+    return _normalizeMealLabel(raw);
+  }
+
+  static String _normalizeMealLabel(String raw) {
+    // BE diet-plan birleştirilmiş içerik göndermişse (örn. "X + Y + Z + ...")
+    // ilk 2 öğeyi virgülle göster, kalan sayıyı "+N" olarak ekle.
+    if (!raw.contains('+')) return raw;
+    final parts = raw
+        .split('+')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    if (parts.length <= 1) return raw;
+    if (parts.length == 2) return '${parts[0]}, ${parts[1]}';
+    return '${parts[0]}, ${parts[1]} +${parts.length - 2}';
   }
 
   /// Removes the BE `saveManualFood` prefix so it never leaks into any UI

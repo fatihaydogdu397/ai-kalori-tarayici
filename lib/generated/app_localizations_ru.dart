@@ -385,6 +385,22 @@ class AppLocalizationsRu extends AppLocalizations {
   String get errorNetwork => 'Нет подключения к интернету. Проверьте сеть.';
 
   @override
+  String get errorTryAgain => 'Bir sorun oluştu. Lütfen tekrar dene.';
+
+  @override
+  String get onboardingAvoidFoodsTitle => 'Kaçınılacak yiyecekler';
+
+  @override
+  String get onboardingAvoidFoodsSub =>
+      'Bu yiyecekler diyet planı önerilerinde kullanılmaz.';
+
+  @override
+  String get onboardingAvoidFoodsHint => 'Yiyecek yaz (ör. mantar)';
+
+  @override
+  String get onboardingAvoidFoodsAdd => 'Ekle';
+
+  @override
   String get retry => 'Повторить';
 
   @override
@@ -402,6 +418,9 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get bloodTestSubtitle =>
       'Загрузка отчёта позволит нам лучше адаптировать план и рекомендации. По желанию — можно добавить в любое время из профиля.';
+
+  @override
+  String get bloodTestUploadedListTitle => 'Yüklenenler';
 
   @override
   String get bloodTestPickFile => 'Выбрать файл';

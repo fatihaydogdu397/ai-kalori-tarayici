@@ -40,6 +40,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Allergies & restrictions (BE keys; writeTokens expanded at finish).
   final Set<String> _restrictionKeys = {};
   final Set<String> _allergenKeys = {};
+  // Free-form food names to avoid. Persisted to BE `user.dislikes` (TEXT[]),
+  // which the diet-plan / recommendation services use to exclude foods at
+  // generation time.
+  final Set<String> _dislikes = <String>{};
   List<DietaryPreferenceOption> _dietaryOptions = const [];
 
   int get _calculatedAge {
@@ -99,6 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       dietTypes: _dietTypes.toList(growable: false),
       allergens: allergenTokens,
       dietRestrictions: restrictionTokens,
+      dislikes: _dislikes.toList(growable: false),
     );
     provider.loadHistory();
     provider.loadTodayStats();
@@ -255,6 +260,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     textMuted: textMuted,
                     restrictionKeys: _restrictionKeys,
                     allergenKeys: _allergenKeys,
+                    dislikes: _dislikes,
                     onOptionsLoaded: (opts) => setState(() => _dietaryOptions = opts),
                     onToggle: () => setState(() {}),
                   ),
@@ -295,13 +301,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
                 child: SizedBox(
                   width: double.infinity,
+                  height: 52.h,
                   child: ElevatedButton(
                     onPressed: _next,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accent,
                       foregroundColor: isDark ? AppColors.void_ : AppColors.snow,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                       elevation: 0,
                     ),
                     child: Text(
@@ -1030,6 +1036,10 @@ class _PageWeeklyPace extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final accent = isDark ? AppColors.lime : AppColors.void_;
     final maxPace = goal == 'maintain' ? 0.5 : 1.0;
+    final presets = goal == 'maintain'
+        ? const <double>[0.1, 0.3, 0.5]
+        : const <double>[0.1, 0.5, 1.0];
+    const emojis = ['🐌', '🐰', '🐎'];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
@@ -1040,7 +1050,7 @@ class _PageWeeklyPace extends StatelessWidget {
           const SizedBox(height: 8),
           Text(l.onboardingWeeklyPaceSub, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
           const Spacer(),
-          // Big value
+          // Big value (selected pace)
           Center(
             child: RichText(
               text: TextSpan(
@@ -1058,20 +1068,29 @@ class _PageWeeklyPace extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          // Emoji markers
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('🐌', style: TextStyle(fontSize: 22.sp)),
-                Text('🐰', style: TextStyle(fontSize: 22.sp)),
-                Text('🐎', style: TextStyle(fontSize: 22.sp)),
-              ],
-            ),
+          // Tap-able preset cards: emoji + value below
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(3, (i) {
+              final value = presets[i];
+              final selected = (pace - value).abs() < 0.05;
+              return _PacePresetCard(
+                emoji: emojis[i],
+                value: value,
+                selected: selected,
+                accent: accent,
+                isDark: isDark,
+                textPrimary: textPrimary,
+                textMuted: textMuted,
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  onChanged(value);
+                },
+              );
+            }),
           ),
-          const SizedBox(height: 8),
-          // Slider
+          const SizedBox(height: 16),
+          // Slider for fine-tuning between presets
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               trackHeight: 4,
@@ -1092,20 +1111,69 @@ class _PageWeeklyPace extends StatelessWidget {
               },
             ),
           ),
-          // Min / Max labels
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+}
+
+class _PacePresetCard extends StatelessWidget {
+  final String emoji;
+  final double value;
+  final bool selected;
+  final Color accent;
+  final bool isDark;
+  final Color textPrimary, textMuted;
+  final VoidCallback onTap;
+
+  const _PacePresetCard({
+    required this.emoji,
+    required this.value,
+    required this.selected,
+    required this.accent,
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = selected
+        ? accent.withValues(alpha: 0.12)
+        : (isDark ? AppColors.darkSurface : AppColors.lightCard);
+    final border = selected
+        ? accent
+        : (isDark ? AppColors.darkSurface : AppColors.lightBorder);
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: bg,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: border, width: selected ? 1.5 : 1),
+            ),
+            child: Column(
               children: [
-                Text('0.1 kg', style: AppTypography.labelSmall.copyWith(color: textMuted)),
-                Text('${(maxPace / 2).toStringAsFixed(1)} kg', style: AppTypography.labelSmall.copyWith(color: textMuted)),
-                Text('$maxPace kg', style: AppTypography.labelSmall.copyWith(color: textMuted)),
+                Text(emoji, style: TextStyle(fontSize: 26.sp)),
+                const SizedBox(height: 6),
+                Text(
+                  '${value.toStringAsFixed(1)} kg',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: selected ? textPrimary : textMuted,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
-          const Spacer(),
-        ],
+        ),
       ),
     );
   }
@@ -1176,7 +1244,6 @@ class _PageActivity extends StatelessWidget {
 
 // ── Page 9: Beslenme Türü ────────────────────────────────────────────────────
 // EAT-117: Seçenekler BE `dietaryPreferenceOptions` query'sinden çekilir.
-// Network hatası / offline durumda hardcoded fallback kullanılır.
 class _PageDietType extends StatefulWidget {
   final bool isDark;
   final Color textPrimary, textMuted;
@@ -1200,20 +1267,16 @@ class _PageDietTypeState extends State<_PageDietType> {
   }
 
   Future<void> _loadOptions() async {
-    try {
-      final all = await NutritionService.instance.dietaryPreferenceOptions();
-      if (!mounted) return;
-      final dietTypes = all
-          .where((o) => o.category == 'DIET_TYPE')
-          .map((o) => (
-                key: (o.writeTokens.isNotEmpty ? o.writeTokens.first : o.key),
-                defaultLabel: o.defaultLabel,
-              ))
-          .toList(growable: false);
-      setState(() => _remoteOptions = dietTypes);
-    } catch (_) {
-      // Sessiz düş — hardcoded fallback kullanılacak.
-    }
+    final all = await NutritionService.instance.dietaryPreferenceOptions();
+    if (!mounted) return;
+    final dietTypes = all
+        .where((o) => o.category == 'DIET_TYPE')
+        .map((o) => (
+              key: (o.writeTokens.isNotEmpty ? o.writeTokens.first : o.key),
+              defaultLabel: o.defaultLabel,
+            ))
+        .toList(growable: false);
+    setState(() => _remoteOptions = dietTypes);
   }
 
   // Key → emoji map. BE yeni key ekleyince burada emoji tanımlanır; tanımsız
@@ -1267,19 +1330,7 @@ class _PageDietTypeState extends State<_PageDietType> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-
-    // BE yanıtı geldiyse onu, gelmediyse (loading / error) statik fallback'i kullan.
-    final options = _remoteOptions ?? const [
-      (key: 'balanced', defaultLabel: 'Balanced'),
-      (key: 'mediterranean', defaultLabel: 'Mediterranean'),
-      (key: 'high_protein', defaultLabel: 'High-protein'),
-      (key: 'low_carb', defaultLabel: 'Low-carb'),
-      (key: 'keto', defaultLabel: 'Keto'),
-      (key: 'vegetarian', defaultLabel: 'Vegetarian'),
-      (key: 'vegan', defaultLabel: 'Vegan'),
-      (key: 'pescatarian', defaultLabel: 'Pescatarian'),
-      (key: 'custom', defaultLabel: 'Custom'),
-    ];
+    final options = _remoteOptions;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
@@ -1290,17 +1341,23 @@ class _PageDietTypeState extends State<_PageDietType> {
           const SizedBox(height: 8),
           Text(l.onboardingDietTypeSub, style: AppTypography.bodyMedium.copyWith(color: widget.textMuted)),
           const SizedBox(height: 32),
-          ...options.map(
-            (opt) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _PillButton(
-                label: '${_emojiFor(opt.key)}  ${_labelFor(opt.key, opt.defaultLabel, l)}',
-                selected: widget.selected.contains(opt.key),
-                isDark: widget.isDark,
-                onTap: () => widget.onToggle(opt.key),
+          if (options == null)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 48),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else
+            ...options.map(
+              (opt) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _PillButton(
+                  label: '${_emojiFor(opt.key)}  ${_labelFor(opt.key, opt.defaultLabel, l)}',
+                  selected: widget.selected.contains(opt.key),
+                  isDark: widget.isDark,
+                  onTap: () => widget.onToggle(opt.key),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -1316,6 +1373,7 @@ class _PageAllergiesRestrictions extends StatefulWidget {
   final Color textPrimary, textMuted;
   final Set<String> restrictionKeys;
   final Set<String> allergenKeys;
+  final Set<String> dislikes;
   final ValueChanged<List<DietaryPreferenceOption>> onOptionsLoaded;
   final VoidCallback onToggle;
 
@@ -1325,6 +1383,7 @@ class _PageAllergiesRestrictions extends StatefulWidget {
     required this.textMuted,
     required this.restrictionKeys,
     required this.allergenKeys,
+    required this.dislikes,
     required this.onOptionsLoaded,
     required this.onToggle,
   });
@@ -1337,6 +1396,34 @@ class _PageAllergiesRestrictionsState extends State<_PageAllergiesRestrictions> 
   List<DietaryPreferenceOption> _restrictions = const [];
   List<DietaryPreferenceOption> _allergens = const [];
   bool _loaded = false;
+  final TextEditingController _dislikeCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _dislikeCtrl.dispose();
+    super.dispose();
+  }
+
+  void _addDislike() {
+    final raw = _dislikeCtrl.text.trim();
+    if (raw.isEmpty) return;
+    // BE matches case-insensitively; store lowercase to dedupe in the Set.
+    final normalized = raw.toLowerCase();
+    if (widget.dislikes.contains(normalized)) {
+      _dislikeCtrl.clear();
+      return;
+    }
+    widget.dislikes.add(normalized);
+    _dislikeCtrl.clear();
+    setState(() {});
+    widget.onToggle();
+  }
+
+  void _removeDislike(String value) {
+    widget.dislikes.remove(value);
+    setState(() {});
+    widget.onToggle();
+  }
 
   @override
   void initState() {
@@ -1431,8 +1518,148 @@ class _PageAllergiesRestrictionsState extends State<_PageAllergiesRestrictions> 
                         ))
                     .toList(growable: false),
               ),
+              const SizedBox(height: 24),
+            ],
+            // Free-form foods to avoid (BE `user.dislikes`).
+            Text(
+              l.onboardingAvoidFoodsTitle,
+              style: AppTypography.titleMedium.copyWith(color: widget.textMuted, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l.onboardingAvoidFoodsSub,
+              style: AppTypography.bodySmall.copyWith(color: widget.textMuted),
+            ),
+            const SizedBox(height: 12),
+            _DislikeInput(
+              controller: _dislikeCtrl,
+              isDark: widget.isDark,
+              hint: l.onboardingAvoidFoodsHint,
+              addLabel: l.onboardingAvoidFoodsAdd,
+              onSubmit: _addDislike,
+            ),
+            if (widget.dislikes.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: widget.dislikes
+                    .map((d) => _RemovableChip(
+                          label: d,
+                          isDark: widget.isDark,
+                          onRemove: () => _removeDislike(d),
+                        ))
+                    .toList(growable: false),
+              ),
             ],
           ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DislikeInput extends StatelessWidget {
+  final TextEditingController controller;
+  final bool isDark;
+  final String hint, addLabel;
+  final VoidCallback onSubmit;
+
+  const _DislikeInput({
+    required this.controller,
+    required this.isDark,
+    required this.hint,
+    required this.addLabel,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = isDark ? AppColors.lime : AppColors.void_;
+    final fg = isDark ? AppColors.darkText : AppColors.lightText;
+    final muted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final fieldBg = isDark ? AppColors.darkCard : AppColors.lightCard;
+    final border = isDark ? AppColors.darkSurface : AppColors.lightBorder;
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w),
+            decoration: BoxDecoration(
+              color: fieldBg,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: border, width: 1),
+            ),
+            child: TextField(
+              controller: controller,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => onSubmit(),
+              style: TextStyle(fontSize: 14.sp, color: fg),
+              decoration: InputDecoration(
+                hintText: hint,
+                hintStyle: TextStyle(fontSize: 14.sp, color: muted),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 14.h),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: onSubmit,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: accent,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Text(
+              addLabel,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: isDark ? AppColors.void_ : AppColors.snow,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RemovableChip extends StatelessWidget {
+  final String label;
+  final bool isDark;
+  final VoidCallback onRemove;
+
+  const _RemovableChip({required this.label, required this.isDark, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = isDark ? AppColors.darkText : AppColors.lightText;
+    final border = isDark ? AppColors.darkSurface : AppColors.lightBorder;
+    final iconColor = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(100.r),
+        border: Border.all(color: border, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: fg),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: onRemove,
+            behavior: HitTestBehavior.opaque,
+            child: Icon(Icons.close_rounded, size: 16.sp, color: iconColor),
+          ),
         ],
       ),
     );
@@ -1539,13 +1766,13 @@ class _PageNotification extends StatelessWidget {
           // Enable button
           SizedBox(
             width: double.infinity,
+            height: 52.h,
             child: ElevatedButton(
               onPressed: onEnable,
               style: ElevatedButton.styleFrom(
                 backgroundColor: accent,
                 foregroundColor: isDark ? AppColors.void_ : AppColors.snow,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                padding: const EdgeInsets.symmetric(vertical: 16),
                 elevation: 0,
               ),
               child: Text(
@@ -1650,13 +1877,13 @@ class _PageBloodTestOptional extends StatelessWidget {
           const Spacer(),
           SizedBox(
             width: double.infinity,
+            height: 52.h,
             child: OutlinedButton.icon(
               onPressed: onUpload,
               style: OutlinedButton.styleFrom(
                 foregroundColor: accent,
                 side: BorderSide(color: accent, width: 1.5),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                padding: const EdgeInsets.symmetric(vertical: 16),
               ),
               icon: Icon(Icons.upload_file_rounded, size: 20.sp),
               label: Text(
@@ -1849,7 +2076,7 @@ class _GoalCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(14.r),
@@ -1863,8 +2090,20 @@ class _GoalCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: AppTypography.titleMedium.copyWith(color: titleColor)),
-                  Text(subtitle, style: AppTypography.bodySmall.copyWith(color: subColor)),
+                  Text(
+                    title,
+                    style: AppTypography.titleMedium.copyWith(color: titleColor, fontSize: 16.sp),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: subColor,
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                      height: 1.35,
+                    ),
+                  ),
                 ],
               ),
             ),

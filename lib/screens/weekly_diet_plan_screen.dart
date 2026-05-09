@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../generated/app_localizations.dart';
+import '../services/app_provider.dart';
+import '../services/api/api_exception.dart';
 import '../services/api/diet_plan_service.dart';
 import '../services/api/nutrition_service.dart';
 import '../utils/error_messages.dart';
@@ -139,6 +142,40 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
     return date.year == now.year && date.month == now.month && date.day == now.day;
   }
 
+  // M19: Edit ekranından dönen sentinel'e göre regenerate'i bu ekran üzerinde
+  // non-dismissable dialog loader ile çalıştır. Ayrı loading screen'e push
+  // etmiyoruz — kullanıcı geri basmış gibi hissetmeli.
+  Future<void> _handleEditResult(Object? result) async {
+    if (result != kDietEditRegenerate) return;
+    if (!mounted) return;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final disliked = context.read<AppProvider>().dislikedFoodIds;
+      final plan = await DietPlanService.instance.generatePlan(
+        dislikedFoodIds: disliked.isEmpty ? null : disliked,
+      );
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).pop(); // close loader
+      setState(() {
+        _days = plan.days.toList();
+        _selectedDay = 0;
+      });
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      Navigator.of(context, rootNavigator: true).pop(); // close loader
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(localizedError(context, e)),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   // EAT-172: BE auto-revert plan'da değişiklik yapmış olabilir (linked food
   // entry silindiyse meal.completed = false). Pull-to-refresh ve
   // complete/uncomplete sonrası planın tamamı yeniden çekilir.
@@ -179,6 +216,17 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
       }
       // BE otomatik FoodAnalysis link'lerini günceller; planı yeniden çek.
       await _refreshPlan();
+      if (!mounted) return;
+      // Yeme aksiyonu (eat) yapıldıysa: home stats güncelle ve Daily tab'a dön.
+      // Geri alma (uncomplete) durumunda kullanıcı muhtemelen plan ekranında
+      // kalmak ister, navigation tetikleme.
+      if (!wasCompleted) {
+        final provider = context.read<AppProvider>();
+        await provider.loadTodayStats();
+        await provider.loadHistory();
+        if (!mounted) return;
+        provider.requestedHomeTab.value = 0;
+      }
     } catch (e) {
       if (!mounted) return;
       // Rollback.
@@ -497,64 +545,67 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               children: [
                 // EAT-138: swap meal
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _showSwapSheet(context, meal, dayIndex, mealIndex, isDark, accent, accentFg);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: accent,
-                      side: BorderSide(color: accent, width: 1.3),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                    ),
-                    icon: Icon(Icons.swap_horiz_rounded, size: 18.sp),
-                    label: Text(
-                      Localizations.localeOf(context).languageCode == 'tr' ? 'Değiştir' : 'Swap',
-                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                  child: SizedBox(
+                    height: 52.h,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showSwapSheet(context, meal, dayIndex, mealIndex, isDark, accent, accentFg);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: accent,
+                        side: BorderSide(color: accent, width: 1.3),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                      ),
+                      icon: Icon(Icons.swap_horiz_rounded, size: 18.sp),
+                      label: Text(
+                        Localizations.localeOf(context).languageCode == 'tr' ? 'Değiştir' : 'Swap',
+                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
-                  child: isToday
-                      ? ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _toggleMealEaten(dayIndex, mealIndex);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: meal.completed
-                                ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
-                                : accent,
-                            foregroundColor: meal.completed ? textPrimary : accentFg,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                            padding: EdgeInsets.symmetric(vertical: 14.h),
-                            elevation: 0,
+                  child: SizedBox(
+                    height: 52.h,
+                    child: isToday
+                        ? ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _toggleMealEaten(dayIndex, mealIndex);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: meal.completed
+                                  ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
+                                  : accent,
+                              foregroundColor: meal.completed ? textPrimary : accentFg,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                              elevation: 0,
+                            ),
+                            icon: Icon(
+                              meal.completed ? Icons.undo_rounded : Icons.restaurant_menu_rounded,
+                              size: 16.sp,
+                            ),
+                            label: Text(
+                              meal.completed ? l.dietPlanMarkNotEaten : l.dietPlanIAteThis,
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                            ),
+                          )
+                        : ElevatedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: accent,
+                              foregroundColor: accentFg,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                              elevation: 0,
+                            ),
+                            child: Text(
+                              Localizations.localeOf(context).languageCode == 'tr' ? 'Tamam' : 'Got it',
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                            ),
                           ),
-                          icon: Icon(
-                            meal.completed ? Icons.undo_rounded : Icons.restaurant_menu_rounded,
-                            size: 16.sp,
-                          ),
-                          label: Text(
-                            meal.completed ? l.dietPlanMarkNotEaten : l.dietPlanIAteThis,
-                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
-                          ),
-                        )
-                      : ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: accent,
-                            foregroundColor: accentFg,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                            padding: EdgeInsets.symmetric(vertical: 14.h),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            Localizations.localeOf(context).languageCode == 'tr' ? 'Tamam' : 'Got it',
-                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
-                          ),
-                        ),
+                  ),
                 ),
               ],
             ),
@@ -626,13 +677,29 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                     cardBg,
                     isTr,
                     onAccept: () {
+                      // M21 fix: meal NAME değişmez (öğün başlığı), sadece
+                      // içerik (foods) ve makrolar değişir. Önceki kod
+                      // ismi food listesiyle ezdiği için bottom sheet'te
+                      // "öğün ismi" alanına yiyecekler yazılıp foods alanı
+                      // boş kalıyordu.
+                      final swappedFoods = <DietMealFood>[
+                        for (var i = 0; i < rec!.items.length; i++)
+                          DietMealFood(
+                            id: '',
+                            position: i,
+                            name: rec!.items[i].name,
+                            portionDescription:
+                                '${rec!.items[i].portionGrams.round()} g',
+                            quantity: rec!.items[i].portionGrams,
+                            unit: 'g',
+                            foodId: rec!.items[i].foodId,
+                          ),
+                      ];
                       _applySwap(
                         dayIndex,
                         mealIndex,
                         DietMeal(
-                          name: rec!.items.isNotEmpty
-                              ? rec!.items.map((i) => i.name).take(3).join(' + ')
-                              : currentMeal.name,
+                          name: currentMeal.name,
                           category: currentMeal.category,
                           calories: rec!.actualCalories.round(),
                           protein: rec!.actualProtein.round(),
@@ -640,6 +707,7 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                           fat: rec!.actualFat.round(),
                           time: currentMeal.time,
                           emoji: currentMeal.emoji,
+                          foods: swappedFoods,
                         ),
                       );
                       Navigator.pop(sheetCtx);
@@ -789,35 +857,39 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
         Row(
           children: [
             Expanded(
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(sheetContext),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: textMuted,
-                  side: BorderSide(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                ),
-                child: Text(
-                  isTr ? 'Vazgeç' : 'Cancel',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+              child: SizedBox(
+                height: 52.h,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(sheetContext),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: textMuted,
+                    side: BorderSide(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  ),
+                  child: Text(
+                    isTr ? 'Vazgeç' : 'Cancel',
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
             ),
             SizedBox(width: 10.w),
             Expanded(
               flex: 2,
-              child: ElevatedButton(
-                onPressed: onAccept,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: accentFg,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  elevation: 0,
-                ),
-                child: Text(
-                  isTr ? 'Bunu kullan' : 'Use this',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+              child: SizedBox(
+                height: 52.h,
+                child: ElevatedButton(
+                  onPressed: onAccept,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accent,
+                    foregroundColor: accentFg,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    isTr ? 'Bunu kullan' : 'Use this',
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                  ),
                 ),
               ),
             ),
@@ -851,9 +923,14 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
               color: isDark ? AppColors.amber : AppColors.void_,
               textColor: textPrimary,
               isDark: isDark,
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context); // close sheet
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const DietProfileEditScreen()));
+                final result = await Navigator.push<Object?>(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DietProfileEditScreen()),
+                );
+                if (!mounted) return;
+                await _handleEditResult(result);
               },
             ),
           ],

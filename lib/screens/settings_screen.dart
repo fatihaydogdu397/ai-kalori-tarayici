@@ -6,6 +6,7 @@ import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
 import '../services/notification_service.dart';
 import '../services/api/api_exception.dart';
+import '../utils/error_messages.dart';
 import '../generated/app_localizations.dart';
 import 'blood_tests_screen.dart';
 import 'privacy_policy_screen.dart';
@@ -40,9 +41,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (!granted) return;
     }
     await s.apply();
-    if (s.enabled && s.summaryEnabled && mounted) {
-      await provider.syncNotification(AppLocalizations.of(context));
-    }
   }
 
   Future<void> _pickTime(
@@ -352,23 +350,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     provider,
                                   ),
                                 ),
-                                showDivider: true,
-                              ),
-                              _ReminderRow(
-                                emoji: '📊',
-                                label: l.dailySummaryTitle,
-                                enabled: _notifSettings.summaryEnabled,
-                                time: const TimeOfDay(hour: 20, minute: 0),
-                                isDark: isDark,
-                                textPrimary: textPrimary,
-                                textMuted: textMuted,
-                                divColor: divColor,
-                                accent: accent,
-                                onToggle: (v) => _saveAndApply(
-                                  _notifSettings.copyWith(summaryEnabled: v),
-                                  provider,
-                                ),
-                                onTimeTap: () {}, // Sabit saat
                                 showDivider: false,
                               ),
                             ],
@@ -710,11 +691,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Navigator.of(context, rootNavigator: true).pop(); // loader'ı kapat
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            isTr
-                ? 'Hesap silinemedi: ${e.message}'
-                : 'Account deletion failed: ${e.message}',
-          ),
+          content: Text(localizedError(context, e)),
           backgroundColor: danger,
           behavior: SnackBarBehavior.floating,
         ),
@@ -890,6 +867,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
+                height: 52.h,
                 child: ElevatedButton(
                   onPressed: () {
                     provider.setCalorieGoalAndSave(value.roundToDouble());
@@ -901,7 +879,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(
                     l.save,

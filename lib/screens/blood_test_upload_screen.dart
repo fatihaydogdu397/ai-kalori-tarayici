@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import '../models/blood_test.dart';
 import '../services/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/error_messages.dart';
@@ -32,6 +33,16 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
   DateTime? _testDate;
   bool _uploading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    // Önceden yüklenen tahlilleri çek (zaten cache'de varsa hızlı dönüş).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<AppProvider>().loadBloodTests();
+    });
+  }
 
   Future<void> _pickFile() async {
     try {
@@ -101,6 +112,10 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
           );
 
       if (!mounted) return;
+      // Yeni yüklenen kayıt da listede görünsün diye yeniden çek.
+      // Onboarding'de devam butonuna basıldığında liste güncel kalır.
+      await context.read<AppProvider>().loadBloodTests();
+      if (!mounted) return;
       widget.onCompleted?.call();
       if (widget.isOnboarding) {
         // Caller handles next navigation.
@@ -124,6 +139,7 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final accent = isDark ? AppColors.lime : AppColors.void_;
     final l = AppLocalizations.of(context);
+    final uploaded = context.watch<AppProvider>().bloodTests;
 
     return Scaffold(
       backgroundColor: bg,
@@ -158,14 +174,58 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
                 l.bloodTestSubtitle,
                 style: TextStyle(fontSize: 13.sp, color: textMuted, height: 1.4),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 20.h),
 
-              // File picker card
+              if (uploaded.isNotEmpty) ...[
+                Text(
+                  l.bloodTestUploadedListTitle,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: textMuted,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Container(
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(
+                      color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < uploaded.length; i++) ...[
+                        if (i > 0)
+                          Divider(
+                            height: 1,
+                            color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                          ),
+                        _UploadedTestRow(
+                          test: uploaded[i],
+                          isDark: isDark,
+                          textPrimary: textPrimary,
+                          textMuted: textMuted,
+                          accent: accent,
+                          l: l,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16.h),
+              ],
+
+              // File picker card — outer height locked to 52.h (matches Upload button)
               GestureDetector(
                 onTap: _uploading ? null : _pickFile,
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
+                  height: 52.h,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   decoration: BoxDecoration(
                     color: cardBg,
                     borderRadius: BorderRadius.circular(14.r),
@@ -179,26 +239,21 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
                       Icon(
                         _picked != null ? Icons.description_rounded : Icons.upload_file_rounded,
                         color: _picked != null ? accent : textMuted,
-                        size: 28,
+                        size: 22,
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _picked?.name ?? l.bloodTestPickFile,
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              _picked != null ? l.bloodTestReplaceFile : l.bloodTestFileTypesHint,
-                              style: TextStyle(fontSize: 11.sp, color: textMuted),
-                            ),
-                          ],
+                        child: Text(
+                          _picked?.name ?? l.bloodTestPickFile,
+                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        _picked != null ? l.bloodTestReplaceFile : l.bloodTestFileTypesHint,
+                        style: TextStyle(fontSize: 11.sp, color: textMuted),
                       ),
                     ],
                   ),
@@ -206,12 +261,13 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
               ),
               SizedBox(height: 12.h),
 
-              // Test date picker
+              // Test date picker — outer height locked to 52.h
               GestureDetector(
                 onTap: _uploading ? null : _pickDate,
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
+                  height: 52.h,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   decoration: BoxDecoration(
                     color: cardBg,
                     borderRadius: BorderRadius.circular(14.r),
@@ -281,6 +337,78 @@ class _BloodTestUploadScreenState extends State<BloodTestUploadScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _UploadedTestRow extends StatelessWidget {
+  final BloodTest test;
+  final bool isDark;
+  final Color textPrimary, textMuted, accent;
+  final AppLocalizations l;
+
+  const _UploadedTestRow({
+    required this.test,
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.accent,
+    required this.l,
+  });
+
+  String _statusLabel() {
+    switch (test.status) {
+      case BloodTestStatus.completed:
+        return l.bloodTestStatusCompleted;
+      case BloodTestStatus.failed:
+        return l.bloodTestStatusFailed;
+      case BloodTestStatus.pending:
+        return l.bloodTestStatusPending;
+    }
+  }
+
+  Color _statusColor() {
+    switch (test.status) {
+      case BloodTestStatus.completed:
+        return AppColors.lime;
+      case BloodTestStatus.failed:
+        return AppColors.coral;
+      case BloodTestStatus.pending:
+        return textMuted;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateLabel = test.testDate ??
+        '${test.createdAt.year.toString().padLeft(4, '0')}-'
+            '${test.createdAt.month.toString().padLeft(2, '0')}-'
+            '${test.createdAt.day.toString().padLeft(2, '0')}';
+    final statusColor = _statusColor();
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Icon(Icons.description_rounded, size: 20, color: textMuted),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  dateLabel,
+                  style: TextStyle(fontSize: 13.sp, color: textPrimary, fontWeight: FontWeight.w700),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  _statusLabel(),
+                  style: TextStyle(fontSize: 11.sp, color: statusColor, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

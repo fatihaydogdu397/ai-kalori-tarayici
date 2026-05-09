@@ -36,10 +36,32 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AppProvider>().loadHistory();
-      context.read<AppProvider>().loadTodayStats();
-      context.read<AppProvider>().syncBackendProfileAndSettings();
+      final provider = context.read<AppProvider>();
+      provider.loadHistory();
+      provider.loadTodayStats();
+      provider.syncBackendProfileAndSettings();
+      provider.requestedHomeTab.addListener(_onTabRequest);
     });
+  }
+
+  @override
+  void dispose() {
+    // Provider hâlâ alive olabilir; listener'ı temizle.
+    try {
+      context.read<AppProvider>().requestedHomeTab.removeListener(_onTabRequest);
+    } catch (_) {}
+    super.dispose();
+  }
+
+  void _onTabRequest() {
+    if (!mounted) return;
+    final provider = context.read<AppProvider>();
+    final requested = provider.requestedHomeTab.value;
+    if (requested == null) return;
+    if (requested != _tab) {
+      setState(() => _tab = requested);
+    }
+    provider.requestedHomeTab.value = null;
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -71,17 +93,14 @@ class _HomeScreenState extends State<HomeScreen> {
         _pickImage(source);
       }
     } else if (provider.state == AnalysisState.error) {
-      // EAT-179: provider'da `errorCode` BE catalog'undan geliyor; UI burada
-      // localize ediyor. 'limit_reached' eski sentinel değer için backward-compat.
-      if (provider.errorMessage == 'limit_reached' ||
-          provider.errorCode == 'food.daily_scan_limit_reached') {
+      if (provider.errorCode == 'food.daily_scan_limit_reached') {
         _showPaywall();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(localizedError(
               context,
-              ApiException(provider.errorMessage, code: provider.errorCode),
+              ApiException('', code: provider.errorCode),
             )),
             backgroundColor: AppColors.coral,
           ),
@@ -148,9 +167,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: l.barcode,
                   isDark: isDark,
                   iconColor: isDark ? AppColors.amber : AppColors.void_,
-                  onTap: () {
+                  onTap: () async {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()));
+                    final result = await Navigator.push<Object?>(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+                    );
+                    if (!context.mounted) return;
+                    if (result == kBarcodeNotFound) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(AppLocalizations.of(context).barcodeNotFound),
+                          backgroundColor: AppColors.coral,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   },
                 ),
               ],
@@ -248,9 +280,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         accent: accent,
                         isDark: isDark,
                         onTap: () async {
-                          final provider = context.read<AppProvider>();
-                          await provider.addWater(0.25);
-                          if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
+                          await context.read<AppProvider>().addWater(0.25);
                         },
                       ),
                       _WaterActionButton(
@@ -259,9 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         accent: accent,
                         isDark: isDark,
                         onTap: () async {
-                          final provider = context.read<AppProvider>();
-                          await provider.addWater(0.5);
-                          if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
+                          await context.read<AppProvider>().addWater(0.5);
                         },
                       ),
                       _WaterActionButton(
@@ -270,9 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         accent: accent,
                         isDark: isDark,
                         onTap: () async {
-                          final provider = context.read<AppProvider>();
-                          await provider.addWater(0.7);
-                          if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
+                          await context.read<AppProvider>().addWater(0.7);
                         },
                       ),
                       _WaterActionButton(
@@ -299,12 +325,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l.cancel)),
                         TextButton(
                           onPressed: () async {
-                            final provider = context.read<AppProvider>();
-                            await provider.resetWater();
-                            if (context.mounted) {
-                              provider.syncNotification(AppLocalizations.of(context));
-                              Navigator.pop(ctx);
-                            }
+                            await context.read<AppProvider>().resetWater();
+                            if (context.mounted) Navigator.pop(ctx);
                           },
                           child: Text(l.reset, style: const TextStyle(color: AppColors.coral)),
                         ),
@@ -353,10 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               final ml = double.tryParse(controller.text);
               if (ml != null && ml > 0) {
-                final provider = context.read<AppProvider>();
-                provider.addWater(ml / 1000).then((_) {
-                  if (context.mounted) provider.syncNotification(AppLocalizations.of(context));
-                });
+                context.read<AppProvider>().addWater(ml / 1000);
                 Navigator.pop(ctx);
               }
             },
@@ -424,6 +443,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
+                height: 52.h,
                 child: ElevatedButton(
                   onPressed: () {
                     provider.setWaterGoal(tempGoal);
@@ -433,7 +453,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     backgroundColor: accent,
                     foregroundColor: isDark ? AppColors.void_ : Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                   child: Text(l.save, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
                 ),

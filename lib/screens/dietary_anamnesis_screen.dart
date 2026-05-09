@@ -223,13 +223,13 @@ class _DietaryAnamnesisScreenState extends State<DietaryAnamnesisScreen> {
       padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 32.h),
       child: SizedBox(
         width: double.infinity,
+        height: 52.h,
         child: ElevatedButton(
           onPressed: _next,
           style: ElevatedButton.styleFrom(
             backgroundColor: accent,
             foregroundColor: accentFg,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-            padding: EdgeInsets.symmetric(vertical: 16.h),
             elevation: 0,
           ),
           child: Text(

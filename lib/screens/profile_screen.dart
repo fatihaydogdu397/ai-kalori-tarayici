@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
+import '../services/health_service.dart';
 import '../generated/app_localizations.dart';
 import 'settings_screen.dart';
 import '../services/purchase_service.dart';
@@ -123,6 +124,17 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       SizedBox(height: 16.h),
 
+                      // 4. Apple Health (M13)
+                      _AppleHealthCard(
+                        provider: provider,
+                        isDark: isDark,
+                        cardBg: cardBg,
+                        border: border,
+                        textPrimary: textPrimary,
+                        textMuted: textMuted,
+                      ),
+                      SizedBox(height: 16.h),
+
                       SizedBox(height: 100.h),
                     ],
                   ),
@@ -183,6 +195,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
+              height: 52.h,
               child: ElevatedButton(
                 onPressed: () {
                   if (upgradeTarget == 'upgrade') {
@@ -792,6 +805,7 @@ void _showEditSheet(BuildContext context, AppProvider provider, bool isDark) {
 
                 SizedBox(
                   width: double.infinity,
+                  height: 52.h,
                   child: ElevatedButton(
                     onPressed: () async {
                       await provider.saveProfile(
@@ -809,7 +823,6 @@ void _showEditSheet(BuildContext context, AppProvider provider, bool isDark) {
                       backgroundColor: accent,
                       foregroundColor: accentFg,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     child: Text(
                       l.save,
@@ -937,6 +950,181 @@ class _MetabolicStat extends StatelessWidget {
         Text(
           sublabel,
           style: TextStyle(fontSize: 9.sp, color: textMuted.withOpacity(0.6), fontWeight: FontWeight.w700, letterSpacing: 0.5),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Apple Health Card (M13) ──────────────────────────────────────────────────
+// Profil sayfasında Apple Health'ten okunan tüm anlık datayı tek kart altında
+// gösterir: bağlantı durumu, bugünkü adım, aktif kalori, en son vücut ağırlığı.
+class _AppleHealthCard extends StatefulWidget {
+  final AppProvider provider;
+  final bool isDark;
+  final Color cardBg, textPrimary, textMuted;
+  final Border? border;
+
+  const _AppleHealthCard({
+    required this.provider,
+    required this.isDark,
+    required this.cardBg,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.border,
+  });
+
+  @override
+  State<_AppleHealthCard> createState() => _AppleHealthCardState();
+}
+
+class _AppleHealthCardState extends State<_AppleHealthCard> {
+  final HealthService _hk = HealthService();
+  double? _latestWeight;
+
+  @override
+  void initState() {
+    super.initState();
+    _refresh();
+  }
+
+  Future<void> _refresh() async {
+    if (!widget.provider.healthEnabled) return;
+    // Steps + active cal provider'da zaten cache; weight için anlık çağrı.
+    await widget.provider.loadTodaySteps();
+    final w = await _hk.getLatestBodyWeight();
+    if (!mounted) return;
+    setState(() => _latestWeight = w);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = widget.isDark ? AppColors.lime : AppColors.void_;
+    final enabled = widget.provider.healthEnabled;
+
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: widget.cardBg,
+        borderRadius: BorderRadius.circular(14.r),
+        border: widget.border,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.favorite_rounded, color: accent, size: 18.sp),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  'Apple Health',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w800,
+                    color: widget.textPrimary,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: enabled
+                      ? accent.withValues(alpha: 0.12)
+                      : widget.textMuted.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  enabled ? 'Connected' : 'Not connected',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w700,
+                    color: enabled ? accent : widget.textMuted,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (!enabled) ...[
+            SizedBox(height: 10.h),
+            Text(
+              'Enable Apple Health from Settings to import steps, active calories and body weight.',
+              style: TextStyle(fontSize: 12.sp, color: widget.textMuted, height: 1.4),
+            ),
+          ] else ...[
+            SizedBox(height: 14.h),
+            Row(
+              children: [
+                Expanded(
+                  child: _HKStat(
+                    icon: Icons.directions_walk_rounded,
+                    label: 'Steps',
+                    value: widget.provider.todaySteps.toString(),
+                    isDark: widget.isDark,
+                    textPrimary: widget.textPrimary,
+                    textMuted: widget.textMuted,
+                  ),
+                ),
+                Expanded(
+                  child: _HKStat(
+                    icon: Icons.local_fire_department_rounded,
+                    label: 'Active kcal',
+                    value: widget.provider.todayActiveCalories.toStringAsFixed(0),
+                    isDark: widget.isDark,
+                    textPrimary: widget.textPrimary,
+                    textMuted: widget.textMuted,
+                  ),
+                ),
+                Expanded(
+                  child: _HKStat(
+                    icon: Icons.monitor_weight_rounded,
+                    label: 'Weight',
+                    value: _latestWeight != null
+                        ? '${_latestWeight!.toStringAsFixed(1)} kg'
+                        : '—',
+                    isDark: widget.isDark,
+                    textPrimary: widget.textPrimary,
+                    textMuted: widget.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HKStat extends StatelessWidget {
+  final IconData icon;
+  final String label, value;
+  final bool isDark;
+  final Color textPrimary, textMuted;
+
+  const _HKStat({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, size: 18.sp, color: textMuted),
+        SizedBox(height: 4.h),
+        Text(
+          value,
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: textPrimary),
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          label,
+          style: TextStyle(fontSize: 10.sp, color: textMuted, fontWeight: FontWeight.w600),
         ),
       ],
     );

@@ -8,7 +8,6 @@ import '../models/food_analysis.dart';
 import '../widgets/portion_picker_sheet.dart';
 import 'health_service.dart';
 import 'widget_service.dart';
-import 'notification_service.dart';
 import 'purchase_service.dart';
 import 'api/api_client.dart';
 import 'api/api_exception.dart';
@@ -24,7 +23,6 @@ import '../models/blood_test.dart';
 import '../main.dart' show rootNavigatorKey;
 import '../screens/auth/auth_screen.dart';
 import 'api/weight_service.dart';
-import '../generated/app_localizations.dart';
 
 enum AnalysisState { idle, loading, success, error }
 
@@ -86,18 +84,28 @@ class AppProvider extends ChangeNotifier {
   FoodAnalysis? _currentAnalysis;
   List<FoodAnalysis> _history = [];
   Map<String, double> _todayStats = {};
-  String _errorMessage = '';
-  // EAT-179: ApiException.code (BE error catalog).
+  // EAT-179: sadece BE error catalog `code`'unu tut. UI tarafı
+  // `localizedError(context, ApiException(code: ...))` ile çevirir.
   String _errorCode = '';
   double _dailyCalorieGoal = 2000;
+
+  /// HomeScreen tab değişikliği request'i. Diğer ekranlar (ör. WeeklyDietPlan
+  /// "I ate this") buradan tab index set ederek home'un Daily tab'ına
+  /// yönlenmesini tetikler. HomeScreen listener bunu okuyup `setState` yapar
+  /// ve değeri null'a çevirir.
+  final ValueNotifier<int?> requestedHomeTab = ValueNotifier<int?>(null);
 
   AnalysisState get state => _state;
   FoodAnalysis? get currentAnalysis => _currentAnalysis;
   List<FoodAnalysis> get history => _history;
-  List<FoodAnalysis> get favorites =>
-      _history.where((a) => a.isFavorite).toList();
+  // M2: favoriler artık `_history`'den türetilmiyor (M1 fix sonrası tarih
+  // değiştirince history baş günün listesiyle değiştiği için favoriler
+  // kayboluyordu). Bağımsız bir liste; loadFavorites BE'den `foodHistory`
+  // sayfasının `isFavorite=true` subset'ini çekiyor. Daha verimli endpoint
+  // için M22 BE ticket'ında `myFavoriteMeals` query açılmalı.
+  List<FoodAnalysis> _favorites = const [];
+  List<FoodAnalysis> get favorites => _favorites;
   Map<String, double> get todayStats => _todayStats;
-  String get errorMessage => _errorMessage;
   String get errorCode => _errorCode;
   double get dailyCalorieGoal => _dailyCalorieGoal;
 
@@ -113,13 +121,23 @@ class AppProvider extends ChangeNotifier {
 
   void setSelectedDate(DateTime date) {
     _selectedDate = date;
-    fetchHistoryByDate(date);
     notifyListeners();
+    // Bugüne dönüldüyse loadTodayStats tek seferde stats + steps + water
+    // tazeler. Geçmiş bir gün seçildiyse fetchHistoryByDate o günün öğünlerini
+    // çeker ve _todayStats'i bu gün için recompute eder. Apple Health steps
+    // bugün için anlık veri olduğu için geçmiş günlerde 0 gösterilir.
+    if (isTodaySelected) {
+      loadTodayStats();
+    } else {
+      fetchHistoryByDate(date);
+    }
   }
 
   Future<void> fetchHistoryByDate(DateTime date) async {
     if (!_isLoggedIn) {
       _history = const [];
+      _todayStats = {};
+      _todaySteps = 0;
       notifyListeners();
       return;
     }
@@ -127,8 +145,34 @@ class AppProvider extends ChangeNotifier {
     try {
       final rows = await _foodService.getDailyMeals(iso);
       _history = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
+      // Seçilen güne göre stats recompute. todayStats adı korunuyor (UI bu
+      // map'i okuyor) ama içerik artık "selected day" datası.
+      double cals = 0, prot = 0, carbs = 0, fat = 0, fiber = 0, sugar = 0;
+      for (final m in _history) {
+        cals += m.totalNutrients.calories;
+        prot += m.totalNutrients.protein;
+        carbs += m.totalNutrients.carbs;
+        fat += m.totalNutrients.fat;
+        fiber += m.totalNutrients.fiber;
+        sugar += m.totalNutrients.sugar;
+      }
+      _todayStats = {
+        'calories': cals,
+        'protein': prot,
+        'carbs': carbs,
+        'fat': fat,
+        'fiber': fiber,
+        'sugar': sugar,
+        'mealCount': _history.length.toDouble(),
+      };
+      // Apple Health steps/water sadece BUGÜN için anlamlı; geçmiş günlerde 0.
+      _todaySteps = 0;
+      _waterToday = 0;
     } on ApiException {
       _history = const [];
+      _todayStats = {};
+      _todaySteps = 0;
+      _waterToday = 0;
     }
     notifyListeners();
   }
@@ -144,14 +188,14 @@ class AppProvider extends ChangeNotifier {
     CookingMethod? cooking,
   }) async {
     if (!await canScan()) {
-      _errorMessage = 'limit_reached';
+      _errorCode = 'food.daily_scan_limit_reached';
       _state = AnalysisState.error;
       notifyListeners();
       return;
     }
 
     _state = AnalysisState.loading;
-    _errorMessage = '';
+    _errorCode = '';
     notifyListeners();
 
     try {
@@ -197,14 +241,7 @@ class AppProvider extends ChangeNotifier {
       );
       _state = AnalysisState.success;
     } catch (e) {
-      // EAT-179: raw mesaj yerine BE code'u tut; UI tarafında localizedError().
-      if (e is ApiException) {
-        _errorCode = e.code ?? 'common.unknown';
-        _errorMessage = e.message;
-      } else {
-        _errorCode = 'common.unknown';
-        _errorMessage = '';
-      }
+      _errorCode = (e is ApiException ? e.code : null) ?? 'common.unknown';
       _state = AnalysisState.error;
     }
 
@@ -214,14 +251,41 @@ class AppProvider extends ChangeNotifier {
   Future<void> loadHistory() async {
     if (!_isLoggedIn) {
       _history = const [];
+      _favorites = const [];
       notifyListeners();
       return;
     }
     try {
       final rows = await _foodService.foodHistory(limit: 100);
       _history = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
+      // M2: history yüklenirken favori subset'ini ayrı listeye al — tarih
+      // değişince history yer değiştirse de favoriler kaybolmasın.
+      _favorites =
+          _history.where((a) => a.isFavorite).toList(growable: false);
     } on ApiException {
       _history = const [];
+      _favorites = const [];
+    }
+    notifyListeners();
+  }
+
+  /// M2: Favori listesini bağımsız tazele. `loadHistory` zaten history+favori
+  /// senkron yüklüyor; bu metod favori toggle / silme sonrası noktalı
+  /// senkronizasyon için. İlerleyen sürümde BE `myFavoriteMeals` dedicated
+  /// query'si eklenince burada bu sorgu çağrılacak.
+  Future<void> loadFavorites() async {
+    if (!_isLoggedIn) {
+      _favorites = const [];
+      notifyListeners();
+      return;
+    }
+    try {
+      // Şimdilik foodHistory pencere; M22 BE ticket'ında dedicated endpoint.
+      final rows = await _foodService.foodHistory(limit: 200);
+      final all = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
+      _favorites = all.where((a) => a.isFavorite).toList(growable: false);
+    } on ApiException {
+      // Mevcut favori listesini koru — kısa ağ glitch'i UI'ı temizlemesin.
     }
     notifyListeners();
   }
@@ -355,8 +419,17 @@ class AppProvider extends ChangeNotifier {
         !analysis.isFavorite,
       );
       final updated = FoodAnalysis.fromBackend(res);
-      final idx = _history.indexWhere((a) => a.id == analysis.id);
-      if (idx != -1) _history[idx] = updated;
+      final hIdx = _history.indexWhere((a) => a.id == analysis.id);
+      if (hIdx != -1) {
+        final mutable = List<FoodAnalysis>.from(_history);
+        mutable[hIdx] = updated;
+        _history = List.unmodifiable(mutable);
+      }
+      // M2: bağımsız favori listesini de güncelle.
+      final favList = List<FoodAnalysis>.from(_favorites);
+      favList.removeWhere((a) => a.id == updated.id);
+      if (updated.isFavorite) favList.insert(0, updated);
+      _favorites = List.unmodifiable(favList);
       notifyListeners();
     } on ApiException {
       rethrow;
@@ -674,6 +747,7 @@ class AppProvider extends ChangeNotifier {
     List<String>? dietTypes,
     List<String>? allergens,
     List<String>? dietRestrictions,
+    List<String>? dislikes,
   }) async {
     final actLevel = activityLevel ?? _activityLevel;
 
@@ -691,6 +765,7 @@ class AppProvider extends ChangeNotifier {
       dietTypes: dietTypes,
       allergens: allergens,
       dietRestrictions: dietRestrictions,
+      dislikedFoodIds: dislikes,
     );
     _applyBackendUser(res);
 
@@ -719,6 +794,31 @@ class AppProvider extends ChangeNotifier {
     _todaySteps = await _healthService.getTodaySteps();
     _todayActiveCalories = await _healthService.getTodayActiveCalories();
     notifyListeners();
+    // M9: Apple Health'ten kilo da ediyoruz; aynı tetikleyiciye binmek
+    // ekstra sync noktası açmamak için makul.
+    unawaited(syncBodyWeightFromHealth());
+  }
+
+  /// M9: Apple Health'teki en son vücut ağırlığını BE log'larına ekle.
+  /// Dedupe: bugün için zaten weight log'u varsa skip; yoksa HK değerini
+  /// `logWeight` ile yaz ve `_weightLogs`'u tazele. Böylece progress
+  /// chart'ında Apple Health weight'i görünür olur.
+  Future<void> syncBodyWeightFromHealth() async {
+    if (!_healthEnabled || !_isLoggedIn) return;
+    final hkWeight = await _healthService.getLatestBodyWeight();
+    if (hkWeight == null || hkWeight <= 0) return;
+    // BE'de bugüne ait log var mı?
+    final todayIso = DateTime.now().toIso8601String().substring(0, 10);
+    final hasTodayLog = _weightLogs.any((log) {
+      final d = (log['date'] ?? '') as String;
+      return d.startsWith(todayIso);
+    });
+    if (hasTodayLog) return;
+    try {
+      await logWeight(hkWeight, DateTime.now());
+    } catch (_) {
+      // Sessiz düş; bir sonraki app açılışında tekrar denenecek.
+    }
   }
 
   // Apple Health
@@ -750,21 +850,6 @@ class AppProvider extends ChangeNotifier {
     final code = prefs.getString('locale');
     if (code != null) _locale = Locale(code);
     notifyListeners();
-  }
-
-  Future<void> syncNotification(AppLocalizations l) async {
-    final calories = _todayStats['calories'] ?? 0;
-    // EAT-189: hasAnyLog = bugün için anlamlı bir aktivite var mı?
-    // Sadece bugünün stats'ine baktığımız için _history (tüm geçmiş) burada
-    // yanıltıcı olur.
-    final hasAnyLog = calories > 0 || _waterToday > 0;
-    await NotificationService.updateDailySummary(
-      l,
-      calories: calories,
-      goal: _dailyCalorieGoal,
-      water: _waterToday,
-      hasAnyLog: hasAnyLog,
-    );
   }
 
   Future<void> _syncLocaleToBackend(Locale locale) async {
@@ -1301,7 +1386,10 @@ class AppProvider extends ChangeNotifier {
         'carbs': (d['totalCarbs'] as num?)?.toDouble() ?? 0.0,
         'fat': (d['totalFat'] as num?)?.toDouble() ?? 0.0,
         'water': (d['waterLiters'] as num?)?.toDouble() ?? 0.0,
-        'scanCount': (d['scanCount'] as num?)?.toInt() ?? 0,
+        // M8: progress_screen `mealCount` okuyor; eskiden `scanCount` map'leniyordu
+        // ve UI'de hep 0 görünüyordu. BE iki ismi de döndürüyor olabilir; ikisini
+        // de tara (mealCount → scanCount → 0 fallback).
+        'mealCount': ((d['mealCount'] ?? d['scanCount']) as num?)?.toInt() ?? 0,
       };
     }).toList(growable: false);
   }

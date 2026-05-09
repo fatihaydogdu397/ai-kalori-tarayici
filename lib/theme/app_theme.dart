@@ -101,6 +101,9 @@ class AppTheme {
           textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
         ),
       ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.lime,
+      ),
     );
   }
 
@@ -113,7 +116,7 @@ class AppTheme {
         primary: AppColors.void_,
         secondary: AppColors.violetDark,
         surface: AppColors.lightCard,
-        onPrimary: AppColors.lime,
+        onPrimary: AppColors.snow,
         onSurface: AppColors.lightText,
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).apply(bodyColor: AppColors.lightText, displayColor: AppColors.lightText),
@@ -139,6 +142,9 @@ class AppTheme {
           padding: EdgeInsets.symmetric(vertical: 14.h),
           textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800),
         ),
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.void_,
       ),
     );
   }

@@ -388,6 +388,22 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine Internetverbindung. Bitte prüfe dein Netzwerk.';
 
   @override
+  String get errorTryAgain => 'Bir sorun oluştu. Lütfen tekrar dene.';
+
+  @override
+  String get onboardingAvoidFoodsTitle => 'Kaçınılacak yiyecekler';
+
+  @override
+  String get onboardingAvoidFoodsSub =>
+      'Bu yiyecekler diyet planı önerilerinde kullanılmaz.';
+
+  @override
+  String get onboardingAvoidFoodsHint => 'Yiyecek yaz (ör. mantar)';
+
+  @override
+  String get onboardingAvoidFoodsAdd => 'Ekle';
+
+  @override
   String get retry => 'Nochmal versuchen';
 
   @override
@@ -405,6 +421,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get bloodTestSubtitle =>
       'Wenn du deinen Laborbericht hochlädst, können wir deinen Plan und unsere Empfehlungen besser anpassen. Optional — du kannst ihn jederzeit aus deinem Profil hinzufügen.';
+
+  @override
+  String get bloodTestUploadedListTitle => 'Yüklenenler';
 
   @override
   String get bloodTestPickFile => 'Datei auswählen';
