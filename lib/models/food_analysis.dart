@@ -98,18 +98,10 @@ class FoodItem {
     );
   }
 
-  static String _shortName(String raw) {
-    final clean = raw.trim();
-    final words = clean.split(RegExp(r'\s+'));
-    // Max 4 kelime, max 40 karakter
-    final short = words.take(4).join(' ');
-    return short.length > 40 ? '${short.substring(0, 37)}...' : short;
-  }
-
   factory FoodItem.fromMap(Map<String, dynamic> map) {
     return FoodItem(
-      name: _shortName(map['name'] ?? ''),
-      nameTr: _shortName(map['name_tr'] ?? map['name'] ?? ''),
+      name: ((map['name'] ?? '') as String).trim(),
+      nameTr: ((map['name_tr'] ?? map['name'] ?? '') as String).trim(),
       portion: (map['portion'] as num?)?.toDouble() ?? 100,
       portionUnit: map['portion_unit'] ?? 'g',
       nutrients: NutrientInfo.fromMap(
@@ -123,8 +115,8 @@ class FoodItem {
   /// BE field'ları düz: calories/protein/carbs/fat/fiber/sugar + portionUnit/healthScore/tags.
   factory FoodItem.fromBackend(Map<String, dynamic> map) {
     return FoodItem(
-      name: _shortName((map['name'] ?? '') as String),
-      nameTr: _shortName((map['nameTr'] ?? map['name'] ?? '') as String),
+      name: ((map['name'] ?? '') as String).trim(),
+      nameTr: ((map['nameTr'] ?? map['name'] ?? '') as String).trim(),
       portion: (map['portion'] as num?)?.toDouble() ?? 100,
       portionUnit: (map['portionUnit'] ?? 'g') as String,
       nutrients: NutrientInfo(
@@ -150,7 +142,6 @@ class FoodAnalysis {
   final String advice;
   final DateTime analyzedAt;
   final MealCategory mealCategory;
-  final bool isFavorite;
 
   FoodAnalysis({
     required this.id,
@@ -161,7 +152,6 @@ class FoodAnalysis {
     required this.advice,
     required this.analyzedAt,
     MealCategory? mealCategory,
-    this.isFavorite = false,
   }) : mealCategory = mealCategory ?? MealCategoryX.fromTime(analyzedAt);
 
   FoodAnalysis copyWith({
@@ -173,7 +163,6 @@ class FoodAnalysis {
     String? advice,
     DateTime? analyzedAt,
     MealCategory? mealCategory,
-    bool? isFavorite,
   }) =>
       FoodAnalysis(
         id: id ?? this.id,
@@ -184,7 +173,6 @@ class FoodAnalysis {
         advice: advice ?? this.advice,
         analyzedAt: analyzedAt ?? this.analyzedAt,
         mealCategory: mealCategory ?? this.mealCategory,
-        isFavorite: isFavorite ?? this.isFavorite,
       );
 
   FoodAnalysis copyWithScaled(double scaleFactor) {
@@ -261,7 +249,6 @@ class FoodAnalysis {
         'totalFiber': totalNutrients.fiber,
         'totalSugar': totalNutrients.sugar,
         'mealCategory': mealCategory.key,
-        'isFavorite': isFavorite ? 1 : 0,
       };
 
   factory FoodAnalysis.fromMap(Map<String, dynamic> map) {
@@ -281,12 +268,11 @@ class FoodAnalysis {
       advice: map['advice'] ?? '',
       analyzedAt: DateTime.parse(map['analyzedAt']),
       mealCategory: MealCategoryX.fromString(map['mealCategory'] as String?),
-      isFavorite: (map['isFavorite'] as int? ?? 0) == 1,
     );
   }
 
   /// Backend GraphQL yanıtından parse et.
-  /// BE alanları: imageUrl (camelCase), isFavorite (bool), mealCategory (UPPERCASE enum),
+  /// BE alanları: imageUrl (camelCase), mealCategory (UPPERCASE enum),
   /// foods (nested FoodItem listesi, her biri ayrı nutrient field'larıyla).
   factory FoodAnalysis.fromBackend(Map<String, dynamic> map) {
     final foodsList = (map['foods'] as List?) ?? const [];
@@ -312,7 +298,6 @@ class FoodAnalysis {
       advice: (map['advice'] ?? '') as String,
       analyzedAt: DateTime.parse(map['analyzedAt'] as String).toLocal(),
       mealCategory: MealCategoryX.fromString(mealCat),
-      isFavorite: map['isFavorite'] == true,
     );
   }
 }

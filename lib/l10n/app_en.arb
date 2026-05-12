@@ -187,6 +187,44 @@
   "unitSystem": "Unit System",
   "reminders": "Reminders",
   "notifications": "Notifications",
+  "waterReminder": "Water reminder",
+  "waterReminderInterval": "Every {hours}h",
+  "@waterReminderInterval": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "waterReminderAmount": "{ml} ml each",
+  "@waterReminderAmount": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
+  "waterReminderActiveHours": "Active hours",
+  "waterReminderActiveHoursValue": "{start}:00 – {end}:00",
+  "@waterReminderActiveHoursValue": {
+    "placeholders": {
+      "start": {
+        "type": "int"
+      },
+      "end": {
+        "type": "int"
+      }
+    }
+  },
+  "waterNotifTitle": "Water time! 💧",
+  "waterNotifBody": "Don't forget to drink {ml} ml of water.",
+  "@waterNotifBody": {
+    "placeholders": {
+      "ml": {
+        "type": "int"
+      }
+    }
+  },
   "dailyCalorieGoal": "Daily Calorie Goal",
   "calorieRange": "Between 1200 – 4000 kcal",
   "selectLanguage": "Select Language",
@@ -577,5 +615,7 @@
   "waterLabel": "Water",
   "weightLabel": "Weight",
   "yearlyLabel": "Yearly",
-  "solidFood": "🍽️  Solid Food"
+  "solidFood": "🍽️  Solid Food",
+  "shareCta": "Share",
+  "shareWeekCta": "Share Week"
 }

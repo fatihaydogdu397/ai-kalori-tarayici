@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/app_provider.dart';
+import '../../utils/error_messages.dart';
 import '../home_screen.dart';
 import 'forgot_password_otp_screen.dart';
 
@@ -52,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e'), backgroundColor: AppColors.coral),
+        SnackBar(content: Text(localizedError(context, e)), backgroundColor: AppColors.coral),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -171,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       } catch (e) {
                          if (!mounted) return;
                          ScaffoldMessenger.of(context).showSnackBar(
-                           SnackBar(content: Text('Failed to send OTP: $e'), backgroundColor: AppColors.coral),
+                           SnackBar(content: Text(localizedError(context, e)), backgroundColor: AppColors.coral),
                          );
                       } finally {
                         if (mounted) setState(() => _isLoading = false);

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/app_provider.dart';
+import '../share/share_card_data.dart';
+import '../share/share_picker_screen.dart';
 import '../services/api/api_exception.dart';
 import '../theme/app_theme.dart';
 import '../utils/error_messages.dart';
@@ -98,10 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizedError(
-              context,
-              ApiException('', code: provider.errorCode),
-            )),
+            content: Text(localizedError(context, ApiException('', code: provider.errorCode))),
             backgroundColor: AppColors.coral,
           ),
         );
@@ -169,10 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   iconColor: isDark ? AppColors.amber : AppColors.void_,
                   onTap: () async {
                     Navigator.pop(context);
-                    final result = await Navigator.push<Object?>(
-                      context,
-                      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
-                    );
+                    final result = await Navigator.push<Object?>(context, MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()));
                     if (!context.mounted) return;
                     if (result == kBarcodeNotFound) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -469,30 +465,54 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final pages = [_buildDashboardPage(isDark), const ProgressScreen(), const ProgramScreen(), const ProfileScreen()];
 
-    return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
-      floatingActionButton: _buildFAB(isDark),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: Consumer<AppProvider>(
-        builder: (context, provider, _) {
-          if (provider.state == AnalysisState.loading && _tab == 0) {
-            return _buildLoading(isDark);
-          }
-          final body = pages[_tab];
-          if (_tab == 0 && provider.isTodaySelected) {
-            return RefreshIndicator(
-              color: isDark ? AppColors.lime : AppColors.limeDark,
-              onRefresh: () async {
-                await provider.loadHistory();
-                await provider.loadTodayStats();
-              },
-              child: body,
-            );
-          }
-          return body;
-        },
-      ),
-      bottomNavigationBar: _buildNavBar(isDark),
+    return Consumer<AppProvider>(
+      builder: (context, provider, _) {
+        Widget body;
+        if (provider.state == AnalysisState.loading && _tab == 0) {
+          body = _buildLoading(isDark);
+        } else {
+          final page = pages[_tab];
+          // Pull-to-refresh: RefreshIndicator widget'ı yok, overscroll'u
+          // doğrudan NotificationListener ile dinleyip provider'ı çağırıyoruz.
+          // ScrollConfiguration overscroll glow'unu da bastırıyor — eski
+          // RefreshIndicator'ın bıraktığı gölge artık çıkmıyor.
+          body = _tab == 0 && provider.isTodaySelected
+              ? NotificationListener<ScrollNotification>(
+                  onNotification: (notif) {
+                    if (notif is ScrollUpdateNotification &&
+                        notif.metrics.pixels < -80 &&
+                        !provider.isDayDataLoading) {
+                      provider.loadHistory();
+                      provider.loadTodayStats();
+                    }
+                    return false;
+                  },
+                  child: ScrollConfiguration(
+                    behavior: const _NoGlowScrollBehavior(),
+                    child: page,
+                  ),
+                )
+              : page;
+        }
+        // Overlay tüm Scaffold'un üstünde — FAB ve bottom nav dahil
+        // dokunulamaz hale gelir.
+        final showOverlay = _tab == 0 && provider.isDayDataLoading;
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: isDark ? AppColors.darkBg : AppColors.lightBg,
+              floatingActionButton: _buildFAB(isDark),
+              floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+              body: body,
+              bottomNavigationBar: _buildNavBar(isDark),
+            ),
+            if (showOverlay)
+              const Positioned.fill(
+                child: _DayDataLoadingOverlay(),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -571,7 +591,6 @@ class _HomeScreenState extends State<HomeScreen> {
             isDark: isDark,
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ResultScreen(analysis: a))),
             onDelete: isToday ? () => context.read<AppProvider>().deleteAnalysis(a.id) : null,
-            onFavorite: isToday ? () => context.read<AppProvider>().toggleFavorite(a) : null,
             l: l,
           ),
         ),
@@ -921,88 +940,66 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Favoriler
-                    if (provider.isTodaySelected && provider.favorites.isNotEmpty) ...[
-                      Row(
+                    Builder(builder: (ctx) {
+                      // `provider.history` zaten seçili güne göre dolduruluyor
+                      // (bugün → loadTodayStats; geçmiş → fetchHistoryByDate).
+                      // Buradaki filter güvenlik için, takvimden gelen tarihe
+                      // birebir kilitler.
+                      final selected = provider.selectedDate;
+                      final selectedMeals = provider.history.where((m) =>
+                          m.analyzedAt.year == selected.year &&
+                          m.analyzedAt.month == selected.month &&
+                          m.analyzedAt.day == selected.day).toList();
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(Icons.favorite_rounded, size: 12, color: AppColors.coral),
-                          const SizedBox(width: 5),
-                          Text(
-                            l.favorites,
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: textMuted, letterSpacing: 0.5),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 72,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: provider.favorites.length,
-                          separatorBuilder: (context2, s) => const SizedBox(width: 8),
-                          itemBuilder: (_, i) {
-                            final fav = provider.favorites[i];
-                            return GestureDetector(
-                              onTap: () async {
-                                await context.read<AppProvider>().duplicateAnalysisToToday(fav);
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('✓ ${l.addedToLog}'),
-                                      behavior: SnackBarBehavior.floating,
-                                      duration: const Duration(seconds: 2),
-                                      backgroundColor: AppColors.limeDark,
-                                    ),
-                                  );
-                                }
-                              },
-                              onLongPress: () => context.read<AppProvider>().toggleFavorite(fav),
-                              child: Container(
-                                width: 110,
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isDark ? AppColors.darkCard : AppColors.lightCard,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: isDark
-                                      ? Border.all(color: AppColors.coral.withValues(alpha: 0.25), width: 1)
-                                      : Border.all(color: AppColors.lightBorder, width: 0.5),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      fav.displayName.isNotEmpty ? fav.displayName : l.mealFallback,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: isDark ? AppColors.darkText : AppColors.lightText,
+                          Text(l.todaysMeals,
+                              style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+                          if (selectedMeals.isNotEmpty)
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SharePickerScreen(
+                                      data: ShareCardData(
+                                        date: selected,
+                                        meals: selectedMeals,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                      locale: Localizations.localeOf(ctx).languageCode,
                                     ),
-                                    const SizedBox(height: 3),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.ios_share_rounded, size: 13, color: textMuted),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      '${fav.totalCalories.toStringAsFixed(0)} kcal',
+                                      l.shareCta,
                                       style: TextStyle(
-                                        fontSize: 10,
-                                        color: isDark ? AppColors.lime : AppColors.limeDeep,
+                                        fontSize: 12,
+                                        color: textMuted,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(l.addMealShort, style: TextStyle(fontSize: 9, color: textMuted)),
                                   ],
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-
-                    Text(l.todaysMeals, style: AppTypography.bodyMedium.copyWith(color: textMuted)),
+                            ),
+                        ],
+                      );
+                    }),
                     SizedBox(height: 12.h),
 
                     if (provider.history.isEmpty)
@@ -1036,7 +1033,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     else
                       _buildGroupedMeals(provider.history, isDark, l),
 
-                    const SizedBox(height: 100),
+                    // const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -1115,6 +1112,44 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+/// Pull-to-refresh sırasında Material'ın varsayılan overscroll glow'unu
+/// (gölgemsi halka) tamamen kaldırır. Loading göstergesi merkezdeki
+/// overlay'den ibaret kalsın.
+class _NoGlowScrollBehavior extends ScrollBehavior {
+  const _NoGlowScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) =>
+      child;
+}
+
+class _DayDataLoadingOverlay extends StatelessWidget {
+  const _DayDataLoadingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ColoredBox(
+      color: (isDark ? AppColors.darkBg : AppColors.lightBg)
+          .withValues(alpha: 0.35),
+      child: Center(
+        child: SizedBox(
+          width: 36,
+          height: 36,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: isDark ? AppColors.lime : AppColors.void_,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _MacroPill extends StatelessWidget {
   final String value, label;
   final Color valueColor, bg;
@@ -1159,9 +1194,8 @@ class _MealRow extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
   final VoidCallback? onDelete;
-  final VoidCallback? onFavorite;
   final AppLocalizations l;
-  const _MealRow({required this.analysis, required this.isDark, required this.onTap, required this.l, this.onDelete, this.onFavorite});
+  const _MealRow({required this.analysis, required this.isDark, required this.onTap, required this.l, this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -1212,19 +1246,6 @@ class _MealRow extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            // EAT-162: hide "Add to favorites" entirely for already-favorited
-            // items; remove-from-favorites lives on the Favorites screen.
-            if (!analysis.isFavorite)
-              GestureDetector(
-                onTap: onFavorite,
-                behavior: HitTestBehavior.opaque,
-                child: Icon(
-                  Icons.favorite_border_rounded,
-                  size: 16,
-                  color: textMuted,
-                ),
-              ),
           ],
         ),
       ),
@@ -1251,8 +1272,17 @@ class _MealRow extends StatelessWidget {
     const size = 44.0;
     const radius = 10.0;
 
-    // Fotoğraf varsa göster
+    final placeholder = _categoryPlaceholder(category, isDark, size, radius);
+
+    // Fotoğraf varsa göster — BE imageUrl (http) veya kısa süreli local path.
     if (imagePath.isNotEmpty) {
+      final isRemote = imagePath.startsWith('http://') || imagePath.startsWith('https://');
+      if (isRemote) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: Image.network(imagePath, width: size, height: size, fit: BoxFit.cover, errorBuilder: (_, __, ___) => placeholder),
+        );
+      }
       final file = File(imagePath);
       if (file.existsSync()) {
         return ClipRRect(
@@ -1262,7 +1292,10 @@ class _MealRow extends StatelessWidget {
       }
     }
 
-    // Fotoğraf yoksa kategori placeholder
+    return placeholder;
+  }
+
+  Widget _categoryPlaceholder(MealCategory category, bool isDark, double size, double radius) {
     final cfg = _categoryConfig(category, isDark);
     return Container(
       width: size,

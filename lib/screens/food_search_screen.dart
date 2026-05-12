@@ -12,6 +12,7 @@ import '../generated/app_localizations.dart';
 class _FoodItem {
   final String id;
   final String name;
+  final String? nameTr;
   final String emoji;
   final double cal; // per 100g
   final double protein;
@@ -22,6 +23,7 @@ class _FoodItem {
   const _FoodItem({
     required this.id,
     required this.name,
+    required this.nameTr,
     required this.emoji,
     required this.cal,
     required this.protein,
@@ -30,11 +32,22 @@ class _FoodItem {
     required this.category,
   });
 
+  /// EAT-196: TR locale'de mevcutsa Türkçe ismi göster, yoksa İngilizce.
+  String displayName(String localeCode) {
+    if (localeCode == 'tr') {
+      final tr = nameTr?.trim();
+      if (tr != null && tr.isNotEmpty) return tr;
+    }
+    return name;
+  }
+
   factory _FoodItem.fromBackend(Map<String, dynamic> raw) {
     final category = (raw['category'] ?? '') as String;
+    final tr = raw['nameTr'] as String?;
     return _FoodItem(
       id: (raw['id'] ?? '') as String,
       name: (raw['name'] ?? '') as String,
+      nameTr: (tr != null && tr.trim().isNotEmpty) ? tr : null,
       emoji: emojiForCategory(category),
       cal: (raw['calories'] as num?)?.toDouble() ?? 0,
       protein: (raw['protein'] as num?)?.toDouble() ?? 0,
@@ -223,10 +236,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
           return 'Keto';
       }
     }
-    return key
-        .split('_')
-        .map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}')
-        .join(' ');
+    return key.split('_').map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
   }
 
   String _translateCategory(String cat, AppLocalizations l) {
@@ -460,7 +470,19 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     );
   }
 
-  void _showAddSheet(BuildContext context, _FoodItem food, bool isDark, Color cardBg, Color textPrimary, Color textMuted, Color accent, Color ctaBg, Color ctaFg, AppLocalizations l) {
+  void _showAddSheet(
+    BuildContext context,
+    _FoodItem food,
+    bool isDark,
+    Color cardBg,
+    Color textPrimary,
+    Color textMuted,
+    Color accent,
+    Color ctaBg,
+    Color ctaFg,
+    AppLocalizations l,
+  ) {
+    final localeCode = Localizations.localeOf(context).languageCode;
     double grams = 100;
     showModalBottomSheet(
       context: context,
@@ -506,7 +528,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            food.name,
+                            food.displayName(localeCode),
                             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w800, color: textPrimary),
                           ),
                           Text(
@@ -586,13 +608,14 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     final factor = grams / 100;
     final provider = context.read<AppProvider>();
     final l = AppLocalizations.of(context);
+    final localeCode = Localizations.localeOf(context).languageCode;
     final analysis = FoodAnalysis(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       imagePath: '', // Mock arama olduğu için görsel yok
       foods: [
         FoodItem(
           name: food.name,
-          nameTr: food.name,
+          nameTr: food.nameTr ?? food.name,
           portion: grams,
           portionUnit: 'g',
           nutrients: NutrientInfo(
@@ -623,7 +646,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(l.foodAddedToLog(food.name)),
+        content: Text(l.foodAddedToLog(food.displayName(localeCode))),
         backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : AppColors.lightText,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -657,6 +680,7 @@ class _FoodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeCode = Localizations.localeOf(context).languageCode;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14.r), border: border),
@@ -672,7 +696,7 @@ class _FoodCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.name,
+                  item.displayName(localeCode),
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
                 ),
                 SizedBox(height: 4.h),
@@ -700,10 +724,7 @@ class _FoodCard extends StatelessWidget {
             child: Container(
               width: 32.w,
               height: 32.w,
-              decoration: BoxDecoration(
-                color: isDark ? accent.withValues(alpha: 0.15) : ctaBg,
-                borderRadius: BorderRadius.circular(10.r),
-              ),
+              decoration: BoxDecoration(color: isDark ? accent.withValues(alpha: 0.15) : ctaBg, borderRadius: BorderRadius.circular(10.r)),
               child: Icon(Icons.add_rounded, color: isDark ? accent : ctaFg, size: 20.sp),
             ),
           ),

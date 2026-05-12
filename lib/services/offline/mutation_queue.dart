@@ -11,9 +11,8 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 ///
 /// Scope (V1): only operations whose backend is already upsert-by-date are
 /// whitelisted, so retries stay idempotent without a server-side request-id
-/// column. Expanding the whitelist to `AnalyzeFood` / `SaveFoodAnalysis` /
-/// `ToggleFavoriteMeal` needs backend idempotency support first (tracked
-/// separately).
+/// column. Expanding the whitelist to `AnalyzeFood` / `SaveFoodAnalysis`
+/// needs backend idempotency support first (tracked separately).
 class QueuedMutation {
   QueuedMutation({
     required this.id,

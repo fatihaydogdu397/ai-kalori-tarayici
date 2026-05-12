@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>3E — Hero Day + Mini Days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.hero-day {
+  background: rgba(28,28,42,0.55);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(200,241,53,0.2);
+  border-radius: 28px;
+  padding: 24px;
+  position: relative;
+}
+.hero-day::before {
+  content: '★ EN İYİ GÜN';
+  position: absolute;
+  top: -12px;
+  left: 24px;
+  background: var(--lime);
+  color: var(--void);
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+}
+.hd-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.hd-day { display: flex; align-items: baseline; gap: 10px; }
+.hd-day .dn { font-size: 16px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; }
+.hd-day .dd { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+.hd-kcal { font-size: 32px; font-weight: 800; color: var(--lime); letter-spacing: -0.03em; }
+.hd-kcal-u { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-left: 6px; }
+.hd-photos { display: flex; gap: 10px; height: 280px; margin-bottom: 16px; }
+.hd-photo { flex: 1; border-radius: 18px; background-size: cover; position: relative; overflow: hidden; }
+.hd-photo::after { content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85)); }
+.hd-photo .ptag {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(10px);
+  padding: 5px 12px; border-radius: 10px;
+  font-size: 12px; font-weight: 800; color: var(--lime);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.hd-photo .pkcal {
+  position: absolute; bottom: 12px; left: 12px; right: 12px; z-index: 2;
+  font-size: 22px; font-weight: 800; color: var(--lime); text-align: center;
+}
+.hd-macros { display: flex; gap: 10px; }
+.hd-macro {
+  flex: 1; padding: 12px 16px; border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  display: flex; flex-direction: column; align-items: center;
+}
+.hd-macro-val { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+.hd-macro-name { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-top: 2px; }
+
+.mini-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(28,28,42,0.4); backdrop-filter: blur(20px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+.mini-day { width: 44px; flex-shrink: 0; }
+.mini-day .mn { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+.mini-day .md { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+.mini-photos { flex: 1; display: flex; gap: 6px; height: 60px; }
+.mini-photo { flex: 1; border-radius: 8px; background-size: cover; position: relative; overflow: hidden; }
+.mini-stats { display: flex; flex-direction: column; align-items: flex-end; min-width: 130px; }
+.mini-kcal { font-size: 18px; font-weight: 800; color: var(--lime); letter-spacing: -0.02em; line-height: 1; }
+.mini-macros { display: flex; gap: 6px; margin-top: 4px; font-size: 11px; font-weight: 700; }
+
+.mini-empty { padding: 14px 16px; background: rgba(255,255,255,0.02); border: 1.5px dashed rgba(255,255,255,0.08); border-radius: 16px; display: flex; align-items: center; justify-content: space-between; color: var(--text-muted); }
+.mini-empty .me-day { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+.mini-empty .me-text { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; opacity: 0.7; }
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:600px; height:600px; background:var(--lime); top:300px; right:-200px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--violet); bottom:200px; left:-150px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">22 – 28 Nis</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bu Hafta</div>
+    <div class="title">Disiplin<br>tatlı geliyor.</div>
+  </div>
+
+  <!-- Hero day (Çar - 3 öğün, en yüksek kcal) -->
+  <div style="position:absolute; top:520px; left:60px; right:60px;">
+    <div class="hero-day">
+      <div class="hd-header">
+        <div class="hd-day"><span class="dn">Çar</span><span class="dd">24 Nis</span></div>
+        <div><span class="hd-kcal">1.540</span><span class="hd-kcal-u">kcal · 3 öğün</span></div>
+      </div>
+      <div class="hd-photos">
+        <div class="hd-photo" style="background: linear-gradient(135deg, #4a402a, #8b7a3a);"><div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #d4a02a 0%, transparent 40%);"></div><div class="ptag">Kahvaltı</div><div class="pkcal">380</div></div>
+        <div class="hd-photo" style="background: linear-gradient(135deg, #3a2a4a, #5a3a8b);"><div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #8b4ad4 0%, transparent 40%);"></div><div class="ptag">Öğle</div><div class="pkcal">520</div></div>
+        <div class="hd-photo" style="background: linear-gradient(135deg, #4a2a2a, #8b3a3a);"><div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #d4632a 0%, transparent 40%);"></div><div class="ptag">Akşam</div><div class="pkcal">640</div></div>
+      </div>
+      <div class="hd-macros">
+        <div class="hd-macro"><div class="hd-macro-val protein-color">94g</div><div class="hd-macro-name">Protein</div></div>
+        <div class="hd-macro"><div class="hd-macro-val carb-color">128g</div><div class="hd-macro-name">Karb</div></div>
+        <div class="hd-macro"><div class="hd-macro-val fat-color">52g</div><div class="hd-macro-name">Yağ</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mini days -->
+  <div style="position:absolute; top:1130px; left:60px; right:60px; display:flex; flex-direction:column; gap:10px;">
+    <div style="font-size:13px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.15em; font-weight:600; margin-bottom:4px;">Diğer Günler</div>
+    <!-- Pzt -->
+    <div class="mini-row">
+      <div class="mini-day"><div class="mn">Pzt</div><div class="md">22</div></div>
+      <div class="mini-photos">
+        <div class="mini-photo" style="background: linear-gradient(135deg, #2a4a2a, #5a8b3a);"></div>
+        <div class="mini-photo" style="background: linear-gradient(135deg, #8b5a2b, #d4622a);"></div>
+        <div class="mini-photo" style="background: linear-gradient(135deg, #4a2a4a, #8b3a8b);"></div>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-kcal">1.360 kcal</div>
+        <div class="mini-macros">
+          <span class="protein-color">88</span>
+          <span class="carb-color">112</span>
+          <span class="fat-color">38</span>
+        </div>
+      </div>
+    </div>
+    <!-- Sal -->
+    <div class="mini-row">
+      <div class="mini-day"><div class="mn">Sal</div><div class="md">23</div></div>
+      <div class="mini-photos">
+        <div class="mini-photo" style="background: linear-gradient(135deg, #2a3a4a, #3a5a8b);"></div>
+        <div class="mini-photo" style="background: linear-gradient(135deg, #4a3520, #8b5a2b);"></div>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-kcal">1.030 kcal</div>
+        <div class="mini-macros">
+          <span class="protein-color">62</span>
+          <span class="carb-color">96</span>
+          <span class="fat-color">28</span>
+        </div>
+      </div>
+    </div>
+    <!-- Cum -->
+    <div class="mini-row">
+      <div class="mini-day"><div class="mn">Cum</div><div class="md">26</div></div>
+      <div class="mini-photos">
+        <div class="mini-photo" style="background: linear-gradient(135deg, #4a352a, #8b6a3a);"></div>
+        <div class="mini-photo" style="background: linear-gradient(135deg, #2a4a3a, #3a8b5a);"></div>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-kcal">960 kcal</div>
+        <div class="mini-macros">
+          <span class="protein-color">58</span>
+          <span class="carb-color">82</span>
+          <span class="fat-color">26</span>
+        </div>
+      </div>
+    </div>
+    <!-- Cmt -->
+    <div class="mini-row">
+      <div class="mini-day"><div class="mn">Cmt</div><div class="md">27</div></div>
+      <div class="mini-photos">
+        <div class="mini-photo" style="background: linear-gradient(135deg, #2a4a4a, #3a8b8b);"></div>
+        <div class="mini-photo" style="background: linear-gradient(135deg, #4a2a3a, #8b3a5a);"></div>
+      </div>
+      <div class="mini-stats">
+        <div class="mini-kcal">1.260 kcal</div>
+        <div class="mini-macros">
+          <span class="protein-color">76</span>
+          <span class="carb-color">102</span>
+          <span class="fat-color">42</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week total -->
+  <div class="macro-card" style="position:absolute; bottom:220px; left:60px; right:60px; padding:18px 28px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.15em; font-weight:600;">Hafta Toplamı</div>
+        <div style="font-size:38px; font-weight:800; color:var(--lime); letter-spacing:-0.03em; line-height:1; margin-top:4px;">6.150 <span style="font-size:14px; color:var(--text-muted); font-weight:500;">kcal</span></div>
+      </div>
+      <div class="stat-badge" style="background: rgba(45,220,180,0.12); border-color: rgba(45,220,180,0.3); color: var(--mint);">5/7 gün ✓</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

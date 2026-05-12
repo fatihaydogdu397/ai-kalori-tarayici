@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>V5 — Ticket Stub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.ticket {
+  display: flex;
+  height: 240px;
+  background: rgba(28,28,42,0.6);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+}
+.ticket::before, .ticket::after {
+  content: '';
+  position: absolute;
+  width: 24px; height: 24px;
+  background: var(--void);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.ticket::before { left: 220px; }
+.ticket::after { left: 220px; display: none; }
+
+.ticket-photo {
+  width: 220px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.ticket-photo::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.3), transparent 30%, transparent 60%, rgba(0,0,0,0.7));
+}
+.ticket-photo .pt-tag {
+  position: absolute; top: 14px; left: 14px; z-index:2;
+  background: var(--lime); color: var(--void);
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  font-family: 'JetBrains Mono', monospace;
+}
+.ticket-photo .pt-name {
+  position: absolute; bottom: 12px; left: 12px; right:12px; z-index: 2;
+  font-size: 16px; font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+/* Perforation */
+.ticket-perf {
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.15) 0,
+    rgba(255,255,255,0.15) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  margin: 14px 0;
+  flex-shrink: 0;
+}
+
+.ticket-info {
+  flex: 1;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+}
+.ticket-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+.ticket-row .val { color: var(--snow); font-weight: 700; font-size: 14px; }
+.ticket-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 14px 0; }
+.ticket-kcal-row {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.ticket-kcal {
+  font-size: 56px; font-weight: 800; color: var(--lime);
+  letter-spacing: -0.04em; line-height: 1;
+  font-family: 'Inter', sans-serif;
+}
+.ticket-kcal-unit { font-size: 13px; color: var(--text-muted); text-transform:uppercase; letter-spacing: 0.15em; font-weight: 600; }
+
+.ticket-macros {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.tm {
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+.tm-val { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.tm-name { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:600px; height:600px; background:var(--lime); top:300px; left:-200px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--coral); bottom:200px; right:-150px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bugün</div>
+    <div class="title">Tabaktan<br>biletine.</div>
+  </div>
+
+  <div style="position:absolute; top:540px; left:60px; right:60px; display:flex; flex-direction:column; gap:18px;">
+    <!-- Ticket 1 -->
+    <div class="ticket">
+      <div class="ticket-photo" style="background: linear-gradient(135deg, #2a4a2a, #5a8b3a);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 40% 30%, #d4a02a 0%, transparent 35%), radial-gradient(circle at 60% 70%, #2a8b3a 0%, transparent 40%);"></div>
+        <div class="pt-tag">#001</div>
+      </div>
+      <div class="ticket-perf"></div>
+      <div class="ticket-info">
+        <div>
+          <div class="ticket-row"><span>Öğün</span><span class="val">Kahvaltı</span></div>
+          <div class="ticket-row" style="margin-top:6px;"><span>Saat</span><span class="val">08:30</span></div>
+        </div>
+        <div>
+          <div class="ticket-divider"></div>
+          <div class="ticket-kcal-row">
+            <div class="ticket-kcal">320</div>
+            <div class="ticket-kcal-unit">kcal</div>
+          </div>
+          <div class="ticket-macros">
+            <div class="tm"><div class="tm-val protein-color">18g</div><div class="tm-name">Protein</div></div>
+            <div class="tm"><div class="tm-val carb-color">32g</div><div class="tm-name">Karb</div></div>
+            <div class="tm"><div class="tm-val fat-color">14g</div><div class="tm-name">Yağ</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Ticket 2 -->
+    <div class="ticket">
+      <div class="ticket-photo" style="background: linear-gradient(135deg, #8b5a2b, #d4622a);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);"></div>
+        <div class="pt-tag">#002</div>
+      </div>
+      <div class="ticket-perf"></div>
+      <div class="ticket-info">
+        <div>
+          <div class="ticket-row"><span>Öğün</span><span class="val">Öğle</span></div>
+          <div class="ticket-row" style="margin-top:6px;"><span>Saat</span><span class="val">13:15</span></div>
+        </div>
+        <div>
+          <div class="ticket-divider"></div>
+          <div class="ticket-kcal-row">
+            <div class="ticket-kcal">240</div>
+            <div class="ticket-kcal-unit">kcal</div>
+          </div>
+          <div class="ticket-macros">
+            <div class="tm"><div class="tm-val protein-color">15g</div><div class="tm-name">Protein</div></div>
+            <div class="tm"><div class="tm-val carb-color">38g</div><div class="tm-name">Karb</div></div>
+            <div class="tm"><div class="tm-val fat-color">6g</div><div class="tm-name">Yağ</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Ticket 3 -->
+    <div class="ticket">
+      <div class="ticket-photo" style="background: linear-gradient(135deg, #4a2a4a, #8b3a8b);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);"></div>
+        <div class="pt-tag">#003</div>
+      </div>
+      <div class="ticket-perf"></div>
+      <div class="ticket-info">
+        <div>
+          <div class="ticket-row"><span>Öğün</span><span class="val">Akşam</span></div>
+          <div class="ticket-row" style="margin-top:6px;"><span>Saat</span><span class="val">19:45</span></div>
+        </div>
+        <div>
+          <div class="ticket-divider"></div>
+          <div class="ticket-kcal-row">
+            <div class="ticket-kcal">540</div>
+            <div class="ticket-kcal-unit">kcal</div>
+          </div>
+          <div class="ticket-macros">
+            <div class="tm"><div class="tm-val protein-color">55g</div><div class="tm-name">Protein</div></div>
+            <div class="tm"><div class="tm-val carb-color">42g</div><div class="tm-name">Karb</div></div>
+            <div class="tm"><div class="tm-val fat-color">18g</div><div class="tm-name">Yağ</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

@@ -70,6 +70,11 @@ dependencies:
   # In-app PDF viewer for blood-test reports (EAT-169)
   pdfrx: ^1.0.0
 
+  # Social share — meal/day cards as Instagram-Story-sized PNG.
+  screenshot: ^3.0.0
+  share_plus: ^10.1.0
+  gal: ^2.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -95,6 +100,5 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
-    - assets/images/
     - assets/icons/
     - .env

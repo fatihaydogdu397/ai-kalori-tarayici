@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>V2 — Alt Strip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.meal-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.85) 30%);
+  padding: 60px 20px 18px;
+  z-index: 3;
+}
+.strip-top { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; }
+.strip-name { font-size: 22px; font-weight: 700; }
+.strip-kcal { font-size: 28px; font-weight: 800; color: var(--lime); letter-spacing:-0.02em; }
+.strip-macros { display: flex; gap: 14px; }
+.strip-macro { display: flex; flex-direction: column; flex:1; }
+.strip-macro-bar { height: 4px; border-radius: 100px; background: rgba(255,255,255,0.15); margin-bottom: 6px; overflow: hidden; }
+.strip-macro-fill { height: 100%; border-radius: 100px; }
+.strip-macro-row { display:flex; justify-content:space-between; align-items:baseline; }
+.strip-macro-val { font-size: 16px; font-weight: 700; }
+.strip-macro-name { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+.time-corner {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: var(--lime);
+  color: var(--void);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  z-index: 4;
+}
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:600px; height:600px; background:var(--lime); top:300px; right:-200px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--violet); bottom:200px; left:-150px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bugün</div>
+    <div class="title">Detayda<br>devamlılık.</div>
+  </div>
+
+  <!-- 3 meals -->
+  <div style="position:absolute; top:540px; left:60px; right:60px; display:flex; flex-direction:column; gap:20px;">
+    <div class="photo" style="height:280px; background: linear-gradient(135deg, #2a4a2a, #5a8b3a);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 40% 30%, #d4a02a 0%, transparent 35%), radial-gradient(circle at 60% 70%, #2a8b3a 0%, transparent 40%);"></div>
+      <div class="time-corner">Kahvaltı</div>
+      <div class="meal-strip">
+        <div class="strip-top">
+          <div class="strip-kcal">320 kcal</div>
+        </div>
+        <div class="strip-macros">
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val protein-color">18g</div><div class="strip-macro-name">Protein</div></div>
+          </div>
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val carb-color">32g</div><div class="strip-macro-name">Karb</div></div>
+          </div>
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val fat-color">14g</div><div class="strip-macro-name">Yağ</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="photo" style="height:280px; background: linear-gradient(135deg, #8b5a2b, #d4622a);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);"></div>
+      <div class="time-corner">Öğle</div>
+      <div class="meal-strip">
+        <div class="strip-top">
+          <div class="strip-kcal">240 kcal</div>
+        </div>
+        <div class="strip-macros">
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val protein-color">15g</div><div class="strip-macro-name">Protein</div></div>
+          </div>
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val carb-color">38g</div><div class="strip-macro-name">Karb</div></div>
+          </div>
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val fat-color">6g</div><div class="strip-macro-name">Yağ</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="photo" style="height:280px; background: linear-gradient(135deg, #4a2a4a, #8b3a8b);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);"></div>
+      <div class="time-corner">Akşam</div>
+      <div class="meal-strip">
+        <div class="strip-top">
+          <div class="strip-kcal">540 kcal</div>
+        </div>
+        <div class="strip-macros">
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val protein-color">55g</div><div class="strip-macro-name">Protein</div></div>
+          </div>
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val carb-color">42g</div><div class="strip-macro-name">Karb</div></div>
+          </div>
+          <div class="strip-macro">
+            <div class="strip-macro-row"><div class="strip-macro-val fat-color">18g</div><div class="strip-macro-name">Yağ</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

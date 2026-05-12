@@ -34,13 +34,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _saveAndApply(NotificationSettings s, AppProvider provider) async {
+    final l = AppLocalizations.of(context);
     setState(() => _notifSettings = s);
     await s.save();
     if (s.enabled) {
       final granted = await NotificationService.requestPermission();
       if (!granted) return;
     }
-    await s.apply();
+    await s.apply(
+      waterTitle: l.waterNotifTitle,
+      waterBody: l.waterNotifBody,
+    );
   }
 
   Future<void> _pickTime(
@@ -350,7 +354,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     provider,
                                   ),
                                 ),
-                                showDivider: false,
+                                showDivider: true,
+                              ),
+                              _WaterReminderRow(
+                                settings: _notifSettings,
+                                isDark: isDark,
+                                textPrimary: textPrimary,
+                                textMuted: textMuted,
+                                divColor: divColor,
+                                accent: accent,
+                                l: l,
+                                onChanged: (next) => _saveAndApply(next, provider),
                               ),
                             ],
                           ],
@@ -1035,6 +1049,205 @@ class _ReminderRow extends StatelessWidget {
         ),
         if (showDivider) Divider(height: 1, indent: 44, color: divColor),
       ],
+    );
+  }
+}
+
+/// Su hatırlatıcı satırı: ana toggle + interval/amount/active-hours pill'leri.
+/// Toggle kapalıyken sadece başlık + switch görünür; açıkken altında 3 pill.
+class _WaterReminderRow extends StatelessWidget {
+  final NotificationSettings settings;
+  final bool isDark;
+  final Color textPrimary, textMuted, divColor, accent;
+  final AppLocalizations l;
+  final ValueChanged<NotificationSettings> onChanged;
+
+  const _WaterReminderRow({
+    required this.settings,
+    required this.isDark,
+    required this.textPrimary,
+    required this.textMuted,
+    required this.divColor,
+    required this.accent,
+    required this.l,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = settings.waterEnabled;
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+          child: Row(
+            children: [
+              const Text('💧', style: TextStyle(fontSize: 16)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l.waterReminder,
+                  style: AppTypography.bodyLarge.copyWith(color: textPrimary),
+                ),
+              ),
+              Switch(
+                value: enabled,
+                onChanged: (v) => onChanged(settings.copyWith(waterEnabled: v)),
+                activeThumbColor: isDark ? AppColors.lime : AppColors.void_,
+                activeTrackColor: (isDark ? AppColors.lime : AppColors.void_).withValues(alpha: 0.3),
+              ),
+            ],
+          ),
+        ),
+        if (enabled)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(44, 0, 14, 12),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _Pill(
+                  label: l.waterReminderInterval(settings.waterIntervalHours),
+                  accent: accent,
+                  onTap: () => _pickInterval(context),
+                ),
+                _Pill(
+                  label: l.waterReminderAmount(settings.waterAmountMl),
+                  accent: accent,
+                  onTap: () => _pickAmount(context),
+                ),
+                _Pill(
+                  label: l.waterReminderActiveHoursValue(
+                    settings.waterStartHour,
+                    settings.waterEndHour,
+                  ),
+                  accent: accent,
+                  onTap: () => _pickActiveHours(context),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _pickInterval(BuildContext context) async {
+    final picked = await _showOptionsSheet<int>(
+      context,
+      title: l.waterReminderInterval(settings.waterIntervalHours),
+      options: const [1, 2, 3, 4, 6],
+      labelOf: (h) => l.waterReminderInterval(h),
+      current: settings.waterIntervalHours,
+    );
+    if (picked != null) onChanged(settings.copyWith(waterIntervalHours: picked));
+  }
+
+  Future<void> _pickAmount(BuildContext context) async {
+    final picked = await _showOptionsSheet<int>(
+      context,
+      title: l.waterReminderAmount(settings.waterAmountMl),
+      options: const [150, 200, 250, 300, 500],
+      labelOf: (ml) => l.waterReminderAmount(ml),
+      current: settings.waterAmountMl,
+    );
+    if (picked != null) onChanged(settings.copyWith(waterAmountMl: picked));
+  }
+
+  Future<void> _pickActiveHours(BuildContext context) async {
+    final start = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: settings.waterStartHour, minute: 0),
+      helpText: l.waterReminderActiveHours,
+    );
+    if (start == null || !context.mounted) return;
+    final end = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: settings.waterEndHour, minute: 0),
+      helpText: l.waterReminderActiveHours,
+    );
+    if (end == null) return;
+    if (end.hour <= start.hour) return; // sessizce reddet — sıralama bozuk
+    onChanged(settings.copyWith(
+      waterStartHour: start.hour,
+      waterEndHour: end.hour,
+    ));
+  }
+
+  Future<T?> _showOptionsSheet<T>(
+    BuildContext context, {
+    required String title,
+    required List<T> options,
+    required String Function(T) labelOf,
+    required T current,
+  }) {
+    final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
+    return showModalBottomSheet<T>(
+      context: context,
+      backgroundColor: cardBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: divColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            for (final opt in options)
+              ListTile(
+                title: Text(
+                  labelOf(opt),
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: textPrimary,
+                    fontWeight: opt == current ? FontWeight.w800 : FontWeight.w500,
+                  ),
+                ),
+                trailing: opt == current
+                    ? Icon(Icons.check_rounded, color: accent)
+                    : null,
+                onTap: () => Navigator.pop(ctx, opt),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  final String label;
+  final Color accent;
+  final VoidCallback onTap;
+  const _Pill({required this.label, required this.accent, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: accent.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w700,
+            color: accent,
+          ),
+        ),
+      ),
     );
   }
 }

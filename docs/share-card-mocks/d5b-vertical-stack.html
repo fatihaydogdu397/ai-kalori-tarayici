@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>D5-B — Vertical Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.meal-row {
+  display: flex; gap: 14px; align-items: stretch;
+  height: 150px;
+}
+.meal-photo {
+  flex: 1.5;
+  border-radius: 18px; background-size: cover;
+  position: relative; overflow: hidden;
+}
+.meal-photo::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85));
+}
+.meal-tag {
+  position: absolute; top: 12px; left: 12px; z-index: 2;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(20px);
+  padding: 5px 12px; border-radius: 100px;
+  font-size: 13px; font-weight: 700; color: var(--lime);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.meal-data {
+  flex: 1;
+  background: rgba(28,28,42,0.55);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.meal-data .kcal-line { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+.meal-data .kcal { font-size: 32px; font-weight: 800; color: var(--lime); letter-spacing: -0.02em; line-height: 1; }
+.meal-data .kcal-u { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+.meal-data .macros { display: flex; gap: 12px; font-size: 13px; font-weight: 700; }
+.meal-data .macros span { display: inline-flex; align-items: center; gap: 4px; }
+.meal-data .macros .dot { width: 6px; height: 6px; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:550px; height:550px; background:var(--violet); top:300px; right:-150px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--lime); bottom:200px; left:-150px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bugünün Günlüğü</div>
+    <div class="title">5 öğün, tam tempo.</div>
+  </div>
+
+  <!-- 5 horizontal rows -->
+  <div style="position:absolute; top:480px; left:60px; right:60px; display:flex; flex-direction:column; gap:12px;">
+    <!-- Kahvaltı -->
+    <div class="meal-row">
+      <div class="meal-photo" style="background: linear-gradient(135deg, #2a4a2a, #5a8b3a);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 40% 30%, #d4a02a 0%, transparent 35%), radial-gradient(circle at 60% 70%, #2a8b3a 0%, transparent 40%);"></div>
+        <div class="meal-tag">Kahvaltı · 08:30</div>
+      </div>
+      <div class="meal-data">
+        <div class="kcal-line">
+          <div class="kcal">320</div>
+          <div class="kcal-u">kcal</div>
+        </div>
+        <div class="macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>P 18g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>K 32g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>Y 14g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Ara 1 -->
+    <div class="meal-row">
+      <div class="meal-photo" style="background: linear-gradient(135deg, #4a402a, #8b7a3a);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d4a02a 0%, transparent 40%);"></div>
+        <div class="meal-tag">Ara 1 · 11:00</div>
+      </div>
+      <div class="meal-data">
+        <div class="kcal-line">
+          <div class="kcal">180</div>
+          <div class="kcal-u">kcal</div>
+        </div>
+        <div class="macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>P 10g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>K 22g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>Y 6g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Öğle -->
+    <div class="meal-row">
+      <div class="meal-photo" style="background: linear-gradient(135deg, #8b5a2b, #d4622a);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);"></div>
+        <div class="meal-tag">Öğle · 13:15</div>
+      </div>
+      <div class="meal-data">
+        <div class="kcal-line">
+          <div class="kcal">540</div>
+          <div class="kcal-u">kcal</div>
+        </div>
+        <div class="macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>P 32g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>K 58g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>Y 22g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Ara 2 -->
+    <div class="meal-row">
+      <div class="meal-photo" style="background: linear-gradient(135deg, #2a4a3a, #3a8b5a);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #2adc8b 0%, transparent 40%);"></div>
+        <div class="meal-tag">Ara 2 · 16:30</div>
+      </div>
+      <div class="meal-data">
+        <div class="kcal-line">
+          <div class="kcal">220</div>
+          <div class="kcal-u">kcal</div>
+        </div>
+        <div class="macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>P 14g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>K 28g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>Y 8g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Akşam -->
+    <div class="meal-row">
+      <div class="meal-photo" style="background: linear-gradient(135deg, #4a2a4a, #8b3a8b);">
+        <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);"></div>
+        <div class="meal-tag">Akşam · 19:45</div>
+      </div>
+      <div class="meal-data">
+        <div class="kcal-line">
+          <div class="kcal">620</div>
+          <div class="kcal-u">kcal</div>
+        </div>
+        <div class="macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>P 48g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>K 52g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>Y 24g</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total -->
+  <div class="macro-card" style="position:absolute; bottom:220px; left:60px; right:60px; padding:20px 28px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-size:13px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.15em; font-weight:600;">Toplam · 5 öğün</div>
+        <div style="font-size:44px; font-weight:800; color:var(--lime); letter-spacing:-0.04em; line-height:1; margin-top:4px;">1.880 <span style="font-size:16px; color:var(--text-muted); font-weight:500;">kcal</span></div>
+      </div>
+      <div style="display:flex; gap:14px;">
+        <div style="text-align:center;"><div style="font-size:22px; font-weight:800;" class="protein-color">122g</div><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">Protein</div></div>
+        <div style="text-align:center;"><div style="font-size:22px; font-weight:800;" class="carb-color">192g</div><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">Karb</div></div>
+        <div style="text-align:center;"><div style="font-size:22px; font-weight:800;" class="fat-color">74g</div><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">Yağ</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

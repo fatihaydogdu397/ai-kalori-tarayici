@@ -571,5 +571,7 @@
   "continueWithApple2": "Продолжить с Apple",
   "continueWithGoogle2": "Продолжить с Google",
   "searchLabel2": "Поиск",
-  "searchFoodsHint2": "Поиск продуктов..."
+  "searchFoodsHint2": "Поиск продуктов...",
+  "shareCta": "Поделиться",
+  "shareWeekCta": "Поделиться неделей"
 }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Haftalık Seyrek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:600px; height:600px; background:var(--mint); top:200px; right:-200px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--lime); bottom:300px; left:-150px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand">
+      <div class="brand-dot">e</div>
+      <span>eatiq</span>
+    </div>
+    <div class="date-pill">22 – 28 Nis</div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bu Hafta</div>
+    <div class="title">Disiplin<br>tatlı geliyor.</div>
+  </div>
+
+  <!-- Stats row -->
+  <div style="position:absolute; top:480px; left:60px; right:60px; display:flex; gap:14px; flex-wrap:wrap;">
+    <div class="stat-badge" style="background: rgba(45, 220, 180, 0.12); border-color: rgba(45, 220, 180, 0.3); color: var(--mint);">
+      🔥 5/7 gün
+    </div>
+    <div class="stat-badge">
+      🥗 12 öğün
+    </div>
+    <div class="stat-badge" style="background: rgba(255, 179, 71, 0.12); border-color: rgba(255, 179, 71, 0.3); color: var(--amber);">
+      ⚡ Ø 1.850 kcal
+    </div>
+  </div>
+
+  <!-- Mosaic: 6 photos in irregular grid -->
+  <div style="position:absolute; top:600px; left:60px; right:60px; height:700px; display:grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(4, 1fr); gap:14px;">
+    <div class="photo" style="grid-column: 1 / 4; grid-row: 1 / 3; background: linear-gradient(135deg, #2a4a2a 0%, #5a8b3a 100%);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 40% 50%, #d4a02a 0%, transparent 40%);"></div>
+    </div>
+    <div class="photo" style="grid-column: 4 / 7; grid-row: 1 / 2; background: linear-gradient(135deg, #8b5a2b 0%, #d4622a 100%);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);"></div>
+    </div>
+    <div class="photo" style="grid-column: 4 / 6; grid-row: 2 / 3; background: linear-gradient(135deg, #4a2a4a 0%, #8b3a8b 100%);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);"></div>
+    </div>
+    <div class="photo" style="grid-column: 6 / 7; grid-row: 2 / 3; background: linear-gradient(135deg, #2a3a4a 0%, #3a5a8b 100%);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #4a8bd4 0%, transparent 40%);"></div>
+    </div>
+
+    <div class="photo" style="grid-column: 1 / 4; grid-row: 3 / 5; background: linear-gradient(135deg, #4a3520 0%, #8b5a2b 100%);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d4622a 0%, transparent 40%);"></div>
+    </div>
+    <div class="photo" style="grid-column: 4 / 7; grid-row: 3 / 5; background: linear-gradient(135deg, #4a2a2a 0%, #8b3a3a 100%);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d4632a 0%, transparent 40%);"></div>
+    </div>
+  </div>
+
+  <!-- Compact summary -->
+  <div class="macro-card" style="position:absolute; bottom:220px; left:60px; right:60px; padding:32px 40px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <div>
+        <div style="font-size:18px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.15em; font-weight:600;">Hafta Toplamı</div>
+        <div style="font-size:80px; font-weight:800; letter-spacing:-0.04em; color:var(--lime); line-height:1;">9.247</div>
+        <div style="font-size:18px; color:var(--text-muted); margin-top:4px;">kcal · ortalama 1.850/gün</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:24px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:10px; height:10px; border-radius:50%; background:var(--violet);"></div>
+        <span style="font-size:18px; color:var(--text-secondary);">Protein <strong style="color:var(--snow)">410g</strong></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:10px; height:10px; border-radius:50%; background:var(--amber);"></div>
+        <span style="font-size:18px; color:var(--text-secondary);">Karb <strong style="color:var(--snow)">680g</strong></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:10px; height:10px; border-radius:50%; background:var(--coral);"></div>
+        <span style="font-size:18px; color:var(--text-secondary);">Yağ <strong style="color:var(--snow)">220g</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

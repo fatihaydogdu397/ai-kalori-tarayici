@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>V1 — Makro Chip'leri Üstte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.meal-chips {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 3;
+  align-items: flex-end;
+}
+.chip {
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(20px);
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.chip-dot { width: 8px; height: 8px; border-radius: 50%; }
+.chip-large {
+  background: var(--lime);
+  color: var(--void);
+  font-size: 16px;
+  padding: 8px 14px;
+}
+.meal-name-bar {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px);
+  padding: 10px 16px;
+  border-radius: 16px;
+  z-index: 3;
+}
+.meal-name-text { font-size: 18px; font-weight: 600; }
+.meal-time-tag {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px);
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--lime);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  z-index: 3;
+}
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:550px; height:550px; background:var(--lime); top:600px; left:-150px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--coral); top:100px; right:-100px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bugünün Günlüğü</div>
+    <div class="title">Her öğün<br>kayıtta.</div>
+  </div>
+
+  <!-- 3 meals stacked vertically with full meta -->
+  <div style="position:absolute; top:540px; left:60px; right:60px; display:flex; flex-direction:column; gap:18px;">
+    <!-- Meal 1 -->
+    <div class="photo" style="height:240px; background: linear-gradient(135deg, #2a4a2a 0%, #5a8b3a 100%);">
+      <div style="position:absolute; inset:0; background:
+        radial-gradient(circle at 40% 30%, #d4a02a 0%, transparent 35%),
+        radial-gradient(circle at 60% 70%, #2a8b3a 0%, transparent 40%);"></div>
+      <div class="meal-time-tag">Kahvaltı</div>
+      <div class="meal-chips">
+        <div class="chip chip-large">320 kcal</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--violet)"></div>P 18g</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--amber)"></div>K 32g</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--coral)"></div>Y 14g</div>
+      </div>
+    </div>
+    <!-- Meal 2 -->
+    <div class="photo" style="height:240px; background: linear-gradient(135deg, #8b5a2b 0%, #d4622a 100%);">
+      <div style="position:absolute; inset:0; background:
+        radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);"></div>
+      <div class="meal-time-tag">Öğle</div>
+      <div class="meal-chips">
+        <div class="chip chip-large">240 kcal</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--violet)"></div>P 15g</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--amber)"></div>K 38g</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--coral)"></div>Y 6g</div>
+      </div>
+    </div>
+    <!-- Meal 3 -->
+    <div class="photo" style="height:240px; background: linear-gradient(135deg, #4a2a4a 0%, #8b3a8b 100%);">
+      <div style="position:absolute; inset:0; background:
+        radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);"></div>
+      <div class="meal-time-tag">Akşam</div>
+      <div class="meal-chips">
+        <div class="chip chip-large">540 kcal</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--violet)"></div>P 55g</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--amber)"></div>K 42g</div>
+        <div class="chip"><div class="chip-dot" style="background:var(--coral)"></div>Y 18g</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total summary -->
+  <div class="macro-card" style="position:absolute; bottom:220px; left:60px; right:60px; padding:24px 36px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-size:18px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.15em; font-weight:600;">Toplam</div>
+      <div style="font-size:48px; font-weight:800; color:var(--lime); letter-spacing:-0.03em;">1.100 <span style="font-size:18px; color:var(--text-muted); font-weight:500;">kcal</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

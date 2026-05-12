@@ -60,6 +60,10 @@ class NotificationService {
 const kNotifBreakfast = 1;
 const kNotifLunch = 2;
 const kNotifDinner = 3;
+// Water reminders use a contiguous range so apply() can cancel the whole batch
+// before re-scheduling. 100..115 covers up to 16 daily slots.
+const kNotifWaterBase = 100;
+const kNotifWaterMaxSlots = 16;
 
 // SharedPrefs keys
 const kPrefNotifEnabled = 'notif_enabled';
@@ -72,6 +76,11 @@ const kPrefNotifLunchHour = 'notif_lunch_hour';
 const kPrefNotifLunchMin = 'notif_lunch_min';
 const kPrefNotifDinnerHour = 'notif_dinner_hour';
 const kPrefNotifDinnerMin = 'notif_dinner_min';
+const kPrefNotifWaterEnabled = 'notif_water_enabled';
+const kPrefNotifWaterIntervalH = 'notif_water_interval_h';
+const kPrefNotifWaterAmountMl = 'notif_water_amount_ml';
+const kPrefNotifWaterStartH = 'notif_water_start_h';
+const kPrefNotifWaterEndH = 'notif_water_end_h';
 
 class NotificationSettings {
   final bool enabled;
@@ -81,6 +90,12 @@ class NotificationSettings {
   final TimeOfDay breakfastTime;
   final TimeOfDay lunchTime;
   final TimeOfDay dinnerTime;
+  // Water reminders — kullanıcı kaç saatte bir / kaç ml içtiğini seçer.
+  final bool waterEnabled;
+  final int waterIntervalHours; // 1..6
+  final int waterAmountMl;      // mesajda gösterilecek miktar
+  final int waterStartHour;     // 0..23
+  final int waterEndHour;       // start..23
 
   const NotificationSettings({
     this.enabled = true,
@@ -90,6 +105,11 @@ class NotificationSettings {
     this.breakfastTime = const TimeOfDay(hour: 8, minute: 0),
     this.lunchTime = const TimeOfDay(hour: 12, minute: 30),
     this.dinnerTime = const TimeOfDay(hour: 19, minute: 0),
+    this.waterEnabled = false,
+    this.waterIntervalHours = 2,
+    this.waterAmountMl = 250,
+    this.waterStartHour = 8,
+    this.waterEndHour = 22,
   });
 
   static Future<NotificationSettings> load() async {
@@ -102,6 +122,11 @@ class NotificationSettings {
       breakfastTime: TimeOfDay(hour: prefs.getInt(kPrefNotifBreakfastHour) ?? 8, minute: prefs.getInt(kPrefNotifBreakfastMin) ?? 0),
       lunchTime: TimeOfDay(hour: prefs.getInt(kPrefNotifLunchHour) ?? 12, minute: prefs.getInt(kPrefNotifLunchMin) ?? 30),
       dinnerTime: TimeOfDay(hour: prefs.getInt(kPrefNotifDinnerHour) ?? 19, minute: prefs.getInt(kPrefNotifDinnerMin) ?? 0),
+      waterEnabled: prefs.getBool(kPrefNotifWaterEnabled) ?? false,
+      waterIntervalHours: prefs.getInt(kPrefNotifWaterIntervalH) ?? 2,
+      waterAmountMl: prefs.getInt(kPrefNotifWaterAmountMl) ?? 250,
+      waterStartHour: prefs.getInt(kPrefNotifWaterStartH) ?? 8,
+      waterEndHour: prefs.getInt(kPrefNotifWaterEndH) ?? 22,
     );
   }
 
@@ -117,9 +142,31 @@ class NotificationSettings {
     await prefs.setInt(kPrefNotifLunchMin, lunchTime.minute);
     await prefs.setInt(kPrefNotifDinnerHour, dinnerTime.hour);
     await prefs.setInt(kPrefNotifDinnerMin, dinnerTime.minute);
+    await prefs.setBool(kPrefNotifWaterEnabled, waterEnabled);
+    await prefs.setInt(kPrefNotifWaterIntervalH, waterIntervalHours);
+    await prefs.setInt(kPrefNotifWaterAmountMl, waterAmountMl);
+    await prefs.setInt(kPrefNotifWaterStartH, waterStartHour);
+    await prefs.setInt(kPrefNotifWaterEndH, waterEndHour);
   }
 
-  Future<void> apply() async {
+  /// Active hours içinde her [waterIntervalHours] saatte bir tetiklenecek
+  /// günlük slot listesi. Örn. 8→22 / 2 saat = [8,10,12,14,16,18,20,22].
+  List<TimeOfDay> get waterSlots {
+    if (!waterEnabled) return const [];
+    final int step = waterIntervalHours.clamp(1, 6);
+    final int start = waterStartHour.clamp(0, 23);
+    final int end = waterEndHour.clamp(start, 23);
+    final slots = <TimeOfDay>[];
+    for (int h = start; h <= end && slots.length < kNotifWaterMaxSlots; h += step) {
+      slots.add(TimeOfDay(hour: h, minute: 0));
+    }
+    return slots;
+  }
+
+  Future<void> apply({
+    String? waterTitle,
+    String Function(int amountMl)? waterBody,
+  }) async {
     if (!enabled) {
       await NotificationService.cancelAll();
       return;
@@ -139,11 +186,26 @@ class NotificationSettings {
     } else {
       await NotificationService.cancel(kNotifDinner);
     }
+
+    // Water reminders — önce eski slot'ları topluca iptal et, sonra yeniden kur.
+    for (int i = 0; i < kNotifWaterMaxSlots; i++) {
+      await NotificationService.cancel(kNotifWaterBase + i);
+    }
+    if (waterEnabled) {
+      final slots = waterSlots;
+      final title = waterTitle ?? 'Su zamanı! 💧';
+      final body = waterBody?.call(waterAmountMl) ?? '$waterAmountMl ml su içmeyi unutma.';
+      for (int i = 0; i < slots.length; i++) {
+        await NotificationService.scheduleDaily(kNotifWaterBase + i, slots[i], title, body);
+      }
+    }
   }
 
   NotificationSettings copyWith({
     bool? enabled, bool? breakfastEnabled, bool? lunchEnabled, bool? dinnerEnabled,
     TimeOfDay? breakfastTime, TimeOfDay? lunchTime, TimeOfDay? dinnerTime,
+    bool? waterEnabled, int? waterIntervalHours, int? waterAmountMl,
+    int? waterStartHour, int? waterEndHour,
   }) => NotificationSettings(
     enabled: enabled ?? this.enabled,
     breakfastEnabled: breakfastEnabled ?? this.breakfastEnabled,
@@ -152,5 +214,10 @@ class NotificationSettings {
     breakfastTime: breakfastTime ?? this.breakfastTime,
     lunchTime: lunchTime ?? this.lunchTime,
     dinnerTime: dinnerTime ?? this.dinnerTime,
+    waterEnabled: waterEnabled ?? this.waterEnabled,
+    waterIntervalHours: waterIntervalHours ?? this.waterIntervalHours,
+    waterAmountMl: waterAmountMl ?? this.waterAmountMl,
+    waterStartHour: waterStartHour ?? this.waterStartHour,
+    waterEndHour: waterEndHour ?? this.waterEndHour,
   );
 }

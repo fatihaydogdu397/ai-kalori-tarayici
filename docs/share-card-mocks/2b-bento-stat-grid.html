@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>2B — Bento + Stat Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.bg-meal { position: relative; border-radius: 24px; overflow: hidden; background-size: cover; }
+.bg-meal::after { content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4), transparent 25%, transparent 50%, rgba(0,0,0,0.95));
+}
+.tag-corner { position: absolute; top: 14px; left: 14px; z-index:3;
+  background: var(--lime); color: var(--void);
+  padding: 5px 11px; border-radius: 8px;
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.kcal-corner { position: absolute; top: 14px; right: 14px; z-index: 3;
+  background: rgba(0,0,0,0.65); backdrop-filter: blur(20px);
+  padding: 6px 14px; border-radius: 100px;
+  font-size: 18px; font-weight: 800; color: var(--lime);
+  border: 1px solid rgba(200,241,53,0.3);
+}
+.bottom-area { position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 3; }
+.meal-name-text { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.stat-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+}
+.stat-cell {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 6px 4px;
+  text-align: center;
+}
+.stat-cell-val { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+.stat-cell-label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; margin-top: 1px; }
+
+.bg-meal.large .meal-name-text { font-size: 24px; margin-bottom: 12px; }
+.bg-meal.large .stat-cell-val { font-size: 22px; }
+.bg-meal.large .stat-cell-label { font-size: 11px; }
+.bg-meal.large .stat-cell { padding: 10px 8px; border-radius: 14px; }
+.bg-meal.large .kcal-corner { font-size: 22px; padding: 8px 16px; }
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:550px; height:550px; background:var(--lime); top:600px; left:-150px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--coral); top:100px; right:-100px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bugünün Günlüğü</div>
+    <div class="title">3 öğün,<br>1 hedef.</div>
+  </div>
+
+  <div style="position:absolute; top:540px; left:60px; right:60px; height:920px; display:grid; grid-template-columns:1.3fr 1fr; grid-template-rows:1fr 1fr; gap:16px;">
+    <!-- Hero -->
+    <div class="bg-meal large" style="grid-row: 1 / 3; background: linear-gradient(135deg, #2a4a2a, #5a8b3a);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 40% 30%, #d4a02a 0%, transparent 35%), radial-gradient(circle at 60% 70%, #2a8b3a 0%, transparent 40%);"></div>
+      <div class="tag-corner">Kahvaltı</div>
+      <div class="kcal-corner">320 kcal</div>
+      <div class="bottom-area">
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-cell-val protein-color">18g</div><div class="stat-cell-label">Protein</div></div>
+          <div class="stat-cell"><div class="stat-cell-val carb-color">32g</div><div class="stat-cell-label">Karb</div></div>
+          <div class="stat-cell"><div class="stat-cell-val fat-color">14g</div><div class="stat-cell-label">Yağ</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Top right -->
+    <div class="bg-meal" style="background: linear-gradient(135deg, #8b5a2b, #d4622a);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);"></div>
+      <div class="tag-corner">Öğle</div>
+      <div class="kcal-corner">240 kcal</div>
+      <div class="bottom-area">
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-cell-val protein-color">15g</div><div class="stat-cell-label">P</div></div>
+          <div class="stat-cell"><div class="stat-cell-val carb-color">38g</div><div class="stat-cell-label">K</div></div>
+          <div class="stat-cell"><div class="stat-cell-val fat-color">6g</div><div class="stat-cell-label">Y</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom right -->
+    <div class="bg-meal" style="background: linear-gradient(135deg, #4a2a4a, #8b3a8b);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);"></div>
+      <div class="tag-corner">Akşam</div>
+      <div class="kcal-corner">540 kcal</div>
+      <div class="bottom-area">
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-cell-val protein-color">55g</div><div class="stat-cell-label">P</div></div>
+          <div class="stat-cell"><div class="stat-cell-val carb-color">42g</div><div class="stat-cell-label">K</div></div>
+          <div class="stat-cell"><div class="stat-cell-val fat-color">18g</div><div class="stat-cell-label">Y</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total -->
+  <div class="macro-card" style="position:absolute; bottom:220px; left:60px; right:60px; padding:20px 32px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-size:14px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.15em; font-weight:600;">Günün Toplamı</div>
+      <div style="display:flex; gap:24px; align-items:baseline;">
+        <div style="font-size:42px; font-weight:800; color:var(--lime); letter-spacing:-0.03em;">1.100<span style="font-size:16px; color:var(--text-muted); font-weight:500; margin-left:6px;">kcal</span></div>
+        <div style="display:flex; gap:12px;">
+          <span style="font-size:18px; font-weight:700;" class="protein-color">88g</span>
+          <span style="font-size:18px; font-weight:700;" class="carb-color">112g</span>
+          <span style="font-size:18px; font-weight:700;" class="fat-color">38g</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

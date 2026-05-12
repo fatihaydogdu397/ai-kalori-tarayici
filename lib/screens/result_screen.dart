@@ -5,13 +5,19 @@ import '../models/food_analysis.dart';
 import '../theme/app_theme.dart';
 import '../generated/app_localizations.dart';
 import '../services/app_provider.dart';
+import '../share/share_card_data.dart';
+import '../share/share_picker_screen.dart';
 import 'manual_entry_screen.dart';
 
 class ResultScreen extends StatefulWidget {
   final FoodAnalysis analysis;
   final bool allowRetry;
 
-  const ResultScreen({super.key, required this.analysis, this.allowRetry = false});
+  const ResultScreen({
+    super.key,
+    required this.analysis,
+    this.allowRetry = false,
+  });
 
   @override
   State<ResultScreen> createState() => _ResultScreenState();
@@ -59,8 +65,12 @@ class _ResultScreenState extends State<ResultScreen> {
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
-    final textSecondary = isDark ? const Color(0xFFCCCCCC) : const Color(0xFF555555);
+    final textMuted = isDark
+        ? AppColors.darkTextMuted
+        : AppColors.lightTextMuted;
+    final textSecondary = isDark
+        ? const Color(0xFFCCCCCC)
+        : const Color(0xFF555555);
     final divider = isDark ? AppColors.darkSurface : AppColors.lightBorder;
     final btnBg = isDark ? AppColors.lime : AppColors.void_;
     final btnText = isDark ? AppColors.void_ : AppColors.snow;
@@ -68,27 +78,35 @@ class _ResultScreenState extends State<ResultScreen> {
     final aiText = isDark ? AppColors.void_ : AppColors.lime;
     final calColor = isDark ? AppColors.lime : AppColors.limeDeep;
     final accent = isDark ? AppColors.lime : AppColors.limeDeep;
-    final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
+    final border = isDark
+        ? null
+        : Border.all(color: AppColors.lightBorder, width: 0.5);
 
-    final food = _currentAnalysis.foods.isNotEmpty ? _currentAnalysis.foods.first : null;
+    final food = _currentAnalysis.foods.isNotEmpty
+        ? _currentAnalysis.foods.first
+        : null;
     final total = _currentAnalysis.totalNutrients;
 
     final tagConfigs = [
-      (AppColors.lime, isDark ? const Color(0xFF1A2010) : const Color(0xFFEEF5E0), isDark ? const Color(0xFF3A5A20) : const Color(0xFFAACE60)),
+      (
+        isDark ? AppColors.lime : AppColors.limeDeep,
+        isDark ? const Color(0xFF1A2010) : const Color(0xFFE2EFC4),
+        isDark ? const Color(0xFF3A5A20) : const Color(0xFF8FB540),
+      ),
       (
         isDark ? AppColors.violet : AppColors.violetDark,
-        isDark ? const Color(0xFF1A1A30) : const Color(0xFFEEECFC),
-        isDark ? const Color(0xFF3A3A60) : const Color(0xFFAAAADE),
+        isDark ? const Color(0xFF1A1A30) : const Color(0xFFDEDCF8),
+        isDark ? const Color(0xFF3A3A60) : const Color(0xFF8A8AD0),
       ),
       (
         isDark ? AppColors.amber : AppColors.amberDark,
-        isDark ? const Color(0xFF1F1510) : const Color(0xFFFFF4E6),
-        isDark ? const Color(0xFF4A3A20) : const Color(0xFFDDAA60),
+        isDark ? const Color(0xFF1F1510) : const Color(0xFFFCE6C2),
+        isDark ? const Color(0xFF4A3A20) : const Color(0xFFD09040),
       ),
       (
         isDark ? AppColors.coral : AppColors.coralDark,
-        isDark ? const Color(0xFF200E10) : const Color(0xFFFFEEEE),
-        isDark ? const Color(0xFF4A2020) : const Color(0xFFDDAAAA),
+        isDark ? const Color(0xFF200E10) : const Color(0xFFFADADA),
+        isDark ? const Color(0xFF4A2020) : const Color(0xFFD08A8A),
       ),
     ];
 
@@ -105,47 +123,133 @@ class _ResultScreenState extends State<ResultScreen> {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: Icon(Icons.chevron_left_rounded, color: textMuted, size: 26),
+                    child: Icon(
+                      Icons.chevron_left_rounded,
+                      color: textMuted,
+                      size: 26,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     l.analysisResult,
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textPrimary),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: textPrimary,
+                    ),
                   ),
                   const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => SharePickerScreen(
+                            data: ShareCardData(
+                              date: _currentAnalysis.analyzedAt,
+                              meals: [_currentAnalysis],
+                            ),
+                            locale: Localizations.localeOf(
+                              context,
+                            ).languageCode,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkCard
+                            : AppColors.lightSurface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkSurface
+                              : AppColors.lightBorder,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.ios_share_rounded,
+                            size: 13,
+                            color: textMuted,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            l.shareCta,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: textMuted,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   if (_currentAnalysis.analyzedAt.year == DateTime.now().year &&
-                      _currentAnalysis.analyzedAt.month == DateTime.now().month &&
-                      _currentAnalysis.analyzedAt.day == DateTime.now().day)
+                      _currentAnalysis.analyzedAt.month ==
+                          DateTime.now().month &&
+                      _currentAnalysis.analyzedAt.day ==
+                          DateTime.now().day) ...[
+                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () async {
                         final updated = await Navigator.push<bool>(
                           context,
-                          MaterialPageRoute(builder: (_) => ManualEntryScreen(existing: _currentAnalysis)),
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ManualEntryScreen(existing: _currentAnalysis),
+                          ),
                         );
                         if (updated == true && context.mounted) {
                           Navigator.pop(context);
                         }
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                          color: isDark
+                              ? AppColors.darkCard
+                              : AppColors.lightSurface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: isDark ? AppColors.darkSurface : AppColors.lightBorder),
+                          border: Border.all(
+                            color: isDark
+                                ? AppColors.darkSurface
+                                : AppColors.lightBorder,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.edit_rounded, size: 13, color: textMuted),
+                            Icon(
+                              Icons.edit_rounded,
+                              size: 13,
+                              color: textMuted,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               l.editProfile,
-                              style: TextStyle(fontSize: 12, color: textMuted, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: textMuted,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
@@ -160,42 +264,109 @@ class _ResultScreenState extends State<ResultScreen> {
                     // Food image
                     Stack(
                       children: [
-                        GestureDetector(
-                          onTap: File(_currentAnalysis.imagePath).existsSync()
-                              ? () => Navigator.push(
-                                  context,
-                                  PageRouteBuilder(
-                                    opaque: false,
-                                    pageBuilder: (_, __, ___) =>
-                                        _FullscreenImagePage(imagePath: _currentAnalysis.imagePath, tag: 'food_image_${_currentAnalysis.id}'),
-                                  ),
-                                )
-                              : null,
-                          child: Hero(
-                            tag: 'food_image_${_currentAnalysis.id}',
-                            child: Container(
-                              width: double.infinity,
-                              height: 160,
-                              decoration: BoxDecoration(
-                                color: isDark ? AppColors.darkCard : AppColors.lightSurface,
-                                borderRadius: BorderRadius.circular(14),
+                        Builder(
+                          builder: (_) {
+                            // BE artık imageUrl döndürüyor (R2/S3); analyze sonrası
+                            // ilk render'da local path da olabiliyor (compress
+                            // sonrası kısa süreli). İkisi de tek noktada handle
+                            // edilsin diye burada ayırıyoruz.
+                            final p = _currentAnalysis.imagePath;
+                            final isRemote =
+                                p.startsWith('http://') ||
+                                p.startsWith('https://');
+                            final hasLocal =
+                                !isRemote &&
+                                p.isNotEmpty &&
+                                File(p).existsSync();
+                            final canShow = isRemote || hasLocal;
+                            final fallback = Center(
+                              child: Icon(
+                                Icons.restaurant_rounded,
+                                size: 48,
+                                color: textMuted,
                               ),
-                              clipBehavior: Clip.hardEdge,
-                              child: File(_currentAnalysis.imagePath).existsSync()
-                                  ? Image.file(File(_currentAnalysis.imagePath), fit: BoxFit.cover)
-                                  : Center(child: Icon(Icons.restaurant_rounded, size: 48, color: textMuted)),
-                            ),
-                          ),
+                            );
+                            return GestureDetector(
+                              onTap: canShow
+                                  ? () => Navigator.push(
+                                      context,
+                                      PageRouteBuilder(
+                                        opaque: false,
+                                        pageBuilder: (_, __, ___) =>
+                                            _FullscreenImagePage(
+                                              imagePath: p,
+                                              tag:
+                                                  'food_image_${_currentAnalysis.id}',
+                                            ),
+                                      ),
+                                    )
+                                  : null,
+                              child: Hero(
+                                tag: 'food_image_${_currentAnalysis.id}',
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 160,
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? AppColors.darkCard
+                                        : AppColors.lightSurface,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: isRemote
+                                      ? Image.network(
+                                          p,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder:
+                                              (
+                                                _,
+                                                child,
+                                                progress,
+                                              ) => progress == null
+                                              ? child
+                                              : Center(
+                                                  child: SizedBox(
+                                                    width: 24,
+                                                    height: 24,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation(
+                                                            textMuted,
+                                                          ),
+                                                    ),
+                                                  ),
+                                                ),
+                                          errorBuilder: (_, __, ___) =>
+                                              fallback,
+                                        )
+                                      : hasLocal
+                                      ? Image.file(File(p), fit: BoxFit.cover)
+                                      : fallback,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         Positioned(
                           top: 10,
                           right: 10,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(color: aiBg, borderRadius: BorderRadius.circular(6)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: aiBg,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                             child: Text(
                               'AI',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: aiText),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: aiText,
+                              ),
                             ),
                           ),
                         ),
@@ -206,7 +377,11 @@ class _ResultScreenState extends State<ResultScreen> {
                     // Main nutrition card
                     Container(
                       padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(14),
+                        border: border,
+                      ),
                       child: Column(
                         children: [
                           Row(
@@ -221,25 +396,40 @@ class _ResultScreenState extends State<ResultScreen> {
                                         final name = food?.nameTr ?? '';
                                         if (name.isNotEmpty) return name;
                                         // summary'nin ilk 3 kelimesini fallback yap
-                                        final words = _currentAnalysis.summary.trim().split(RegExp(r'\s+'));
+                                        final words = _currentAnalysis.summary
+                                            .trim()
+                                            .split(RegExp(r'\s+'));
                                         return words.take(3).join(' ');
                                       }(),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: textPrimary),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w800,
+                                        color: textPrimary,
+                                      ),
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
                                       '~${_currentPortion.toStringAsFixed(0)}${food?.portionUnit ?? "g"}',
-                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textMuted),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: textMuted,
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isDark ? AppColors.darkBg : AppColors.lightBg,
+                                  color: isDark
+                                      ? AppColors.darkBg
+                                      : AppColors.lightBg,
                                   borderRadius: BorderRadius.circular(10),
                                   border: border,
                                 ),
@@ -247,9 +437,20 @@ class _ResultScreenState extends State<ResultScreen> {
                                   children: [
                                     Text(
                                       total.calories.toStringAsFixed(0),
-                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: calColor, height: 1),
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                        color: calColor,
+                                        height: 1,
+                                      ),
                                     ),
-                                    Text('kcal', style: TextStyle(fontSize: 10, color: textMuted)),
+                                    Text(
+                                      'kcal',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: textMuted,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -258,36 +459,57 @@ class _ResultScreenState extends State<ResultScreen> {
                           const SizedBox(height: 12),
                           // PORTION SLIDER
                           if (food != null &&
-                              _currentAnalysis.analyzedAt.year == DateTime.now().year &&
-                              _currentAnalysis.analyzedAt.month == DateTime.now().month &&
-                              _currentAnalysis.analyzedAt.day == DateTime.now().day) ...[
+                              _currentAnalysis.analyzedAt.year ==
+                                  DateTime.now().year &&
+                              _currentAnalysis.analyzedAt.month ==
+                                  DateTime.now().month &&
+                              _currentAnalysis.analyzedAt.day ==
+                                  DateTime.now().day) ...[
                             Row(
                               children: [
                                 Text(
                                   '${_currentPortion.toStringAsFixed(0)}${food.portionUnit}',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: btnBg),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: btnBg,
+                                  ),
                                 ),
                                 Expanded(
                                   child: SliderTheme(
                                     data: SliderTheme.of(context).copyWith(
                                       trackHeight: 4,
-                                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                                      overlayShape: SliderComponentShape.noOverlay,
+                                      thumbShape: const RoundSliderThumbShape(
+                                        enabledThumbRadius: 8,
+                                      ),
+                                      overlayShape:
+                                          SliderComponentShape.noOverlay,
                                       activeTrackColor: btnBg,
-                                      inactiveTrackColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                                      inactiveTrackColor: isDark
+                                          ? AppColors.darkSurface
+                                          : AppColors.lightBorder,
                                       thumbColor: btnBg,
                                     ),
-                                    child: Builder(builder: (_) {
-                                      final sliderMin = _originalPortion < 10 ? 0.0 : 10.0;
-                                      final sliderMax = _originalPortion > 500 ? _originalPortion * 2 : 1000.0;
-                                      return Slider(
-                                        value: _currentPortion.clamp(sliderMin, sliderMax),
-                                        min: sliderMin,
-                                        max: sliderMax,
-                                        divisions: 100,
-                                        onChanged: _onPortionChanged,
-                                      );
-                                    }),
+                                    child: Builder(
+                                      builder: (_) {
+                                        final sliderMin = _originalPortion < 10
+                                            ? 0.0
+                                            : 10.0;
+                                        final sliderMax = _originalPortion > 500
+                                            ? _originalPortion * 2
+                                            : 1000.0;
+                                        return Slider(
+                                          value: _currentPortion.clamp(
+                                            sliderMin,
+                                            sliderMax,
+                                          ),
+                                          min: sliderMin,
+                                          max: sliderMax,
+                                          divisions: 100,
+                                          onChanged: _onPortionChanged,
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ],
@@ -301,19 +523,25 @@ class _ResultScreenState extends State<ResultScreen> {
                               _MacroCell(
                                 value: '${total.protein.toStringAsFixed(0)}g',
                                 label: l.protein,
-                                color: isDark ? AppColors.violet : AppColors.violetDark,
+                                color: isDark
+                                    ? AppColors.violet
+                                    : AppColors.violetDark,
                               ),
                               VerticalDivider(color: divider, width: 1),
                               _MacroCell(
                                 value: '${total.carbs.toStringAsFixed(0)}g',
                                 label: l.carbs,
-                                color: isDark ? AppColors.amber : AppColors.amberDark,
+                                color: isDark
+                                    ? AppColors.amber
+                                    : AppColors.amberDark,
                               ),
                               VerticalDivider(color: divider, width: 1),
                               _MacroCell(
                                 value: '${total.fat.toStringAsFixed(0)}g',
                                 label: l.fat,
-                                color: isDark ? AppColors.coral : AppColors.coralDark,
+                                color: isDark
+                                    ? AppColors.coral
+                                    : AppColors.coralDark,
                               ),
                             ],
                           ),
@@ -326,25 +554,45 @@ class _ResultScreenState extends State<ResultScreen> {
                     if (food != null && food.tags.isNotEmpty) ...[
                       Container(
                         padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(14),
+                          border: border,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(l.detectedIngredients, style: TextStyle(fontSize: 11, color: textMuted)),
+                            Text(
+                              l.detectedIngredients,
+                              style: TextStyle(fontSize: 11, color: textMuted),
+                            ),
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 6,
                               runSpacing: 6,
                               children: food.tags.asMap().entries.map((e) {
-                                final cfg = tagConfigs[e.key % tagConfigs.length];
+                                final cfg =
+                                    tagConfigs[e.key % tagConfigs.length];
                                 return Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: cfg.$2,
                                     borderRadius: BorderRadius.circular(5),
-                                    border: Border.all(color: cfg.$3, width: 0.5),
+                                    border: Border.all(
+                                      color: cfg.$3,
+                                      width: 0.5,
+                                    ),
                                   ),
-                                  child: Text(e.value, style: TextStyle(fontSize: 11, color: cfg.$1)),
+                                  child: Text(
+                                    e.value,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: cfg.$1,
+                                    ),
+                                  ),
                                 );
                               }).toList(),
                             ),
@@ -372,16 +620,31 @@ class _ResultScreenState extends State<ResultScreen> {
                     if (_currentAnalysis.advice.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(14), border: border),
+                        decoration: BoxDecoration(
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(14),
+                          border: border,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Öneri',
-                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: textMuted),
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: textMuted,
+                              ),
                             ),
                             const SizedBox(height: 6),
-                            Text(_currentAnalysis.advice, style: TextStyle(fontSize: 13, color: textSecondary, height: 1.55)),
+                            Text(
+                              _currentAnalysis.advice,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: textSecondary,
+                                height: 1.55,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -412,17 +675,28 @@ class _ResultScreenState extends State<ResultScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: btnBg,
                         foregroundColor: btnText,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 0,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(_portionChanged ? Icons.save_rounded : Icons.check_circle_outline_rounded, size: 20),
+                          Icon(
+                            _portionChanged
+                                ? Icons.save_rounded
+                                : Icons.check_circle_outline_rounded,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             _portionChanged ? l.save : l.backToHome,
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: btnText),
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: btnText,
+                            ),
                           ),
                         ],
                       ),
@@ -436,16 +710,26 @@ class _ResultScreenState extends State<ResultScreen> {
                       child: TextButton(
                         onPressed: () => Navigator.pop(context, true),
                         style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.camera_alt_rounded, size: 16, color: textMuted),
+                            Icon(
+                              Icons.camera_alt_rounded,
+                              size: 16,
+                              color: textMuted,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'Tekrar Analiz Et',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textMuted),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: textMuted,
+                              ),
                             ),
                           ],
                         ),
@@ -465,17 +749,27 @@ class _ResultScreenState extends State<ResultScreen> {
 class _MacroCell extends StatelessWidget {
   final String value, label;
   final Color color;
-  const _MacroCell({required this.value, required this.label, required this.color});
+  const _MacroCell({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final textMuted = Theme.of(context).brightness == Brightness.dark ? AppColors.darkTextMuted : AppColors.lightTextMuted;
+    final textMuted = Theme.of(context).brightness == Brightness.dark
+        ? AppColors.darkTextMuted
+        : AppColors.lightTextMuted;
     return Expanded(
       child: Column(
         children: [
           Text(
             value,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: color),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
           ),
           const SizedBox(height: 2),
           Text(label, style: TextStyle(fontSize: 10, color: textMuted)),
@@ -515,18 +809,41 @@ class _ExpandableNoteState extends State<_ExpandableNote> {
       onTap: () => setState(() => _expanded = !_expanded),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(color: widget.cardBg, borderRadius: BorderRadius.circular(14), border: widget.border),
+        decoration: BoxDecoration(
+          color: widget.cardBg,
+          borderRadius: BorderRadius.circular(14),
+          border: widget.border,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Text(widget.label, style: TextStyle(fontSize: 11, color: widget.textMuted)),
+                Text(
+                  widget.label,
+                  style: TextStyle(fontSize: 11, color: widget.textMuted),
+                ),
                 const Spacer(),
-                Icon(_expanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded, size: 16, color: widget.textMuted),
+                Icon(
+                  _expanded
+                      ? Icons.keyboard_arrow_up_rounded
+                      : Icons.keyboard_arrow_down_rounded,
+                  size: 16,
+                  color: widget.textMuted,
+                ),
               ],
             ),
-            if (_expanded) ...[const SizedBox(height: 8), Text(widget.text, style: TextStyle(fontSize: 13, color: widget.textBody, height: 1.55))],
+            if (_expanded) ...[
+              const SizedBox(height: 8),
+              Text(
+                widget.text,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: widget.textBody,
+                  height: 1.55,
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -542,16 +859,62 @@ class _FullscreenImagePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRemote =
+        imagePath.startsWith('http://') || imagePath.startsWith('https://');
+    final image = isRemote
+        ? Image.network(imagePath, fit: BoxFit.contain)
+        : Image.file(File(imagePath), fit: BoxFit.contain);
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Center(
-          child: Hero(
-            tag: tag,
-            child: InteractiveViewer(minScale: 0.5, maxScale: 4.0, child: Image.file(File(imagePath), fit: BoxFit.contain)),
+      body: Stack(
+        children: [
+          // Tap-to-dismiss alanı; aynı zamanda InteractiveViewer'a sarılı resim.
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Center(
+              child: Hero(
+                tag: tag,
+                child: InteractiveViewer(
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: image,
+                ),
+              ),
+            ),
           ),
-        ),
+          // Sağ üst kapatma butonu — tap-to-dismiss'a ek olarak açık
+          // (erişilebilir) kapanış affordance'ı.
+          Positioned(
+            top: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.55),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

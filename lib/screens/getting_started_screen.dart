@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../generated/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../services/app_provider.dart';
-import 'home_screen.dart';
 import 'onboarding_screen.dart';
 import 'auth/auth_screen.dart';
 import 'paywall_screen.dart';
@@ -67,13 +66,9 @@ class _GettingStartedScreenState extends State<GettingStartedScreen> with Single
       return;
     }
 
-    if (provider.isPremium) {
-      provider.loadHistory();
-      provider.loadTodayStats();
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-      return;
-    }
-
+    // Kullanıcı isteği: her açılışta logged-in kullanıcı paywall görsün
+    // (premium dahil). Premium check kaldırıldı; PaywallScreen içindeki
+    // CTA / restore kullanıcının home'a geçmesini sağlıyor.
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const PaywallScreen()));
   }
 

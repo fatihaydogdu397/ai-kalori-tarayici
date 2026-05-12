@@ -222,10 +222,14 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
       // kalmak ister, navigation tetikleme.
       if (!wasCompleted) {
         final provider = context.read<AppProvider>();
-        await provider.loadTodayStats();
+        // Bugünü seç → home Daily tab'da setSelectedDate listener'ı zaten
+        // loadTodayStats'ı tetikliyor. History'yi explicit yenileyelim,
+        // sonra root route'a dönüp Daily tab'a geç.
+        provider.setSelectedDate(DateTime.now());
         await provider.loadHistory();
         if (!mounted) return;
         provider.requestedHomeTab.value = 0;
+        Navigator.of(context).popUntil((r) => r.isFirst);
       }
     } catch (e) {
       if (!mounted) return;
@@ -420,7 +424,6 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
   void _showMealDetail(BuildContext context, DietMeal meal, int dayIndex, int mealIndex, bool isDark, Color accent, Color accentFg) {
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
-    final isToday = _isToday(_days[dayIndex].date);
     final l = AppLocalizations.of(context);
 
     showModalBottomSheet(
@@ -569,42 +572,32 @@ class _WeeklyDietPlanScreenState extends State<WeeklyDietPlanScreen> {
                 Expanded(
                   child: SizedBox(
                     height: 52.h,
-                    child: isToday
-                        ? ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _toggleMealEaten(dayIndex, mealIndex);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: meal.completed
-                                  ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
-                                  : accent,
-                              foregroundColor: meal.completed ? textPrimary : accentFg,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                              elevation: 0,
-                            ),
-                            icon: Icon(
-                              meal.completed ? Icons.undo_rounded : Icons.restaurant_menu_rounded,
-                              size: 16.sp,
-                            ),
-                            label: Text(
-                              meal.completed ? l.dietPlanMarkNotEaten : l.dietPlanIAteThis,
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
-                            ),
-                          )
-                        : ElevatedButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: accent,
-                              foregroundColor: accentFg,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              Localizations.localeOf(context).languageCode == 'tr' ? 'Tamam' : 'Got it',
-                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
-                            ),
-                          ),
+                    // "Bu öğünü yedim" eskiden sadece bugün için görünüyordu;
+                    // istek üzerine herhangi bir gün için (geçmiş/gelecek dahil)
+                    // her zaman gösteriliyor. BE completeMeal/uncompleteMeal
+                    // gün-agnostik çalışıyor.
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _toggleMealEaten(dayIndex, mealIndex);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: meal.completed
+                            ? (isDark ? AppColors.darkSurface : AppColors.lightSurface)
+                            : accent,
+                        foregroundColor: meal.completed ? textPrimary : accentFg,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                        elevation: 0,
+                      ),
+                      icon: Icon(
+                        meal.completed ? Icons.undo_rounded : Icons.restaurant_menu_rounded,
+                        size: 16.sp,
+                      ),
+                      label: Text(
+                        meal.completed ? l.dietPlanMarkNotEaten : l.dietPlanIAteThis,
+                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -955,7 +948,10 @@ class _MealCard extends StatelessWidget {
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
     final textMuted = isDark ? AppColors.darkTextMuted : AppColors.lightTextSecondary;
-    final showEatenBadge = isToday && meal.completed;
+    // "Yenildi" rozeti her gün için gösterilir (eskiden sadece bugün
+    // gösterilirdi). completed flag'i BE'den geliyor, geçmiş günlerde de
+    // kullanıcının markladığı öğünler görünür.
+    final showEatenBadge = meal.completed;
 
     return GestureDetector(
       onTap: onTap,

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>3F — Tile Grid (Bar'sız)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.tile {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(28,28,42,0.5);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+}
+.tile-photo {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+.tile-photo::after { content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4), transparent 30%, transparent 60%, rgba(0,0,0,0.5));
+}
+.tile-day {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+  padding: 4px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 800; color: var(--lime);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.tile-mealcount {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
+  padding: 4px 10px; border-radius: 100px;
+  font-size: 12px; font-weight: 700; color: var(--snow);
+}
+.tile-info {
+  padding: 14px 16px;
+  background: rgba(28,28,42,0.7);
+}
+.tile-kcal-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.tile-kcal { font-size: 28px; font-weight: 800; color: var(--lime); letter-spacing: -0.03em; line-height: 1; }
+.tile-kcal-u { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+.tile-macros {
+  display: flex; justify-content: space-between; gap: 6px;
+  font-size: 13px; font-weight: 700;
+}
+.tile-macros span { display: inline-flex; align-items: center; gap: 5px; }
+.tile-macros .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+.tile-empty {
+  border-radius: 18px;
+  background: rgba(255,255,255,0.02);
+  border: 1.5px dashed rgba(255,255,255,0.08);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text-muted); padding: 20px;
+}
+.tile-empty-day { font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; margin-bottom: 6px; opacity: 0.7; }
+.tile-empty-text { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:600px; height:600px; background:var(--violet); top:200px; right:-200px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--lime); bottom:300px; left:-150px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">22 – 28 Nis</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bu Hafta</div>
+    <div class="title">Her gün<br>bir bilanço.</div>
+  </div>
+
+  <!-- Stats -->
+  <div style="position:absolute; top:480px; left:60px; right:60px; display:flex; gap:12px; flex-wrap:wrap;">
+    <div class="stat-badge" style="background: rgba(45,220,180,0.12); border-color: rgba(45,220,180,0.3); color: var(--mint);">🔥 5/7 gün</div>
+    <div class="stat-badge">🥗 12 öğün</div>
+    <div class="stat-badge" style="background: rgba(255,179,71,0.12); border-color: rgba(255,179,71,0.3); color: var(--amber);">⚡ Ø 1.230 kcal</div>
+  </div>
+
+  <!-- 7-day grid, 3 cols -->
+  <div style="position:absolute; top:600px; left:60px; right:60px; display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;">
+    <!-- Pzt -->
+    <div class="tile">
+      <div class="tile-photo" style="background: linear-gradient(135deg, #2a4a2a, #5a8b3a);">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #d4a02a 0%, transparent 40%);"></div>
+        <div class="tile-day">Pzt · 22</div>
+        <div class="tile-mealcount">3 öğün</div>
+      </div>
+      <div class="tile-info">
+        <div class="tile-kcal-row">
+          <div class="tile-kcal">1.360</div>
+          <div class="tile-kcal-u">kcal</div>
+        </div>
+        <div class="tile-macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>88g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>112g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>38g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Sal -->
+    <div class="tile">
+      <div class="tile-photo" style="background: linear-gradient(135deg, #2a3a4a, #3a5a8b);">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #4a8bd4 0%, transparent 40%);"></div>
+        <div class="tile-day">Sal · 23</div>
+        <div class="tile-mealcount">2 öğün</div>
+      </div>
+      <div class="tile-info">
+        <div class="tile-kcal-row">
+          <div class="tile-kcal">1.030</div>
+          <div class="tile-kcal-u">kcal</div>
+        </div>
+        <div class="tile-macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>62g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>96g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>28g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Çar -->
+    <div class="tile">
+      <div class="tile-photo" style="background: linear-gradient(135deg, #4a402a, #8b7a3a);">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #d4a02a 0%, transparent 40%);"></div>
+        <div class="tile-day">Çar · 24</div>
+        <div class="tile-mealcount">3 öğün</div>
+      </div>
+      <div class="tile-info">
+        <div class="tile-kcal-row">
+          <div class="tile-kcal">1.540</div>
+          <div class="tile-kcal-u">kcal</div>
+        </div>
+        <div class="tile-macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>94g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>128g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>52g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Cum -->
+    <div class="tile">
+      <div class="tile-photo" style="background: linear-gradient(135deg, #4a352a, #8b6a3a);">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #d4852a 0%, transparent 40%);"></div>
+        <div class="tile-day">Cum · 26</div>
+        <div class="tile-mealcount">2 öğün</div>
+      </div>
+      <div class="tile-info">
+        <div class="tile-kcal-row">
+          <div class="tile-kcal">960</div>
+          <div class="tile-kcal-u">kcal</div>
+        </div>
+        <div class="tile-macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>58g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>82g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>26g</span>
+        </div>
+      </div>
+    </div>
+    <!-- Cmt -->
+    <div class="tile">
+      <div class="tile-photo" style="background: linear-gradient(135deg, #4a2a3a, #8b3a5a);">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%, #d44a6a 0%, transparent 40%);"></div>
+        <div class="tile-day">Cmt · 27</div>
+        <div class="tile-mealcount">2 öğün</div>
+      </div>
+      <div class="tile-info">
+        <div class="tile-kcal-row">
+          <div class="tile-kcal">1.260</div>
+          <div class="tile-kcal-u">kcal</div>
+        </div>
+        <div class="tile-macros">
+          <span class="protein-color"><span class="dot protein-bg"></span>76g</span>
+          <span class="carb-color"><span class="dot carb-bg"></span>102g</span>
+          <span class="fat-color"><span class="dot fat-bg"></span>42g</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week total -->
+  <div class="macro-card" style="position:absolute; bottom:220px; left:60px; right:60px; padding:20px 32px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-size:14px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.15em; font-weight:600;">Hafta Toplamı</div>
+        <div style="font-size:48px; font-weight:800; color:var(--lime); letter-spacing:-0.04em; line-height:1; margin-top:4px;">6.150 <span style="font-size:18px; color:var(--text-muted); font-weight:500;">kcal</span></div>
+      </div>
+      <div style="display:flex; gap:16px;">
+        <div style="text-align:center;"><div style="font-size:22px; font-weight:800;" class="protein-color">378g</div><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">P</div></div>
+        <div style="text-align:center;"><div style="font-size:22px; font-weight:800;" class="carb-color">520g</div><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">K</div></div>
+        <div style="text-align:center;"><div style="font-size:22px; font-weight:800;" class="fat-color">186g</div><div style="font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; font-weight:600;">Y</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

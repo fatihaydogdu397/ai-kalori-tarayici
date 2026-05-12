@@ -495,6 +495,35 @@ class AppLocalizationsFr extends AppLocalizations {
   String get notifications => 'Notifications';
 
   @override
+  String get waterReminder => 'Su hatırlatıcısı';
+
+  @override
+  String waterReminderInterval(int hours) {
+    return 'Her $hours saatte';
+  }
+
+  @override
+  String waterReminderAmount(int ml) {
+    return '$ml ml içecek';
+  }
+
+  @override
+  String get waterReminderActiveHours => 'Aktif saatler';
+
+  @override
+  String waterReminderActiveHoursValue(int start, int end) {
+    return '$start:00 – $end:00';
+  }
+
+  @override
+  String get waterNotifTitle => 'Su zamanı! 💧';
+
+  @override
+  String waterNotifBody(int ml) {
+    return '$ml ml su içmeyi unutma.';
+  }
+
+  @override
   String get dailyCalorieGoal => 'Objectif calorique journalier';
 
   @override
@@ -1291,4 +1320,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get searchFoodsHint2 => 'Rechercher des aliments...';
+
+  @override
+  String get shareCta => 'Partager';
+
+  @override
+  String get shareWeekCta => 'Partager la semaine';
 }

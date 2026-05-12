@@ -104,7 +104,7 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.coral),
+        SnackBar(content: Text(localizedError(context, e)), backgroundColor: AppColors.coral),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

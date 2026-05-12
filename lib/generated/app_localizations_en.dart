@@ -488,6 +488,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notifications => 'Notifications';
 
   @override
+  String get waterReminder => 'Water reminder';
+
+  @override
+  String waterReminderInterval(int hours) {
+    return 'Every ${hours}h';
+  }
+
+  @override
+  String waterReminderAmount(int ml) {
+    return '$ml ml each';
+  }
+
+  @override
+  String get waterReminderActiveHours => 'Active hours';
+
+  @override
+  String waterReminderActiveHoursValue(int start, int end) {
+    return '$start:00 – $end:00';
+  }
+
+  @override
+  String get waterNotifTitle => 'Water time! 💧';
+
+  @override
+  String waterNotifBody(int ml) {
+    return 'Don\'t forget to drink $ml ml of water.';
+  }
+
+  @override
   String get dailyCalorieGoal => 'Daily Calorie Goal';
 
   @override
@@ -1274,4 +1303,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchFoodsHint2 => 'Search foods...';
+
+  @override
+  String get shareCta => 'Share';
+
+  @override
+  String get shareWeekCta => 'Share Week';
 }

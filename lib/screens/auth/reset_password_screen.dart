@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/app_provider.dart';
+import '../../utils/error_messages.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -109,7 +110,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed: $e'), backgroundColor: AppColors.coral),
+        SnackBar(content: Text(localizedError(context, e)), backgroundColor: AppColors.coral),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

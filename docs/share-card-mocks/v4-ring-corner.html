@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>V4 — Ring Corner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.meal-card {
+  position: relative;
+  height: 360px;
+  border-radius: 28px;
+  overflow: hidden;
+  background-size: cover;
+}
+.meal-card::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 50%, rgba(0,0,0,0.85));
+}
+.meal-tag {
+  position: absolute; top: 18px; left: 18px; z-index:3;
+  background: var(--lime); color: var(--void);
+  padding: 6px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.ring-wrap {
+  position: absolute; top: 18px; right: 18px; z-index:3;
+  width: 110px; height: 110px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.ring-wrap svg { position: absolute; }
+.ring-center { text-align: center; z-index: 2; }
+.ring-kcal { font-size: 28px; font-weight: 800; color: var(--lime); letter-spacing: -0.02em; line-height: 1; }
+.ring-unit { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 700; margin-top: 2px; }
+
+.meal-bottom {
+  position: absolute; bottom: 22px; left: 22px; right: 22px; z-index: 3;
+}
+.meal-title { font-size: 28px; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.02em; }
+.macro-pills { display: flex; gap: 8px; }
+.macro-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.12); backdrop-filter: blur(20px);
+  padding: 8px 14px; border-radius: 100px;
+  font-size: 15px; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.macro-pill-dot { width: 8px; height: 8px; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:550px; height:550px; background:var(--violet); top:400px; left:-150px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--lime); bottom:300px; right:-100px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bugün</div>
+    <div class="title">3 öğün,<br>tam kontrol.</div>
+  </div>
+
+  <div style="position:absolute; top:540px; left:60px; right:60px; display:flex; flex-direction:column; gap:18px;">
+    <!-- Meal 1 -->
+    <div class="meal-card" style="background: linear-gradient(135deg, #2a4a2a, #5a8b3a);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 40% 30%, #d4a02a 0%, transparent 35%), radial-gradient(circle at 60% 70%, #2a8b3a 0%, transparent 40%);"></div>
+      <div class="meal-tag">Kahvaltı</div>
+      <div class="ring-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110" style="transform: rotate(-90deg);">
+          <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/>
+          <circle cx="55" cy="55" r="48" fill="none" stroke="var(--violet)" stroke-width="6" stroke-dasharray="180 301" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="var(--amber)" stroke-width="5" stroke-dasharray="200 251" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="33" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+          <circle cx="55" cy="55" r="33" fill="none" stroke="var(--coral)" stroke-width="4" stroke-dasharray="115 207" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-kcal">320</div>
+          <div class="ring-unit">kcal</div>
+        </div>
+      </div>
+      <div class="meal-bottom">
+        <div class="macro-pills">
+          <div class="macro-pill"><div class="macro-pill-dot protein-bg"></div><span class="protein-color">P 18g</span></div>
+          <div class="macro-pill"><div class="macro-pill-dot carb-bg"></div><span class="carb-color">K 32g</span></div>
+          <div class="macro-pill"><div class="macro-pill-dot fat-bg"></div><span class="fat-color">Y 14g</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal 2 -->
+    <div class="meal-card" style="background: linear-gradient(135deg, #8b5a2b, #d4622a);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);"></div>
+      <div class="meal-tag">Öğle</div>
+      <div class="ring-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110" style="transform: rotate(-90deg);">
+          <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/>
+          <circle cx="55" cy="55" r="48" fill="none" stroke="var(--violet)" stroke-width="6" stroke-dasharray="150 301" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="var(--amber)" stroke-width="5" stroke-dasharray="225 251" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="33" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+          <circle cx="55" cy="55" r="33" fill="none" stroke="var(--coral)" stroke-width="4" stroke-dasharray="50 207" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-kcal">240</div>
+          <div class="ring-unit">kcal</div>
+        </div>
+      </div>
+      <div class="meal-bottom">
+        <div class="macro-pills">
+          <div class="macro-pill"><div class="macro-pill-dot protein-bg"></div><span class="protein-color">P 15g</span></div>
+          <div class="macro-pill"><div class="macro-pill-dot carb-bg"></div><span class="carb-color">K 38g</span></div>
+          <div class="macro-pill"><div class="macro-pill-dot fat-bg"></div><span class="fat-color">Y 6g</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal 3 -->
+    <div class="meal-card" style="background: linear-gradient(135deg, #4a2a4a, #8b3a8b);">
+      <div style="position:absolute; inset:0; background: radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);"></div>
+      <div class="meal-tag">Akşam</div>
+      <div class="ring-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110" style="transform: rotate(-90deg);">
+          <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="6"/>
+          <circle cx="55" cy="55" r="48" fill="none" stroke="var(--violet)" stroke-width="6" stroke-dasharray="285 301" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"/>
+          <circle cx="55" cy="55" r="40" fill="none" stroke="var(--amber)" stroke-width="5" stroke-dasharray="190 251" stroke-linecap="round"/>
+          <circle cx="55" cy="55" r="33" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+          <circle cx="55" cy="55" r="33" fill="none" stroke="var(--coral)" stroke-width="4" stroke-dasharray="125 207" stroke-linecap="round"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-kcal">540</div>
+          <div class="ring-unit">kcal</div>
+        </div>
+      </div>
+      <div class="meal-bottom">
+        <div class="macro-pills">
+          <div class="macro-pill"><div class="macro-pill-dot protein-bg"></div><span class="protein-color">P 55g</span></div>
+          <div class="macro-pill"><div class="macro-pill-dot carb-bg"></div><span class="carb-color">K 42g</span></div>
+          <div class="macro-pill"><div class="macro-pill-dot fat-bg"></div><span class="fat-color">Y 18g</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

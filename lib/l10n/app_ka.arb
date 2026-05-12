@@ -571,5 +571,7 @@
   "continueWithApple2": "Apple-ით გაგრძელება",
   "continueWithGoogle2": "Google-ით გაგრძელება",
   "searchLabel2": "ძებნა",
-  "searchFoodsHint2": "კვების ძებნა..."
+  "searchFoodsHint2": "კვების ძებნა...",
+  "shareCta": "გაზიარება",
+  "shareWeekCta": "კვირის გაზიარება"
 }

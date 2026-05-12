@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Share Card — Galeri</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void: #0F0F14;
+      --card: #1C1C2A;
+      --surface: #2A2A3E;
+      --snow: #F0EEF8;
+      --text-muted: #9090A8;
+      --text-secondary: #B0B0C8;
+      --lime: #C8F135;
+      --violet: #7B8FFF;
+      --amber: #FFB347;
+      --coral: #FF6B6B;
+      --mint: #2DDCB4;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      background: var(--void);
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--snow);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 40px 32px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header h1::before {
+      content: 'K';
+      width: 44px;
+      height: 44px;
+      background: var(--lime);
+      color: var(--void);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .header .meta {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--snow);
+    }
+
+    .tab.active {
+      background: var(--lime);
+      color: var(--void);
+      border-color: var(--lime);
+    }
+
+    .tab .count {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .tab.active .count {
+      background: rgba(15, 15, 20, 0.2);
+    }
+
+    .tab:not(.active) .count {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section.hidden {
+      display: none;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .section-header .desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--lime);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .preview-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1080 / 1920;
+      overflow: hidden;
+      background: #08080C;
+    }
+
+    .preview-wrap iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1080px;
+      height: 1920px;
+      border: 0;
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .card-info {
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card-code {
+      color: var(--lime);
+      font-weight: 800;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+      letter-spacing: 0.02em;
+      margin-right: 4px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+    }
+
+    .tag.lime {
+      background: rgba(200, 241, 53, 0.12);
+      color: var(--lime);
+    }
+
+    .tag.violet {
+      background: rgba(123, 143, 255, 0.12);
+      color: var(--violet);
+    }
+
+    .tag.coral {
+      background: rgba(255, 107, 107, 0.12);
+      color: var(--coral);
+    }
+
+    .tag.mint {
+      background: rgba(45, 220, 180, 0.12);
+      color: var(--mint);
+    }
+
+    .tag.amber {
+      background: rgba(255, 179, 71, 0.12);
+      color: var(--amber);
+    }
+
+    .open-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--lime);
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover .open-icon {
+      opacity: 1;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      position: relative;
+      height: calc(100vh - 80px);
+      aspect-ratio: 1080 / 1920;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+      background: #000;
+    }
+
+    .modal-content iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1080px;
+      height: 1920px;
+      border: 0;
+      transform-origin: top left;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--snow);
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 200;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+      padding: 10px 14px;
+      border-radius: 14px;
+      color: var(--snow);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-info .modal-code {
+      background: var(--lime);
+      color: var(--void);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    .modal-info .modal-title {
+      font-weight: 700;
+    }
+
+    .modal-info .modal-file {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>Share Card · Galeri</h1>
+      <div class="meta">23 tasarım · 1080×1920 · Instagram Story</div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-filter="all">Hepsi <span class="count">23</span></div>
+      <div class="tab" data-filter="daily-1">Günlük · 1 öğün <span class="count">4</span></div>
+      <div class="tab" data-filter="daily-3">Günlük · 3 öğün <span class="count">8</span></div>
+      <div class="tab" data-filter="daily-4">Günlük · 4 öğün <span class="count">2</span></div>
+      <div class="tab" data-filter="daily-5">Günlük · 5 öğün <span class="count">2</span></div>
+      <div class="tab" data-filter="weekly">Haftalık <span class="count">7</span></div>
+    </div>
+
+    <!-- Daily 1 meal -->
+    <div class="section" data-category="daily-1">
+      <div class="section-header">
+        <h2>Günlük · 1 öğün</h2>
+        <div class="desc">Farklı yaklaşımlar — hero, full-bleed, polaroid, magazine</div>
+      </div>
+      <div class="grid">
+        <div class="card" data-file="1-single-meal.html" data-title="Hero">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="1-single-meal.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D1-A</span> · Hero</div>
+            <div class="card-desc">Tek büyük foto, alt kısımda glassmorphism makro kartı</div>
+            <div class="card-tags">
+              <span class="tag lime">hero</span>
+              <span class="tag">tam makro</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-file="d1b-fullbleed.html" data-title="Full Bleed">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="d1b-fullbleed.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D1-B</span> · Full Bleed</div>
+            <div class="card-desc">Foto tam ekran arka plan, dev kalori sayısı + glass makro kartı</div>
+            <div class="card-tags">
+              <span class="tag lime">dramatik</span>
+              <span class="tag mint">minimal</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-file="d1c-polaroid.html" data-title="Polaroid">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="d1c-polaroid.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D1-C</span> · Polaroid</div>
+            <div class="card-desc">Eğik polaroid + el yazısı caption + etrafında dağılmış sticker'lar</div>
+            <div class="card-tags">
+              <span class="tag coral">eğlenceli</span>
+              <span class="tag amber">scrapbook</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-file="d1d-magazine.html" data-title="Magazine">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="d1d-magazine.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D1-D</span> · Magazine</div>
+            <div class="card-desc">Editöryel — serif başlık, italik vurgu, "Issue" footer'ı</div>
+            <div class="card-tags">
+              <span class="tag violet">premium</span>
+              <span class="tag">editöryel</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily 3 meals -->
+    <div class="section" data-category="daily-3">
+      <div class="section-header">
+        <h2>Günlük · 3 öğün</h2>
+        <div class="desc">Her fotoda kendi makroları gösterimi — farklı yaklaşımlar</div>
+      </div>
+      <div class="grid">
+        <div class="card" data-file="2-three-meals.html" data-title="Bento (sadece kcal)">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="2-three-meals.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-A</span> · Bento — sadece kcal</div>
+            <div class="card-desc">Asimetrik bento (1 büyük + 2 küçük), fotoda sadece kalori</div>
+            <div class="card-tags">
+              <span class="tag">başlangıç</span>
+              <span class="tag lime">bento</span>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="card" data-file="2a-bento-compact-macros.html" data-title="Bento — Kompakt Makro">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="2a-bento-compact-macros.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-B</span> · Bento — Kompakt Makro</div>
+            <div class="card-desc">Bento + alt kısımda dot'lu satır (P 18g · K 32g · Y 14g)</div>
+            <div class="card-tags">
+              <span class="tag lime">bento</span>
+              <span class="tag">tam makro</span>
+              <span class="tag mint">minimal</span>
+            </div>
+          </div>
+        </div> -->
+        <div class="card" data-file="2b-bento-stat-grid.html" data-title="Bento — Stat Grid">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="2b-bento-stat-grid.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-C</span> · Bento — Stat Grid</div>
+            <div class="card-desc">Bento + glassmorphism 3-hücre stat grid, kcal sağ üst pill</div>
+            <div class="card-tags">
+              <span class="tag lime">bento</span>
+              <span class="tag">tam makro</span>
+              <span class="tag amber">data-heavy</span>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="card" data-file="v1-meal-chips.html" data-title="Chips Üstte">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="v1-meal-chips.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-D</span> · Chips Üstte</div>
+            <div class="card-desc">Sağ üstte dikey chip'ler, dikey 3 yatay foto</div>
+            <div class="card-tags">
+              <span class="tag mint">minimal</span>
+              <span class="tag">tam makro</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-file="v2-bottom-strip.html" data-title="Alt Strip">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="v2-bottom-strip.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-E</span> · Alt Strip</div>
+            <div class="card-desc">Foto altında gradient + bar chart'lı makro şeridi</div>
+            <div class="card-tags">
+              <span class="tag amber">data-heavy</span>
+              <span class="tag">bar chart</span>
+            </div>
+          </div>
+        </div> -->
+        <div class="card" data-file="v3-side-card.html" data-title="Yan Kart">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="v3-side-card.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-F</span> · Yan Kart</div>
+            <div class="card-desc">Foto + yan glass kart, zigzag (sol-sağ-sol)</div>
+            <div class="card-tags">
+              <span class="tag violet">premium</span>
+              <span class="tag">magazine</span>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="card" data-file="v4-ring-corner.html" data-title="Ring Corner">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="v4-ring-corner.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-G</span> · Ring Corner</div>
+            <div class="card-desc">Sağ üstte çoklu ring chart, alt makro pill'leri (Apple Fitness vibe)</div>
+            <div class="card-tags">
+              <span class="tag violet">premium</span>
+              <span class="tag lime">ring chart</span>
+            </div>
+          </div>
+        </div> -->
+        <div class="card" data-file="v5-ticket-stub.html" data-title="Ticket Stub">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="v5-ticket-stub.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D3-H</span> · Ticket Stub</div>
+            <div class="card-desc">Bilet metaforu, perforasyon, monospace font, saat bilgisi</div>
+            <div class="card-tags">
+              <span class="tag coral">deneysel</span>
+              <span class="tag amber">data-heavy</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily 4 meals -->
+    <div class="section" data-category="daily-4">
+      <div class="section-header">
+        <h2>Günlük · 4 öğün</h2>
+        <div class="desc">Bento grid yaklaşımları — eşit ya da hero ağırlıklı</div>
+      </div>
+      <div class="grid">
+        <div class="card" data-file="d4a-bento-2x2.html" data-title="2×2 Grid">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="d4a-bento-2x2.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D4-A</span> · 2×2 Grid</div>
+            <div class="card-desc">4 eşit foto, her birinde kcal + makro satırı, alt total kartı</div>
+            <div class="card-tags">
+              <span class="tag lime">eşit grid</span>
+              <span class="tag">tam makro</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-file="d4b-hero-three.html" data-title="Hero + 3">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="d4b-hero-three.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D4-B</span> · Hero + 3</div>
+            <div class="card-desc">1 büyük hero (sol) + 3 dikey küçük (sağ), asimetrik bento</div>
+            <div class="card-tags">
+              <span class="tag lime">bento</span>
+              <span class="tag amber">hero</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily 5 meals -->
+    <div class="section" data-category="daily-5">
+      <div class="section-header">
+        <h2>Günlük · 5 öğün</h2>
+        <div class="desc">Daha yoğun günler — ara öğünler dahil</div>
+      </div>
+      <div class="grid">
+        <div class="card" data-file="d5a-hero-four.html" data-title="Hero + 2×2">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="d5a-hero-four.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D5-A</span> · Hero + 2×2</div>
+            <div class="card-desc">Üstte geniş hero + altta 2×2 grid (4 küçük foto)</div>
+            <div class="card-tags">
+              <span class="tag lime">bento</span>
+              <span class="tag amber">hero</span>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="card" data-file="d5b-vertical-stack.html" data-title="Yatay Şeritler">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="d5b-vertical-stack.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">D5-B</span> · Yatay Şeritler</div>
+            <div class="card-desc">5 yatay satır: foto + yan glass kartta saat/kcal/makrolar</div>
+            <div class="card-tags">
+              <span class="tag mint">timeline</span>
+              <span class="tag">saatli</span>
+            </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+
+    <!-- Weekly -->
+    <div class="section" data-category="weekly">
+      <div class="section-header">
+        <h2>Haftalık</h2>
+        <div class="desc">7 günlük özet — değişken öğün sayısı / boş gün senaryoları</div>
+      </div>
+      <div class="grid">
+        <!-- <div class="card" data-file="3-weekly-sparse.html" data-title="Mosaic (seyrek)">
+        <div class="open-icon">↗</div>
+        <div class="preview-wrap"><iframe src="3-weekly-sparse.html" loading="lazy"></iframe></div>
+        <div class="card-info">
+          <div class="card-title"><span class="card-code">W-A</span> · Mosaic (seyrek)</div>
+          <div class="card-desc">Asimetrik mosaic + boş gün placeholder + ring chart</div>
+          <div class="card-tags">
+            <span class="tag">başlangıç</span>
+            <span class="tag">sadece toplam</span>
+          </div>
+        </div>
+      </div> -->
+        <!-- <div class="card" data-file="4-weekly-dense.html" data-title="Mosaic (yoğun)">
+        <div class="open-icon">↗</div>
+        <div class="preview-wrap"><iframe src="4-weekly-dense.html" loading="lazy"></iframe></div>
+        <div class="card-info">
+          <div class="card-title"><span class="card-code">W-B</span> · Mosaic (yoğun)</div>
+          <div class="card-desc">12+ öğün için pinterest-style yoğun mozaik + "+N daha" badge'leri</div>
+          <div class="card-tags">
+            <span class="tag amber">çok öğün</span>
+            <span class="tag">sadece toplam</span>
+          </div>
+        </div>
+      </div>
+      <div class="card" data-file="3a-weekly-day-rows.html" data-title="Gün Satırları">
+        <div class="open-icon">↗</div>
+        <div class="preview-wrap"><iframe src="3a-weekly-day-rows.html" loading="lazy"></iframe></div>
+        <div class="card-info">
+          <div class="card-title"><span class="card-code">W-C</span> · Gün Satırları</div>
+          <div class="card-desc">Her gün yatay satır: gün etiketi + foto thumb'lar + sağda makro kart</div>
+          <div class="card-tags">
+            <span class="tag lime">net yapı</span>
+            <span class="tag coral">küçük foto</span>
+            <span class="tag">tam makro</span>
+          </div>
+        </div>
+      </div>
+      <div class="card" data-file="3f-weekly-tiles-no-bars.html" data-title="Tile Grid (bar'sız)">
+        <div class="open-icon">↗</div>
+        <div class="preview-wrap"><iframe src="3f-weekly-tiles-no-bars.html" loading="lazy"></iframe></div>
+        <div class="card-info">
+          <div class="card-title"><span class="card-code">W-E</span> · Tile Grid — bar'sız</div>
+          <div class="card-desc">3b'nin temiz versiyonu — bar'lar atıldı, fotolar 200px'e büyüdü</div>
+          <div class="card-tags">
+            <span class="tag mint">temiz</span>
+            <span class="tag">tam makro</span>
+          </div>
+        </div>
+      </div> -->
+        <div class="card" data-file="3c-weekly-recorded-only.html" data-title="Sadece Kayıtlı Günler">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="3c-weekly-recorded-only.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">W-F</span> · Sadece Kayıtlı Günler</div>
+            <div class="card-desc">Boş günleri sakla, fotolar 2 katına büyür (200px). Tek hikaye.</div>
+            <div class="card-tags">
+              <span class="tag lime">büyük foto</span>
+              <span class="tag">tam makro</span>
+              <span class="tag mint">tek hikaye</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" data-file="3i-weekly-full-7days.html" data-title="7 Günlük Tam Hafta">
+          <div class="open-icon">↗</div>
+          <div class="preview-wrap"><iframe src="3i-weekly-full-7days.html" loading="lazy"></iframe></div>
+          <div class="card-info">
+            <div class="card-title"><span class="card-code">W-I</span> · 7 Günlük Tam Hafta</div>
+            <div class="card-desc">W-F'in 7 gün doluyken hali — fotolar 120px, hepsi tek karta sığar</div>
+            <div class="card-tags">
+              <span class="tag mint">tam hafta</span>
+              <span class="tag lime">7/7 gün</span>
+              <span class="tag">tam makro</span>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="card" data-file="3e-weekly-hero-day.html" data-title="Hero Day + Mini'ler">
+        <div class="open-icon">↗</div>
+        <div class="preview-wrap"><iframe src="3e-weekly-hero-day.html" loading="lazy"></iframe></div>
+        <div class="card-info">
+          <div class="card-title"><span class="card-code">W-H</span> · Hero Day + Mini'ler</div>
+          <div class="card-desc">"En iyi gün" rozetli büyük kart + diğer günler mini satırlar</div>
+          <div class="card-tags">
+            <span class="tag lime">gamification</span>
+            <span class="tag">hikaye</span>
+          </div>
+        </div>
+      </div> -->
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div class="modal-content">
+      <iframe id="modalFrame" src=""></iframe>
+    </div>
+    <div class="modal-info" id="modalInfo"></div>
+  </div>
+
+  <script>
+    // Scale preview iframes (1080x1920 native) to fit their card wrapper
+    function scalePreviews() {
+      document.querySelectorAll('.preview-wrap').forEach(wrap => {
+        const iframe = wrap.querySelector('iframe');
+        const scale = wrap.offsetWidth / 1080;
+        iframe.style.transform = `scale(${scale})`;
+      });
+    }
+
+    // Scale modal iframe to fit modal-content
+    function scaleModal() {
+      const modalContent = document.querySelector('.modal-content');
+      const iframe = document.getElementById('modalFrame');
+      if (!modalContent || !iframe) return;
+      const scale = modalContent.offsetWidth / 1080;
+      iframe.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener('load', scalePreviews);
+    window.addEventListener('resize', () => { scalePreviews(); scaleModal(); });
+    setTimeout(scalePreviews, 100);
+    setTimeout(scalePreviews, 500);
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const filter = tab.dataset.filter;
+        document.querySelectorAll('.section').forEach(s => {
+          if (filter === 'all' || s.dataset.category === filter) {
+            s.classList.remove('hidden');
+          } else {
+            s.classList.add('hidden');
+          }
+        });
+        setTimeout(scalePreviews, 100);
+      });
+    });
+
+    // Card click → modal
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        const file = card.dataset.file;
+        const title = card.dataset.title;
+        const code = card.querySelector('.card-code')?.textContent || '';
+        const iframe = document.getElementById('modalFrame');
+        iframe.src = file;
+        document.getElementById('modalInfo').innerHTML =
+          `<span class="modal-code">${code}</span>` +
+          `<span class="modal-title">${title}</span>` +
+          `<span class="modal-file">${file}</span>`;
+        document.getElementById('modal').classList.add('open');
+        iframe.addEventListener('load', scaleModal, { once: true });
+        setTimeout(scaleModal, 100);
+      });
+    });
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+      document.getElementById('modalFrame').src = '';
+    }
+    document.getElementById('modal').addEventListener('click', e => {
+      if (e.target.id === 'modal') closeModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+
+</html>

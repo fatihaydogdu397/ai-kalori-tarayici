@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>D1-C — Polaroid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.polaroid {
+  position: absolute;
+  top: 360px; left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 720px;
+  background: var(--snow);
+  padding: 40px 40px 32px;
+  border-radius: 8px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3);
+  z-index: 4;
+}
+.polaroid-photo {
+  width: 100%;
+  height: 720px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #4a3520 0%, #8b5a2b 100%);
+  position: relative;
+  overflow: hidden;
+}
+.polaroid-photo::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, #d4622a 0%, transparent 40%),
+    radial-gradient(circle at 70% 60%, #f4a050 0%, transparent 35%),
+    radial-gradient(circle at 50% 80%, #2a5a2a 0%, transparent 30%);
+}
+.polaroid-caption {
+  font-family: 'Caveat', cursive;
+  font-size: 38px;
+  color: var(--void);
+  text-align: center;
+  margin-top: 24px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Macro stickers floating around polaroid */
+.sticker {
+  position: absolute;
+  z-index: 5;
+  background: var(--void);
+  border: 3px solid var(--lime);
+  padding: 14px 20px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.4);
+}
+.sticker-val { font-size: 38px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.sticker-name {
+  font-size: 13px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.15em;
+  font-weight: 700; margin-top: 4px;
+}
+
+.kcal-sticker {
+  background: var(--lime);
+  border-color: var(--lime);
+  border-radius: 100px;
+  padding: 18px 36px;
+  top: 220px; left: 50%;
+  transform: translateX(-50%) rotate(-4deg);
+}
+.kcal-sticker .sticker-val {
+  color: var(--void);
+  font-size: 64px;
+}
+.kcal-sticker .sticker-name {
+  color: var(--lime-deep);
+  font-weight: 800;
+}
+
+.protein-sticker {
+  top: 450px; right: 40px;
+  transform: rotate(8deg);
+}
+.carb-sticker {
+  top: 800px; left: 40px;
+  transform: rotate(-6deg);
+}
+.fat-sticker {
+  bottom: 320px; right: 60px;
+  transform: rotate(5deg);
+}
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:600px; height:600px; background:var(--lime); top:-150px; right:-150px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--violet); bottom:200px; left:-100px;"></div>
+  <div class="glow-blob" style="width:400px; height:400px; background:var(--coral); top:50%; right:-100px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <!-- Kcal sticker (top, prominent) -->
+  <div class="sticker kcal-sticker">
+    <div class="sticker-val">487</div>
+    <div class="sticker-name">Kalori</div>
+  </div>
+
+  <!-- Polaroid -->
+  <div class="polaroid">
+    <div class="polaroid-photo"></div>
+    <div class="polaroid-caption">Bugünün öğünü ✦</div>
+  </div>
+
+  <!-- Macro stickers -->
+  <div class="sticker protein-sticker">
+    <div class="sticker-val protein-color">42g</div>
+    <div class="sticker-name">Protein</div>
+  </div>
+  <div class="sticker carb-sticker">
+    <div class="sticker-val carb-color">38g</div>
+    <div class="sticker-name">Karb</div>
+  </div>
+  <div class="sticker fat-sticker">
+    <div class="sticker-val fat-color">15g</div>
+    <div class="sticker-name">Yağ</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

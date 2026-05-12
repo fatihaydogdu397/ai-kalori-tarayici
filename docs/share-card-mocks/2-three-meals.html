@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>3 Öğün — Asimetrik Bento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="glow-blob" style="width:550px; height:550px; background:var(--lime); top:600px; left:-150px;"></div>
+  <div class="glow-blob" style="width:500px; height:500px; background:var(--coral); top:100px; right:-100px;"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand">
+      <div class="brand-dot">e</div>
+      <span>eatiq</span>
+    </div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-block" style="top:200px; left:60px; right:60px;">
+    <div class="title-eyebrow">Bugünün Günlüğü</div>
+    <div class="title">3 öğün,<br>1 hedef.</div>
+  </div>
+
+  <!-- Bento grid: 1 large + 2 small -->
+  <div style="position:absolute; top:540px; left:60px; right:60px; height:760px; display:grid; grid-template-columns:1.6fr 1fr; grid-template-rows:1fr 1fr; gap:16px;">
+    <!-- Large hero -->
+    <div class="photo" style="grid-row: 1 / 3; background:
+      linear-gradient(135deg, #2a4a2a 0%, #5a8b3a 100%);
+    ">
+      <div style="position:absolute; inset:0; background:
+        radial-gradient(circle at 40% 30%, #d4a02a 0%, transparent 35%),
+        radial-gradient(circle at 60% 70%, #2a8b3a 0%, transparent 40%);
+      "></div>
+      <div class="photo-meta">
+        <div class="photo-kcal">320 kcal</div>
+      </div>
+      <div style="position:absolute; top:16px; left:16px; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); padding:6px 14px; border-radius:100px; font-size:14px; font-weight:600; color:var(--lime); text-transform:uppercase; letter-spacing:0.1em;">
+        Kahvaltı
+      </div>
+    </div>
+    <!-- Top right -->
+    <div class="photo" style="background: linear-gradient(135deg, #8b5a2b 0%, #d4622a 100%);">
+      <div style="position:absolute; inset:0; background:
+        radial-gradient(circle at 50% 50%, #f4a050 0%, transparent 40%);
+      "></div>
+      <div class="photo-meta">
+        <div class="photo-kcal">240 kcal</div>
+      </div>
+      <div style="position:absolute; top:14px; left:14px; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); padding:5px 12px; border-radius:100px; font-size:13px; font-weight:600; color:var(--lime); text-transform:uppercase; letter-spacing:0.1em;">
+        Öğle
+      </div>
+    </div>
+    <!-- Bottom right -->
+    <div class="photo" style="background: linear-gradient(135deg, #4a2a4a 0%, #8b3a8b 100%);">
+      <div style="position:absolute; inset:0; background:
+        radial-gradient(circle at 50% 50%, #d44a8b 0%, transparent 40%);
+      "></div>
+      <div class="photo-meta">
+        <div class="photo-kcal">540 kcal</div>
+      </div>
+      <div style="position:absolute; top:14px; left:14px; background:rgba(0,0,0,0.5); backdrop-filter:blur(20px); padding:5px 12px; border-radius:100px; font-size:13px; font-weight:600; color:var(--lime); text-transform:uppercase; letter-spacing:0.1em;">
+        Akşam
+      </div>
+    </div>
+  </div>
+
+  <!-- Macro card -->
+  <div class="macro-card" style="position:absolute; bottom:220px; left:60px; right:60px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div class="kcal-number" style="font-size:110px;">1.100</div>
+        <div class="kcal-label">Toplam Kalori</div>
+      </div>
+      <div class="stat-badge" style="font-size:20px; padding:14px 22px;">
+        ✓ 3 öğün
+      </div>
+    </div>
+    <div class="macro-row" style="margin-top:28px;">
+      <div class="macro-item">
+        <div class="macro-value protein-color">88g</div>
+        <div class="macro-name">Protein</div>
+      </div>
+      <div class="macro-item">
+        <div class="macro-value carb-color">112g</div>
+        <div class="macro-name">Karb</div>
+      </div>
+      <div class="macro-item">
+        <div class="macro-value fat-color">38g</div>
+        <div class="macro-name">Yağ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>

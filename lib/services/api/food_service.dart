@@ -10,7 +10,7 @@ class FoodService {
   final ApiClient _api = ApiClient.instance;
 
   static const String _analysisFields = '''
-    id imageUrl summary advice analyzedAt mealCategory isFavorite
+    id imageUrl summary advice analyzedAt mealCategory
     totalCalories totalProtein totalCarbs totalFat totalFiber totalSugar
     createdAt
     foods {
@@ -141,20 +141,6 @@ class FoodService {
     return list
         .map((e) => Map<String, dynamic>.from(e as Map))
         .toList(growable: false);
-  }
-
-  /// Idempotent favorite toggle (EAT-98). Aynı değeri tekrar göndermek no-op.
-  Future<Map<String, dynamic>> toggleFavoriteMeal(
-      String mealId, bool isFavorite) async {
-    final data = await _api.mutate(
-      '''
-      mutation ToggleFavoriteMeal(\$mealId: ID!, \$isFavorite: Boolean!) {
-        toggleFavoriteMeal(mealId: \$mealId, isFavorite: \$isFavorite) { $_analysisFields }
-      }
-      ''',
-      variables: {'mealId': mealId, 'isFavorite': isFavorite},
-    );
-    return Map<String, dynamic>.from(data['toggleFavoriteMeal'] as Map);
   }
 
   /// EAT-99: sadece aynı gün içinde kaydedilen yemekler silinebilir.

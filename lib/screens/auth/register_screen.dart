@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/app_provider.dart';
+import '../../utils/error_messages.dart';
 import '../onboarding_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -107,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed: $e'), backgroundColor: AppColors.coral),
+        SnackBar(content: Text(localizedError(context, e)), backgroundColor: AppColors.coral),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);

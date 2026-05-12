@@ -98,16 +98,22 @@ class AppProvider extends ChangeNotifier {
   AnalysisState get state => _state;
   FoodAnalysis? get currentAnalysis => _currentAnalysis;
   List<FoodAnalysis> get history => _history;
-  // M2: favoriler artık `_history`'den türetilmiyor (M1 fix sonrası tarih
-  // değiştirince history baş günün listesiyle değiştiği için favoriler
-  // kayboluyordu). Bağımsız bir liste; loadFavorites BE'den `foodHistory`
-  // sayfasının `isFavorite=true` subset'ini çekiyor. Daha verimli endpoint
-  // için M22 BE ticket'ında `myFavoriteMeals` query açılmalı.
-  List<FoodAnalysis> _favorites = const [];
-  List<FoodAnalysis> get favorites => _favorites;
   Map<String, double> get todayStats => _todayStats;
   String get errorCode => _errorCode;
   double get dailyCalorieGoal => _dailyCalorieGoal;
+
+  /// Refcount of in-flight network fetches (history / today stats / per-day
+  /// fetch). When > 0 the home screen paints a translucent loading overlay.
+  int _dayDataFetchCount = 0;
+  bool get isDayDataLoading => _dayDataFetchCount > 0;
+  void _beginFetch() {
+    _dayDataFetchCount++;
+    if (_dayDataFetchCount == 1) notifyListeners();
+  }
+  void _endFetch() {
+    if (_dayDataFetchCount > 0) _dayDataFetchCount--;
+    if (_dayDataFetchCount == 0) notifyListeners();
+  }
 
   DateTime _selectedDate = DateTime.now();
   DateTime get selectedDate => _selectedDate;
@@ -142,6 +148,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
     final iso = date.toIso8601String().substring(0, 10);
+    _beginFetch();
     try {
       final rows = await _foodService.getDailyMeals(iso);
       _history = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
@@ -173,6 +180,8 @@ class AppProvider extends ChangeNotifier {
       _todayStats = {};
       _todaySteps = 0;
       _waterToday = 0;
+    } finally {
+      _endFetch();
     }
     notifyListeners();
   }
@@ -251,41 +260,17 @@ class AppProvider extends ChangeNotifier {
   Future<void> loadHistory() async {
     if (!_isLoggedIn) {
       _history = const [];
-      _favorites = const [];
       notifyListeners();
       return;
     }
+    _beginFetch();
     try {
       final rows = await _foodService.foodHistory(limit: 100);
       _history = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
-      // M2: history yüklenirken favori subset'ini ayrı listeye al — tarih
-      // değişince history yer değiştirse de favoriler kaybolmasın.
-      _favorites =
-          _history.where((a) => a.isFavorite).toList(growable: false);
     } on ApiException {
       _history = const [];
-      _favorites = const [];
-    }
-    notifyListeners();
-  }
-
-  /// M2: Favori listesini bağımsız tazele. `loadHistory` zaten history+favori
-  /// senkron yüklüyor; bu metod favori toggle / silme sonrası noktalı
-  /// senkronizasyon için. İlerleyen sürümde BE `myFavoriteMeals` dedicated
-  /// query'si eklenince burada bu sorgu çağrılacak.
-  Future<void> loadFavorites() async {
-    if (!_isLoggedIn) {
-      _favorites = const [];
-      notifyListeners();
-      return;
-    }
-    try {
-      // Şimdilik foodHistory pencere; M22 BE ticket'ında dedicated endpoint.
-      final rows = await _foodService.foodHistory(limit: 200);
-      final all = rows.map(FoodAnalysis.fromBackend).toList(growable: false);
-      _favorites = all.where((a) => a.isFavorite).toList(growable: false);
-    } on ApiException {
-      // Mevcut favori listesini koru — kısa ağ glitch'i UI'ı temizlemesin.
+    } finally {
+      _endFetch();
     }
     notifyListeners();
   }
@@ -296,6 +281,7 @@ class AppProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    _beginFetch();
     try {
       // Backend todayStats UTC-based; lokal bugün için history'den aggregate et.
       // Su/hedef hâlâ backend'den (backend timezone fix bekliyor, Jira).
@@ -328,6 +314,8 @@ class AppProvider extends ChangeNotifier {
       if (goal != null) _waterGoal = goal;
     } on ApiException {
       _todayStats = {};
+    } finally {
+      _endFetch();
     }
     notifyListeners();
     unawaited(_syncWidget());
@@ -407,30 +395,6 @@ class AppProvider extends ChangeNotifier {
       }
       notifyListeners();
       await loadTodayStats();
-    } on ApiException {
-      rethrow;
-    }
-  }
-
-  Future<void> toggleFavorite(FoodAnalysis analysis) async {
-    try {
-      final res = await _foodService.toggleFavoriteMeal(
-        analysis.id,
-        !analysis.isFavorite,
-      );
-      final updated = FoodAnalysis.fromBackend(res);
-      final hIdx = _history.indexWhere((a) => a.id == analysis.id);
-      if (hIdx != -1) {
-        final mutable = List<FoodAnalysis>.from(_history);
-        mutable[hIdx] = updated;
-        _history = List.unmodifiable(mutable);
-      }
-      // M2: bağımsız favori listesini de güncelle.
-      final favList = List<FoodAnalysis>.from(_favorites);
-      favList.removeWhere((a) => a.id == updated.id);
-      if (updated.isFavorite) favList.insert(0, updated);
-      _favorites = List.unmodifiable(favList);
-      notifyListeners();
     } on ApiException {
       rethrow;
     }

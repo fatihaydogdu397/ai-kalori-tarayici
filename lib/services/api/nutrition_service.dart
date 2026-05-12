@@ -9,17 +9,16 @@ class NutritionService {
 
   final ApiClient _api = ApiClient.instance;
 
-  // EAT-92 / EAT-136: dietTags + mealTags + allergens istek üzerine döner.
+  // EAT-92 / EAT-136 / EAT-196: dietTags + mealTags + allergens + nameTr.
   static const String _foodFields = '''
-    id fdcId name category
+    id fdcId name nameTr category
     calories protein fat carbs fiber sugar
     dietTags mealTags allergens isIngredient
   ''';
 
-  /// [search] bulanık arama, [category] tam kategori eşleşmesi.
-  /// EAT-136 follow-up: BE `FoodsFilterInput`'ta henüz `tags` alanı yok;
-  /// chip'ler client-side filter uygular — [dietTagFilter] verilirse bu
-  /// metot sonuçları `dietTags ⊇ dietTagFilter` olanlara düşürür.
+  /// [search] bulanık arama (BE pg_trgm + ILIKE name|nameTr; EAT-196/198),
+  /// [category] tam kategori eşleşmesi,
+  /// [dietTagFilter] BE `FoodsFilterInput.dietTags` array contains-all (EAT-197).
   Future<List<Map<String, dynamic>>> foods({
     String? search,
     String? category,
@@ -33,6 +32,9 @@ class NutritionService {
     }
     if (category != null && category.isNotEmpty) {
       filter['category'] = category;
+    }
+    if (dietTagFilter != null && dietTagFilter.isNotEmpty) {
+      filter['dietTags'] = dietTagFilter;
     }
 
     final data = await _api.query(
@@ -48,21 +50,9 @@ class NutritionService {
       },
     );
     final list = (data['foods'] as List?) ?? const [];
-    var rows = list
+    return list
         .map((e) => Map<String, dynamic>.from(e as Map))
         .toList(growable: false);
-
-    if (dietTagFilter != null && dietTagFilter.isNotEmpty) {
-      final want = dietTagFilter.map((t) => t.toLowerCase()).toSet();
-      rows = rows.where((row) {
-        final tags = (row['dietTags'] as List?)
-                ?.map((e) => (e as String).toLowerCase())
-                .toSet() ??
-            <String>{};
-        return want.every(tags.contains);
-      }).toList(growable: false);
-    }
-    return rows;
   }
 
   Future<int> foodsCount({String? search, String? category}) async {

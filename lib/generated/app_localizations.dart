@@ -1026,6 +1026,48 @@ abstract class AppLocalizations {
   /// **'Bildirimler'**
   String get notifications;
 
+  /// No description provided for @waterReminder.
+  ///
+  /// In tr, this message translates to:
+  /// **'Su hatırlatıcısı'**
+  String get waterReminder;
+
+  /// No description provided for @waterReminderInterval.
+  ///
+  /// In tr, this message translates to:
+  /// **'Her {hours} saatte'**
+  String waterReminderInterval(int hours);
+
+  /// No description provided for @waterReminderAmount.
+  ///
+  /// In tr, this message translates to:
+  /// **'{ml} ml içecek'**
+  String waterReminderAmount(int ml);
+
+  /// No description provided for @waterReminderActiveHours.
+  ///
+  /// In tr, this message translates to:
+  /// **'Aktif saatler'**
+  String get waterReminderActiveHours;
+
+  /// No description provided for @waterReminderActiveHoursValue.
+  ///
+  /// In tr, this message translates to:
+  /// **'{start}:00 – {end}:00'**
+  String waterReminderActiveHoursValue(int start, int end);
+
+  /// No description provided for @waterNotifTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Su zamanı! 💧'**
+  String get waterNotifTitle;
+
+  /// No description provided for @waterNotifBody.
+  ///
+  /// In tr, this message translates to:
+  /// **'{ml} ml su içmeyi unutma.'**
+  String waterNotifBody(int ml);
+
   /// No description provided for @dailyCalorieGoal.
   ///
   /// In tr, this message translates to:
@@ -2513,6 +2555,18 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Yiyecek ara...'**
   String get searchFoodsHint2;
+
+  /// No description provided for @shareCta.
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaş'**
+  String get shareCta;
+
+  /// No description provided for @shareWeekCta.
+  ///
+  /// In tr, this message translates to:
+  /// **'Haftayı Paylaş'**
+  String get shareWeekCta;
 }
 
 class _AppLocalizationsDelegate

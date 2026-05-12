@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../services/app_provider.dart';
 import '../../services/auth/social_sign_in.dart';
+import '../../utils/error_messages.dart';
 import '../../generated/app_localizations.dart';
 import 'login_screen.dart';
 import 'register_screen.dart';
@@ -68,7 +69,7 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Giriş başarısız: $e'),
+          content: Text(localizedError(context, e)),
           backgroundColor: AppColors.coral,
         ),
       );

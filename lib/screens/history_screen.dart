@@ -6,6 +6,9 @@ import '../models/food_analysis.dart';
 import '../services/app_provider.dart';
 import '../theme/app_theme.dart';
 import '../generated/app_localizations.dart';
+import '../share/share_card_data.dart';
+import '../share/share_picker_screen.dart';
+import '../share/weekly_share_picker_screen.dart';
 import 'result_screen.dart';
 
 class HistoryScreen extends StatelessWidget {
@@ -86,7 +89,44 @@ class HistoryScreen extends StatelessWidget {
                     style: AppTypography.titleLarge.copyWith(color: textPrimary),
                   ),
                   const Spacer(),
-                  if (totalScans > 0)
+                  if (totalScans > 0) ...[
+                    GestureDetector(
+                      onTap: () => _openWeeklyShare(context, provider),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.lime
+                              : AppColors.void_,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.ios_share_rounded,
+                              size: 12,
+                              color: isDark ? AppColors.void_ : AppColors.snow,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              l.shareWeekCta,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: isDark
+                                    ? AppColors.void_
+                                    : AppColors.snow,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -106,6 +146,7 @@ class HistoryScreen extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
               const SizedBox(height: 20),
@@ -232,6 +273,18 @@ class HistoryScreen extends StatelessWidget {
                         color: textMuted,
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => _openDailyShare(context, dt, items),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.ios_share_rounded,
+                          size: 14,
+                          color: textMuted,
+                        ),
+                      ),
+                    ),
                     const Spacer(),
                     Flexible(
                       child: Wrap(
@@ -284,7 +337,6 @@ class HistoryScreen extends StatelessWidget {
                     ),
                   ),
                   onDelete: diff == 0 ? () => provider.deleteAnalysis(a.id) : null,
-                  onFavorite: () => provider.toggleFavorite(a),
                   onAddToToday: () async {
                     await provider.duplicateAnalysisToToday(a);
                     if (context.mounted) {
@@ -304,6 +356,50 @@ class HistoryScreen extends StatelessWidget {
             ],
           );
         }, childCount: dates.length),
+      ),
+    );
+  }
+
+  void _openDailyShare(
+    BuildContext context,
+    DateTime date,
+    List<FoodAnalysis> meals,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SharePickerScreen(
+          data: ShareCardData(
+            date: date,
+            meals: meals,
+          ),
+          locale: Localizations.localeOf(context).languageCode,
+        ),
+      ),
+    );
+  }
+
+  void _openWeeklyShare(BuildContext context, AppProvider provider) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final weekStart = today.subtract(const Duration(days: 6));
+    final days = List<List<FoodAnalysis>>.generate(7, (i) {
+      final d = weekStart.add(Duration(days: i));
+      return provider.history
+          .where((m) =>
+              m.analyzedAt.year == d.year &&
+              m.analyzedAt.month == d.month &&
+              m.analyzedAt.day == d.day)
+          .toList()
+        ..sort((a, b) => a.analyzedAt.compareTo(b.analyzedAt));
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WeeklySharePickerScreen(
+          data: WeeklyShareCardData(weekStart: weekStart, days: days),
+          locale: Localizations.localeOf(context).languageCode,
+        ),
       ),
     );
   }
@@ -348,7 +444,6 @@ class _HistoryCard extends StatelessWidget {
   final bool isDark;
   final VoidCallback onTap;
   final VoidCallback? onDelete;
-  final VoidCallback? onFavorite;
   final VoidCallback? onAddToToday;
 
   const _HistoryCard({
@@ -357,7 +452,6 @@ class _HistoryCard extends StatelessWidget {
     required this.isDark,
     required this.onTap,
     this.onDelete,
-    this.onFavorite,
     this.onAddToToday,
   });
 
@@ -482,7 +576,7 @@ class _HistoryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Calories + favori
+              // Calories
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -496,21 +590,6 @@ class _HistoryCard extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 4, right: 10),
                             child: Icon(Icons.add_circle_outline_rounded, size: 18, color: calColor),
-                          ),
-                        ),
-                      // EAT-162: hide "Add to favorites" entirely for already-favorited
-                      // items; remove-from-favorites lives on the Favorites screen.
-                      if (!analysis.isFavorite)
-                        GestureDetector(
-                          onTap: onFavorite,
-                          behavior: HitTestBehavior.opaque,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Icon(
-                              Icons.favorite_border_rounded,
-                              size: 16,
-                              color: textMuted,
-                            ),
                           ),
                         ),
                     ],
@@ -603,15 +682,27 @@ class _Thumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = File(path);
-    if (file.existsSync()) {
-      return Image.file(file, width: 52, height: 52, fit: BoxFit.cover);
-    }
-    return Container(
+    final fallback = Container(
       width: 52,
       height: 52,
       color: bg,
       child: Icon(Icons.restaurant_rounded, color: iconColor, size: 22),
     );
+    if (path.isEmpty) return fallback;
+    final isRemote = path.startsWith('http://') || path.startsWith('https://');
+    if (isRemote) {
+      return Image.network(
+        path,
+        width: 52,
+        height: 52,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => fallback,
+      );
+    }
+    final file = File(path);
+    if (file.existsSync()) {
+      return Image.file(file, width: 52, height: 52, fit: BoxFit.cover);
+    }
+    return fallback;
   }
 }

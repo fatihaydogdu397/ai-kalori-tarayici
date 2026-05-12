@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../theme/app_theme.dart';
 import '../generated/app_localizations.dart';
 import '../services/app_provider.dart';
+import '../share/share_mode_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProgressScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class ProgressScreen extends StatefulWidget {
 
 class _ProgressScreenState extends State<ProgressScreen> {
   int _tabIndex = 1; // 0: Today, 1: This Week, 2: 30 Days, 3: Weight
+  int? _touchedMonthlyIdx;
 
   @override
   void initState() {
@@ -33,12 +35,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final bg = isDark ? AppColors.darkBg : AppColors.lightBg;
     final cardBg = isDark ? AppColors.darkCard : AppColors.lightCard;
     final textPrimary = isDark ? AppColors.darkText : AppColors.lightText;
-    final textMuted =
-        isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
     final accent = isDark ? AppColors.lime : AppColors.limeDark;
-    final border = isDark
-        ? null
-        : Border.all(color: AppColors.lightBorder, width: 0.5);
+    final border = isDark ? null : Border.all(color: AppColors.lightBorder, width: 0.5);
 
     return Scaffold(
       backgroundColor: bg,
@@ -57,44 +56,58 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 toolbarHeight: 56,
                 title: Text(
                   l.progress,
-                  style: TextStyle(
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.w800,
-                    color: textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w800, color: textPrimary),
                 ),
+                actions: [
+                  Padding(
+                    padding: EdgeInsets.only(right: 12.w),
+                    child: GestureDetector(
+                      onTap: () => ShareModePicker.show(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColors.darkCard : AppColors.lightSurface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.ios_share_rounded, size: 14, color: textMuted),
+                            const SizedBox(width: 4),
+                            Text(
+                              l.shareCta,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: textMuted,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               // ── Hero + Tabs + Content ─────────────────────────────────────
               SliverToBoxAdapter(
                 child: Padding(
-                  padding:
-                      EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 100.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Hero summary card (above tabs)
-                      _buildHeroSection(
-                        context,
-                        provider,
-                        cardBg,
-                        textPrimary,
-                        textMuted,
-                        accent,
-                        border,
-                        isDark,
-                      ),
+                      _buildHeroSection(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark),
                       SizedBox(height: 12.h),
 
                       // Pill tab bar (full-width)
                       _PillTabBar(
                         selectedIndex: _tabIndex,
-                        labels: [
-                          l.today,
-                          l.thisWeek,
-                          l.thirtyDays,
-                          l.weight,
-                        ],
+                        labels: [l.today, l.thisWeek, l.thirtyDays, l.weight],
                         accent: accent,
                         cardBg: cardBg,
                         textPrimary: textPrimary,
@@ -105,16 +118,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       SizedBox(height: 16.h),
 
                       // Tab content (charts, breakdowns, insights)
-                      _buildTabContent(
-                        context,
-                        provider,
-                        cardBg,
-                        textPrimary,
-                        textMuted,
-                        accent,
-                        border,
-                        isDark,
-                      ),
+                      _buildTabContent(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark),
                     ],
                   ),
                 ),
@@ -141,17 +145,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
   ) {
     switch (_tabIndex) {
       case 0:
-        return _buildTodayHero(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildTodayHero(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       case 1:
-        return _buildWeekHero(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildWeekHero(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       case 2:
-        return _buildMonthHero(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildMonthHero(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       default:
-        return _buildWeightHero(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildWeightHero(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
     }
   }
 
@@ -177,11 +177,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
 
     return Container(
       padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20.r),
-        border: border,
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(20.r), border: border),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,16 +186,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
             children: [
               Text(
                 l.today,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: textMuted,
-                  letterSpacing: 0.5,
-                ),
+                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: textMuted, letterSpacing: 0.5),
               ),
               const Spacer(),
-              if (provider.streak > 0)
-                _StreakChip(streak: provider.streak, accent: accent, isDark: isDark),
+              if (provider.streak > 0) _StreakChip(streak: provider.streak, accent: accent, isDark: isDark),
             ],
           ),
           SizedBox(height: 12.h),
@@ -218,34 +208,19 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       children: [
                         Text(
                           cal.toStringAsFixed(0),
-                          style: TextStyle(
-                            fontSize: 52.sp,
-                            fontWeight: FontWeight.w900,
-                            color: accent,
-                            height: 1,
-                          ),
+                          style: TextStyle(fontSize: 52.sp, fontWeight: FontWeight.w900, color: accent, height: 1),
                         ),
                         SizedBox(width: 6.w),
                         Text(
                           'kcal',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w500,
-                            color: textMuted,
-                          ),
+                          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w500, color: textMuted),
                         ),
                       ],
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      goal > 0
-                          ? l.kcalRemainingGoal(remaining.toStringAsFixed(0), goal.toStringAsFixed(0))
-                          : l.noGoalSet,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: textMuted,
-                        fontWeight: FontWeight.w400,
-                      ),
+                      goal > 0 ? l.kcalRemainingGoal(remaining.toStringAsFixed(0), goal.toStringAsFixed(0)) : l.noGoalSet,
+                      style: TextStyle(fontSize: 12.sp, color: textMuted, fontWeight: FontWeight.w400),
                     ),
                   ],
                 ),
@@ -257,24 +232,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    CircularProgressIndicator(
-                      value: 1.0,
-                      strokeWidth: 7,
-                      color: accent.withValues(alpha: 0.15),
-                    ),
-                    CircularProgressIndicator(
-                      value: calProgress,
-                      strokeWidth: 7,
-                      color: accent,
-                      strokeCap: StrokeCap.round,
-                    ),
+                    CircularProgressIndicator(value: 1.0, strokeWidth: 7, color: accent.withValues(alpha: 0.15)),
+                    CircularProgressIndicator(value: calProgress, strokeWidth: 7, color: accent, strokeCap: StrokeCap.round),
                     Text(
                       '${(calProgress * 100).toStringAsFixed(0)}%',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w700,
-                        color: textPrimary,
-                      ),
+                      style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: textPrimary),
                     ),
                   ],
                 ),
@@ -290,9 +252,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 label: 'Protein',
                 value: '${pro.toStringAsFixed(0)}g',
                 color: AppColors.violet,
-                bg: isDark
-                    ? AppColors.darkProteinBg
-                    : AppColors.lightProteinBg,
+                bg: isDark ? AppColors.darkProteinBg : AppColors.lightProteinBg,
                 textPrimary: textPrimary,
                 textMuted: textMuted,
               ),
@@ -301,9 +261,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 label: 'Carbs',
                 value: '${car.toStringAsFixed(0)}g',
                 color: AppColors.amber,
-                bg: isDark
-                    ? AppColors.darkCarbsBg
-                    : AppColors.lightCarbsBg,
+                bg: isDark ? AppColors.darkCarbsBg : AppColors.lightCarbsBg,
                 textPrimary: textPrimary,
                 textMuted: textMuted,
               ),
@@ -312,9 +270,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 label: 'Fat',
                 value: '${fat.toStringAsFixed(0)}g',
                 color: AppColors.coral,
-                bg: isDark
-                    ? AppColors.darkFatBg
-                    : AppColors.lightFatBg,
+                bg: isDark ? AppColors.darkFatBg : AppColors.lightFatBg,
                 textPrimary: textPrimary,
                 textMuted: textMuted,
               ),
@@ -323,9 +279,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 label: 'Water',
                 value: '${provider.waterToday.toStringAsFixed(1)}L',
                 color: AppColors.mint,
-                bg: isDark
-                    ? AppColors.darkWaterBg
-                    : AppColors.lightWaterBg,
+                bg: isDark ? AppColors.darkWaterBg : AppColors.lightWaterBg,
                 textPrimary: textPrimary,
                 textMuted: textMuted,
               ),
@@ -347,19 +301,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
     bool isDark,
   ) {
     final weekly = provider.weeklyStats;
-    final avgCal = weekly.isEmpty
-        ? 0.0
-        : weekly.fold<double>(
-                0, (s, d) => s + (d['calories'] as num).toDouble()) /
-            weekly.length;
-    final totalMeals = weekly.fold<int>(
-      0,
-      (s, d) => s + ((d['mealCount'] as num?)?.toInt() ?? 0),
-    );
+    final avgCal = weekly.isEmpty ? 0.0 : weekly.fold<double>(0, (s, d) => s + (d['calories'] as num).toDouble()) / weekly.length;
+    final totalMeals = weekly.fold<int>(0, (s, d) => s + ((d['mealCount'] as num?)?.toInt() ?? 0));
     final insights = provider.weeklyInsights;
-    final achievement = insights.isNotEmpty
-        ? (insights['goalAchievement'] as double)
-        : 0.0;
+    final achievement = insights.isNotEmpty ? (insights['goalAchievement'] as double) : 0.0;
     final l = AppLocalizations.of(context);
 
     return _HeroStatRow(
@@ -372,9 +317,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       rightUnit: '',
       rightSub: l.mealsLoggedLabel,
       rightColor: AppColors.violet,
-      badgeLabel: achievement > 0
-          ? l.goalHitBadge(achievement.toStringAsFixed(0))
-          : null,
+      badgeLabel: achievement > 0 ? l.goalHitBadge(achievement.toStringAsFixed(0)) : null,
       badgeColor: accent,
       cardBg: cardBg,
       border: border,
@@ -395,19 +338,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
     bool isDark,
   ) {
     final monthly = provider.monthlyStats;
-    final avgCal = monthly.isEmpty
-        ? 0.0
-        : monthly.fold<double>(
-                0, (s, d) => s + (d['calories'] as num).toDouble()) /
-            monthly.length;
-    final totalMeals = monthly.fold<int>(
-      0,
-      (s, d) => s + ((d['mealCount'] as num?)?.toInt() ?? 0),
-    );
+    final avgCal = monthly.isEmpty ? 0.0 : monthly.fold<double>(0, (s, d) => s + (d['calories'] as num).toDouble()) / monthly.length;
+    final totalMeals = monthly.fold<int>(0, (s, d) => s + ((d['mealCount'] as num?)?.toInt() ?? 0));
     final insights = provider.monthlyInsights;
-    final consistency = insights.isNotEmpty
-        ? (insights['consistencyScore'] as double)
-        : 0.0;
+    final consistency = insights.isNotEmpty ? (insights['consistencyScore'] as double) : 0.0;
     final l = AppLocalizations.of(context);
 
     return _HeroStatRow(
@@ -420,9 +354,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       rightUnit: '',
       rightSub: l.mealsLoggedLabel,
       rightColor: AppColors.violet,
-      badgeLabel: consistency > 0
-          ? l.consistencyBadge(consistency.toStringAsFixed(0))
-          : null,
+      badgeLabel: consistency > 0 ? l.consistencyBadge(consistency.toStringAsFixed(0)) : null,
       badgeColor: AppColors.amber,
       cardBg: cardBg,
       border: border,
@@ -445,13 +377,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final logs = provider.weightLogs;
     final isImperial = provider.unitSystem == UnitSystem.imperial;
     final unit = isImperial ? 'lb' : 'kg';
-    final lastWeight = logs.isNotEmpty
-        ? (logs.last['weight'] as num).toDouble()
-        : provider.weight;
+    final lastWeight = logs.isNotEmpty ? (logs.last['weight'] as num).toDouble() : provider.weight;
     final targetWeight = provider.targetWeight;
-    final startWeight = logs.isNotEmpty
-        ? (logs.first['weight'] as num).toDouble()
-        : lastWeight;
+    final startWeight = logs.isNotEmpty ? (logs.first['weight'] as num).toDouble() : lastWeight;
     final delta = lastWeight - startWeight;
     final hasDelta = logs.length > 1;
     final l = AppLocalizations.of(context);
@@ -506,17 +434,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
   ) {
     switch (_tabIndex) {
       case 0:
-        return _buildTodayContent(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildTodayContent(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       case 1:
-        return _buildWeeklyContent(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildWeeklyContent(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       case 2:
-        return _buildMonthlyContent(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildMonthlyContent(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
       default:
-        return _buildWeightContent(
-            context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
+        return _buildWeightContent(context, provider, cardBg, textPrimary, textMuted, accent, border, isDark);
     }
   }
 
@@ -579,15 +503,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
-                      maxY: weekly.fold<double>(
-                                  0,
-                                  (m, d) =>
-                                      (d['calories'] as num).toDouble() > m
-                                          ? (d['calories'] as num).toDouble()
-                                          : m,
-                                ) *
-                              1.3 +
-                          100,
+                      maxY:
+                          weekly.fold<double>(0, (m, d) => (d['calories'] as num).toDouble() > m ? (d['calories'] as num).toDouble() : m) * 1.3 + 100,
                       barTouchData: BarTouchData(enabled: false),
                       titlesData: FlTitlesData(
                         show: true,
@@ -606,11 +523,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                                   padding: EdgeInsets.only(top: 8.h),
                                   child: Text(
                                     DateFormat('E').format(d),
-                                    style: TextStyle(
-                                      fontSize: 12.sp,
-                                      color: textMuted,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: TextStyle(fontSize: 12.sp, color: textMuted, fontWeight: FontWeight.w600),
                                   ),
                                 );
                               } catch (_) {
@@ -627,50 +540,30 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               padding: EdgeInsets.only(right: 4.w),
                               child: Text(
                                 val.toInt().toString(),
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: textMuted,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: TextStyle(fontSize: 10.sp, color: textMuted, fontWeight: FontWeight.w500),
                               ),
                             ),
                           ),
                         ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       ),
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: false,
-                        getDrawingHorizontalLine: (_) => FlLine(
-                          color: isDark
-                              ? AppColors.darkSurface
-                              : AppColors.lightBorder,
-                          strokeWidth: 0.5,
-                        ),
+                        getDrawingHorizontalLine: (_) => FlLine(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, strokeWidth: 0.5),
                       ),
                       borderData: FlBorderData(show: false),
                       barGroups: List.generate(weekly.length, (i) {
-                        final calVal =
-                            (weekly[i]['calories'] as num).toDouble();
+                        final calVal = (weekly[i]['calories'] as num).toDouble();
                         return BarChartGroupData(
                           x: i,
                           barRods: [
                             BarChartRodData(
                               toY: calVal,
-                              color: calVal > 0
-                                  ? accent
-                                  : (isDark
-                                      ? AppColors.darkSurface
-                                      : AppColors.lightBorder),
+                              color: calVal > 0 ? accent : (isDark ? AppColors.darkSurface : AppColors.lightBorder),
                               width: 14,
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(4.r),
-                              ),
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(4.r)),
                             ),
                           ],
                         );
@@ -681,14 +574,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         ),
         SizedBox(height: 12.h),
 
-        _MacroBreakdownFromList(
-          stats: weekly,
-          cardBg: cardBg,
-          border: border,
-          textPrimary: textPrimary,
-          textMuted: textMuted,
-          isDark: isDark,
-        ),
+        _MacroBreakdownFromList(stats: weekly, cardBg: cardBg, border: border, textPrimary: textPrimary, textMuted: textMuted, isDark: isDark),
         SizedBox(height: 12.h),
 
         _AnalysisGrid(
@@ -718,13 +604,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
     bool isDark,
   ) {
     final monthly = provider.monthlyStats;
-    final maxCal = monthly.fold<double>(
-      0,
-      (m, d) {
-        final v = (d['calories'] as num).toDouble();
-        return v > m ? v : m;
-      },
-    );
+    final maxCal = monthly.fold<double>(0, (m, d) {
+      final v = (d['calories'] as num).toDouble();
+      return v > m ? v : m;
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -743,16 +626,41 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
                       maxY: maxCal * 1.3 + 100,
-                      barTouchData: BarTouchData(enabled: false),
+                      barTouchData: BarTouchData(
+                        enabled: true,
+                        touchTooltipData: BarTouchTooltipData(
+                          getTooltipColor: (_) => isDark ? AppColors.darkSurface : Colors.black87,
+                          tooltipRoundedRadius: 6,
+                          tooltipPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                          getTooltipItem: (group, groupIdx, rod, rodIdx) {
+                            final idx = group.x;
+                            if (idx < 0 || idx >= monthly.length) return null;
+                            final dateStr = monthly[idx]['date'] as String;
+                            String label;
+                            try {
+                              final d = DateTime.parse(dateStr);
+                              label = '${d.day}/${d.month}';
+                            } catch (_) {
+                              label = dateStr;
+                            }
+                            return BarTooltipItem(
+                              '$label\n${rod.toY.toInt()} kcal',
+                              TextStyle(color: Colors.white, fontSize: 11.sp, fontWeight: FontWeight.w600),
+                            );
+                          },
+                        ),
+                        touchCallback: (event, response) {
+                          if (!event.isInterestedForInteractions || response == null || response.spot == null) {
+                            setState(() => _touchedMonthlyIdx = null);
+                            return;
+                          }
+                          setState(() => _touchedMonthlyIdx = response.spot!.touchedBarGroup.x);
+                        },
+                      ),
                       gridData: FlGridData(
                         show: true,
                         drawVerticalLine: false,
-                        getDrawingHorizontalLine: (_) => FlLine(
-                          color: isDark
-                              ? AppColors.darkSurface
-                              : AppColors.lightBorder,
-                          strokeWidth: 0.5,
-                        ),
+                        getDrawingHorizontalLine: (_) => FlLine(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, strokeWidth: 0.5),
                       ),
                       titlesData: FlTitlesData(
                         show: true,
@@ -760,9 +668,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
                           sideTitles: SideTitles(
                             showTitles: true,
                             reservedSize: 22,
-                            interval: 7,
+                            interval: 1,
                             getTitlesWidget: (value, meta) {
                               final idx = value.toInt();
+                              if (_touchedMonthlyIdx != idx) {
+                                return const SizedBox.shrink();
+                              }
                               if (idx < 0 || idx >= monthly.length) {
                                 return const SizedBox.shrink();
                               }
@@ -770,14 +681,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               try {
                                 final d = DateTime.parse(dateStr);
                                 return Padding(
-                                  padding: EdgeInsets.only(top: 8.h),
+                                  padding: EdgeInsets.only(top: 6.h),
                                   child: Text(
                                     '${d.day}/${d.month}',
-                                    style: TextStyle(
-                                      color: textMuted,
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: TextStyle(color: accent, fontSize: 10.sp, fontWeight: FontWeight.w700),
                                   ),
                                 );
                               } catch (_) {
@@ -794,40 +701,28 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               padding: EdgeInsets.only(right: 4.w),
                               child: Text(
                                 val.toInt().toString(),
-                                style: TextStyle(
-                                  fontSize: 10.sp,
-                                  color: textMuted,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: TextStyle(fontSize: 10.sp, color: textMuted, fontWeight: FontWeight.w500),
                               ),
                             ),
                           ),
                         ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
+                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       ),
-                      borderData: FlBorderData(show: false),
+                      borderData: FlBorderData(
+                        show: true,
+                        border: Border(bottom: BorderSide(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, width: 0.8)),
+                      ),
                       barGroups: List.generate(monthly.length, (i) {
-                        final calVal =
-                            (monthly[i]['calories'] as num).toDouble();
+                        final calVal = (monthly[i]['calories'] as num).toDouble();
                         return BarChartGroupData(
                           x: i,
                           barRods: [
                             BarChartRodData(
                               toY: calVal,
-                              color: calVal > 0
-                                  ? accent
-                                  : (isDark
-                                      ? AppColors.darkSurface
-                                      : AppColors.lightBorder),
+                              color: calVal > 0 ? accent : (isDark ? AppColors.darkSurface : AppColors.lightBorder),
                               width: 6,
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(2.r),
-                              ),
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(2.r)),
                             ),
                           ],
                         );
@@ -838,14 +733,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         ),
         SizedBox(height: 12.h),
 
-        _MacroBreakdownFromList(
-          stats: monthly,
-          cardBg: cardBg,
-          border: border,
-          textPrimary: textPrimary,
-          textMuted: textMuted,
-          isDark: isDark,
-        ),
+        _MacroBreakdownFromList(stats: monthly, cardBg: cardBg, border: border, textPrimary: textPrimary, textMuted: textMuted, isDark: isDark),
         SizedBox(height: 12.h),
 
         _AnalysisGrid(
@@ -884,11 +772,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           padding: EdgeInsets.only(top: 40.h),
           child: Column(
             children: [
-              Icon(
-                Icons.monitor_weight_rounded,
-                size: 48.sp,
-                color: textMuted.withValues(alpha: 0.4),
-              ),
+              Icon(Icons.monitor_weight_rounded, size: 48.sp, color: textMuted.withValues(alpha: 0.4)),
               SizedBox(height: 16.h),
               Text(
                 'No weight data yet.\nLog your weight to see your progress here.',
@@ -921,11 +805,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
         Container(
           height: 250.h,
           padding: EdgeInsets.fromLTRB(16.w, 24.h, 24.w, 16.h),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16.r),
-            border: border,
-          ),
+          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16.r), border: border),
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.spaceAround,
@@ -936,20 +816,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 show: true,
                 drawVerticalLine: false,
                 horizontalInterval: 5,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: isDark ? AppColors.darkSurface : AppColors.lightBorder,
-                  strokeWidth: 1,
-                  dashArray: [4, 4],
-                ),
+                getDrawingHorizontalLine: (value) =>
+                    FlLine(color: isDark ? AppColors.darkSurface : AppColors.lightBorder, strokeWidth: 1, dashArray: [4, 4]),
               ),
               titlesData: FlTitlesData(
                 show: true,
-                rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -965,11 +838,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         padding: EdgeInsets.only(top: 8.h),
                         child: Text(
                           '${dt.day}/${dt.month}',
-                          style: TextStyle(
-                            color: textMuted,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(color: textMuted, fontSize: 10.sp, fontWeight: FontWeight.w600),
                         ),
                       );
                     },
@@ -985,11 +854,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                         padding: EdgeInsets.only(right: 8.w),
                         child: Text(
                           value.toInt().toString(),
-                          style: TextStyle(
-                            color: textMuted,
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(color: textMuted, fontSize: 10.sp, fontWeight: FontWeight.w600),
                         ),
                       );
                     },
@@ -1007,9 +872,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                       toY: w,
                       color: AppColors.violet,
                       width: (logs.length > 30 ? 4.0 : 8.0),
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(2.r),
-                      ),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(2.r)),
                     ),
                   ],
                 );
@@ -1022,21 +885,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
         // Last 5 logs
         Container(
           padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(16.r),
-            border: border,
-          ),
+          decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16.r), border: border),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Recent Logs',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: textPrimary,
-                ),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
               ),
               SizedBox(height: 12.h),
               ...logs.reversed.take(5).map((log) {
@@ -1049,19 +904,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     children: [
                       Text(
                         DateFormat('d MMM y').format(dt),
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: textMuted,
-                          fontWeight: FontWeight.w400,
-                        ),
+                        style: TextStyle(fontSize: 13.sp, color: textMuted, fontWeight: FontWeight.w400),
                       ),
                       Text(
                         '${w.toStringAsFixed(1)} $unit',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: textPrimary,
-                        ),
+                        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
                       ),
                     ],
                   ),
@@ -1101,10 +948,7 @@ class _PillTabBar extends StatelessWidget {
     return Container(
       height: 44.h,
       padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22.r),
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(22.r)),
       child: Row(
         children: List.generate(labels.length, (i) {
           final selected = i == selectedIndex;
@@ -1115,9 +959,7 @@ class _PillTabBar extends StatelessWidget {
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
                 decoration: BoxDecoration(
-                  color: selected
-                      ? (isDark ? accent : AppColors.void_)
-                      : Colors.transparent,
+                  color: selected ? (isDark ? accent : AppColors.void_) : Colors.transparent,
                   borderRadius: BorderRadius.circular(18.r),
                 ),
                 alignment: Alignment.center,
@@ -1125,11 +967,8 @@ class _PillTabBar extends StatelessWidget {
                   labels[i],
                   style: TextStyle(
                     fontSize: 12.sp,
-                    fontWeight:
-                        selected ? FontWeight.w700 : FontWeight.w500,
-                    color: selected
-                        ? (isDark ? AppColors.void_ : Colors.white)
-                        : textMuted,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: selected ? (isDark ? AppColors.void_ : Colors.white) : textMuted,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1181,11 +1020,7 @@ class _HeroStatRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(20.r),
-        border: border,
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(20.r), border: border),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1194,30 +1029,19 @@ class _HeroStatRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: textMuted,
-                  letterSpacing: 0.5,
-                ),
+                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: textMuted, letterSpacing: 0.5),
               ),
               if (badgeLabel != null) ...[
                 const Spacer(),
                 Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 10.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: (badgeColor ?? textMuted)
-                        .withValues(alpha: isDark ? 0.15 : 0.12),
+                    color: (badgeColor ?? textMuted).withValues(alpha: isDark ? 0.15 : 0.12),
                     borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
                     badgeLabel!,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: badgeColor ?? textMuted,
-                    ),
+                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: badgeColor ?? textMuted),
                   ),
                 ),
               ],
@@ -1228,28 +1052,25 @@ class _HeroStatRow extends StatelessWidget {
           // Two stat columns
           Row(
             children: [
-              Expanded(child: _HeroStat(
-                value: leftValue,
-                unit: leftUnit,
-                sub: leftSub,
-                color: leftColor,
-                textPrimary: textPrimary,
-                textMuted: textMuted,
-              )),
+              Expanded(
+                child: _HeroStat(value: leftValue, unit: leftUnit, sub: leftSub, color: leftColor, textPrimary: textPrimary, textMuted: textMuted),
+              ),
               Container(
                 width: 1,
                 height: 40.h,
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
                 color: textMuted.withValues(alpha: 0.15),
               ),
-              Expanded(child: _HeroStat(
-                value: rightValue,
-                unit: rightUnit,
-                sub: rightSub,
-                color: rightColor,
-                textPrimary: textPrimary,
-                textMuted: textMuted,
-              )),
+              Expanded(
+                child: _HeroStat(
+                  value: rightValue,
+                  unit: rightUnit,
+                  sub: rightSub,
+                  color: rightColor,
+                  textPrimary: textPrimary,
+                  textMuted: textMuted,
+                ),
+              ),
             ],
           ),
         ],
@@ -1282,22 +1103,13 @@ class _HeroStat extends StatelessWidget {
           children: [
             Text(
               value,
-              style: TextStyle(
-                fontSize: 28.sp,
-                fontWeight: FontWeight.w900,
-                color: color,
-                height: 1,
-              ),
+              style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w900, color: color, height: 1),
             ),
             if (unit.isNotEmpty) ...[
               SizedBox(width: 4.w),
               Text(
                 unit,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w400,
-                  color: textMuted,
-                ),
+                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w400, color: textMuted),
               ),
             ],
           ],
@@ -1305,11 +1117,7 @@ class _HeroStat extends StatelessWidget {
         SizedBox(height: 4.h),
         Text(
           sub,
-          style: TextStyle(
-            fontSize: 11.sp,
-            color: textMuted,
-            fontWeight: FontWeight.w400,
-          ),
+          style: TextStyle(fontSize: 11.sp, color: textMuted, fontWeight: FontWeight.w400),
         ),
       ],
     );
@@ -1323,11 +1131,7 @@ class _StreakChip extends StatelessWidget {
   final Color accent;
   final bool isDark;
 
-  const _StreakChip({
-    required this.streak,
-    required this.accent,
-    required this.isDark,
-  });
+  const _StreakChip({required this.streak, required this.accent, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -1344,11 +1148,7 @@ class _StreakChip extends StatelessWidget {
           SizedBox(width: 4.w),
           Text(
             '$streak day streak',
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w600,
-              color: accent,
-            ),
+            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: accent),
           ),
         ],
       ),
@@ -1377,28 +1177,17 @@ class _MacroPill extends StatelessWidget {
     return Expanded(
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(12.r),
-        ),
+        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12.r)),
         child: Column(
           children: [
             Text(
               value,
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
+              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: color),
             ),
             SizedBox(height: 2.h),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w400,
-                color: textMuted,
-              ),
+              style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w400, color: textMuted),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -1417,33 +1206,19 @@ class _ChartCard extends StatelessWidget {
   final Border? border;
   final Widget child;
 
-  const _ChartCard({
-    required this.title,
-    required this.cardBg,
-    required this.textPrimary,
-    this.border,
-    required this.child,
-  });
+  const _ChartCard({required this.title, required this.cardBg, required this.textPrimary, this.border, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16.r),
-        border: border,
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16.r), border: border),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              color: textPrimary,
-            ),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
           ),
           SizedBox(height: 16.h),
           child,
@@ -1497,21 +1272,13 @@ class _MacroBreakdownCard extends StatelessWidget {
     final total = pro + car + fat;
     return Container(
       padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16.r),
-        border: border,
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16.r), border: border),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Macro Breakdown',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              color: textPrimary,
-            ),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: textPrimary),
           ),
           SizedBox(height: 14.h),
           Row(
@@ -1525,24 +1292,9 @@ class _MacroBreakdownCard extends StatelessWidget {
                           sectionsSpace: 2,
                           centerSpaceRadius: 30.w,
                           sections: [
-                            PieChartSectionData(
-                              color: AppColors.violet,
-                              value: pro,
-                              title: '',
-                              radius: 12.w,
-                            ),
-                            PieChartSectionData(
-                              color: AppColors.amber,
-                              value: car,
-                              title: '',
-                              radius: 12.w,
-                            ),
-                            PieChartSectionData(
-                              color: AppColors.coral,
-                              value: fat,
-                              title: '',
-                              radius: 12.w,
-                            ),
+                            PieChartSectionData(color: AppColors.violet, value: pro, title: '', radius: 12.w),
+                            PieChartSectionData(color: AppColors.amber, value: car, title: '', radius: 12.w),
+                            PieChartSectionData(color: AppColors.coral, value: fat, title: '', radius: 12.w),
                           ],
                         ),
                       )
@@ -1552,32 +1304,11 @@ class _MacroBreakdownCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    _MacroBar(
-                      label: 'Protein',
-                      value: pro,
-                      color: AppColors.violet,
-                      textPrimary: textPrimary,
-                      textMuted: textMuted,
-                      isDark: isDark,
-                    ),
+                    _MacroBar(label: 'Protein', value: pro, color: AppColors.violet, textPrimary: textPrimary, textMuted: textMuted, isDark: isDark),
                     SizedBox(height: 10.h),
-                    _MacroBar(
-                      label: 'Carbs',
-                      value: car,
-                      color: AppColors.amber,
-                      textPrimary: textPrimary,
-                      textMuted: textMuted,
-                      isDark: isDark,
-                    ),
+                    _MacroBar(label: 'Carbs', value: car, color: AppColors.amber, textPrimary: textPrimary, textMuted: textMuted, isDark: isDark),
                     SizedBox(height: 10.h),
-                    _MacroBar(
-                      label: 'Fat',
-                      value: fat,
-                      color: AppColors.coral,
-                      textPrimary: textPrimary,
-                      textMuted: textMuted,
-                      isDark: isDark,
-                    ),
+                    _MacroBar(label: 'Fat', value: fat, color: AppColors.coral, textPrimary: textPrimary, textMuted: textMuted, isDark: isDark),
                   ],
                 ),
               ),
@@ -1609,12 +1340,9 @@ class _MacroBreakdownFromList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (stats.isEmpty) return const SizedBox.shrink();
-    final pro = stats.fold<double>(
-        0, (s, d) => s + (d['protein'] as num).toDouble());
-    final car =
-        stats.fold<double>(0, (s, d) => s + (d['carbs'] as num).toDouble());
-    final fat =
-        stats.fold<double>(0, (s, d) => s + (d['fat'] as num).toDouble());
+    final pro = stats.fold<double>(0, (s, d) => s + (d['protein'] as num).toDouble());
+    final car = stats.fold<double>(0, (s, d) => s + (d['carbs'] as num).toDouble());
+    final fat = stats.fold<double>(0, (s, d) => s + (d['fat'] as num).toDouble());
 
     return _MacroBreakdownCard(
       pro: pro,
@@ -1656,19 +1384,11 @@ class _MacroBar extends StatelessWidget {
           children: [
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-                color: textMuted,
-              ),
+              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: textMuted),
             ),
             Text(
               '${value.toStringAsFixed(0)}g',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w700,
-                color: textPrimary,
-              ),
+              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: textPrimary),
             ),
           ],
         ),
@@ -1678,8 +1398,7 @@ class _MacroBar extends StatelessWidget {
           child: LinearProgressIndicator(
             value: value > 0 ? (value / 700).clamp(0.0, 1.0) : 0,
             minHeight: 6,
-            backgroundColor:
-                isDark ? AppColors.darkSurface : AppColors.lightBorder,
+            backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightBorder,
             valueColor: AlwaysStoppedAnimation(color),
           ),
         ),
@@ -1718,12 +1437,7 @@ class _AnalysisGrid extends StatelessWidget {
 
     String mealStr = '-';
     if (topMeal != null) {
-      const map = {
-        'breakfast': 'Breakfast',
-        'lunch': 'Lunch',
-        'dinner': 'Dinner',
-        'snack': 'Snack',
-      };
+      const map = {'breakfast': 'Breakfast', 'lunch': 'Lunch', 'dinner': 'Dinner', 'snack': 'Snack'};
       mealStr = map[topMeal] ?? topMeal;
     }
 
@@ -1734,14 +1448,11 @@ class _AnalysisGrid extends StatelessWidget {
           padding: EdgeInsets.only(left: 4.w, bottom: 12.h),
           child: Text(
             isWeekly ? 'Weekly Insights' : 'Monthly Insights',
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-              color: textPrimary,
-            ),
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, color: textPrimary),
           ),
         ),
         GridView.count(
+          padding: EdgeInsets.zero,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
@@ -1819,11 +1530,7 @@ class _InsightItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16.r),
-        border: border,
-      ),
+      decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16.r), border: border),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1835,11 +1542,7 @@ class _InsightItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    color: textMuted,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 11.sp, color: textMuted, fontWeight: FontWeight.w500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1848,11 +1551,7 @@ class _InsightItem extends StatelessWidget {
           ),
           Text(
             value,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w800,
-              color: textPrimary,
-            ),
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w800, color: textPrimary),
           ),
         ],
       ),

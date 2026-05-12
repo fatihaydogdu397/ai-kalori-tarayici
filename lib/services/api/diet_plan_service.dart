@@ -148,7 +148,13 @@ class DietPlanService {
     final mealsRaw = (day['meals'] as List?) ?? const [];
     final meals = mealsRaw
         .map((e) => _parseMeal(Map<String, dynamic>.from(e as Map)))
-        .toList(growable: false);
+        .toList()
+      // Sıra: Kahvaltı → Öğle → Atıştırmalık → Akşam. Backend siparişi ne
+      // olursa olsun bu chronological akış UI'da kullanıcının beklediği
+      // şekildedir (snack lunch ile dinner arasında).
+      ..sort((a, b) =>
+          (_categoryOrder[a.category] ?? 99)
+              .compareTo(_categoryOrder[b.category] ?? 99));
 
     final dayNumber = day['dayNumber'] as int;
     final totalCals = meals.fold<int>(0, (s, m) => s + m.calories);
@@ -161,6 +167,13 @@ class DietPlanService {
       totalCalories: totalCals,
     );
   }
+
+  static const Map<String, int> _categoryOrder = {
+    'Breakfast': 0,
+    'Lunch': 1,
+    'Snack': 2,
+    'Dinner': 3,
+  };
 
   DietMeal _parseMeal(Map<String, dynamic> meal) {
     final categoryRaw = ((meal['mealCategory'] ?? '') as String).toLowerCase();

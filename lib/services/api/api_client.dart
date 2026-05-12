@@ -45,40 +45,17 @@ class ApiClient {
     }
     if (url.isEmpty && !kReleaseMode) url = _devFallbackUrl;
     if (url.isEmpty) {
-      throw ApiException(
-        'API_BASE_URL not set. Add it to .env or build with --dart-define=API_BASE_URL=<url>.',
-        code: 'CONFIG_ERROR',
-      );
+      throw ApiException('API_BASE_URL not set. Add it to .env or build with --dart-define=API_BASE_URL=<url>.', code: 'CONFIG_ERROR');
     }
     return Uri.parse(url);
   }
 
-  Future<Map<String, dynamic>> query(
-    String document, {
-    Map<String, dynamic>? variables,
-    String? operationName,
-    bool requiresAuth = true,
-  }) {
-    return _execute(
-      document: document,
-      variables: variables,
-      operationName: operationName,
-      requiresAuth: requiresAuth,
-    );
+  Future<Map<String, dynamic>> query(String document, {Map<String, dynamic>? variables, String? operationName, bool requiresAuth = true}) {
+    return _execute(document: document, variables: variables, operationName: operationName, requiresAuth: requiresAuth);
   }
 
-  Future<Map<String, dynamic>> mutate(
-    String document, {
-    Map<String, dynamic>? variables,
-    String? operationName,
-    bool requiresAuth = true,
-  }) {
-    return _execute(
-      document: document,
-      variables: variables,
-      operationName: operationName,
-      requiresAuth: requiresAuth,
-    );
+  Future<Map<String, dynamic>> mutate(String document, {Map<String, dynamic>? variables, String? operationName, bool requiresAuth = true}) {
+    return _execute(document: document, variables: variables, operationName: operationName, requiresAuth: requiresAuth);
   }
 
   Future<Map<String, dynamic>> _execute({
@@ -88,10 +65,7 @@ class ApiClient {
     required bool requiresAuth,
     bool isRetry = false,
   }) async {
-    final headers = <String, String>{
-      HttpHeaders.contentTypeHeader: 'application/json',
-      HttpHeaders.acceptHeader: 'application/json',
-    };
+    final headers = <String, String>{HttpHeaders.contentTypeHeader: 'application/json', HttpHeaders.acceptHeader: 'application/json'};
 
     if (requiresAuth) {
       final token = await _storage.readAccessToken();
@@ -111,9 +85,7 @@ class ApiClient {
 
     http.Response res;
     try {
-      res = await _http
-          .post(_uri, headers: headers, body: body)
-          .timeout(const Duration(seconds: 30));
+      res = await _http.post(_uri, headers: headers, body: body).timeout(const Duration(seconds: 30));
     } on SocketException catch (e) {
       _logError(operationName, 'SocketException: ${e.message}', sw.elapsed);
       throw await _networkFailure(
@@ -150,27 +122,19 @@ class ApiClient {
 
     if (res.statusCode == 401 || res.statusCode == 403) {
       if (requiresAuth && !isRetry && await _tryRefreshToken()) {
-        return _execute(
-          document: document,
-          variables: variables,
-          operationName: operationName,
-          requiresAuth: requiresAuth,
-          isRetry: true,
-        );
+        return _execute(document: document, variables: variables, operationName: operationName, requiresAuth: requiresAuth, isRetry: true);
       }
       if (requiresAuth) {
         await _handleAuthFailure();
       }
-      throw ApiException('Authentication required',
-          code: 'UNAUTHENTICATED', statusCode: res.statusCode);
+      throw ApiException('Authentication required', code: 'UNAUTHENTICATED', statusCode: res.statusCode);
     }
 
     Map<String, dynamic> decoded;
     try {
       decoded = jsonDecode(res.body) as Map<String, dynamic>;
     } catch (_) {
-      throw ApiException('Invalid server response (${res.statusCode})',
-          statusCode: res.statusCode);
+      throw ApiException('Invalid server response (${res.statusCode})', statusCode: res.statusCode);
     }
 
     if (decoded['errors'] is List && (decoded['errors'] as List).isNotEmpty) {
@@ -180,32 +144,21 @@ class ApiClient {
       final code = ext?['code']?.toString();
 
       // Token-bazlı hatalar: refresh dene, başarısızsa logout.
-      final isTokenError = code == 'UNAUTHENTICATED' ||
-          code == 'auth.unauthenticated' ||
-          code == 'auth.token_expired';
+      final isTokenError = code == 'UNAUTHENTICATED' || code == 'auth.unauthenticated' || code == 'auth.token_expired';
       // Refresh ile çözülemeyecek session-fatal hatalar: kullanıcıyı doğrudan
       // social login ekranına at (örn. account deleted on BE, account
       // disabled). Refresh denenmez.
-      final isSessionFatal = code == 'profile.user_not_found' ||
-          code == 'auth.user_disabled' ||
-          code == 'auth.account_locked';
+      final isSessionFatal = code == 'profile.user_not_found' || code == 'auth.user_disabled' || code == 'auth.account_locked';
       if (isTokenError && requiresAuth && !isRetry) {
         if (await _tryRefreshToken()) {
-          return _execute(
-            document: document,
-            variables: variables,
-            operationName: operationName,
-            requiresAuth: requiresAuth,
-            isRetry: true,
-          );
+          return _execute(document: document, variables: variables, operationName: operationName, requiresAuth: requiresAuth, isRetry: true);
         }
         await _handleAuthFailure();
       } else if (isSessionFatal && requiresAuth) {
         await _handleAuthFailure();
       }
 
-      throw ApiException(message,
-          code: code, statusCode: res.statusCode, extensions: ext);
+      throw ApiException(message, code: code, statusCode: res.statusCode, extensions: ext);
     }
 
     final data = decoded['data'];
@@ -236,11 +189,7 @@ class ApiClient {
     }
   }
 
-  void _logRequest(
-    String? operationName,
-    String document,
-    Map<String, dynamic>? variables,
-  ) {
+  void _logRequest(String? operationName, String document, Map<String, dynamic>? variables) {
     final op = _opLabel(operationName, document);
     final vars = variables == null ? '' : ' vars=${jsonEncode(_redact(variables))}';
     _log('→ $op$vars');
@@ -266,10 +215,7 @@ class ApiClient {
 
   dynamic _redact(dynamic value) {
     if (value is Map) {
-      return value.map((k, v) => MapEntry(
-            k,
-            _redactedKeys.contains(k) ? '***REDACTED***' : _redact(v),
-          ));
+      return value.map((k, v) => MapEntry(k, _redactedKeys.contains(k) ? '***REDACTED***' : _redact(v)));
     }
     if (value is List) {
       return value.map(_redact).toList();
@@ -277,12 +223,7 @@ class ApiClient {
     return value;
   }
 
-  void _logResponse(
-    String? operationName,
-    int status,
-    String body,
-    Duration elapsed,
-  ) {
+  void _logResponse(String? operationName, int status, String body, Duration elapsed) {
     final op = _opLabel(operationName, '');
     _log('← $op [$status] ${elapsed.inMilliseconds}ms $body');
   }
@@ -307,11 +248,7 @@ class ApiClient {
     final name = _opLabel(operationName, document);
     if (requiresAuth && !isRetry && MutationQueue.isWhitelisted(name)) {
       try {
-        await MutationQueue.instance.enqueue(
-          operationName: name,
-          document: document,
-          variables: variables ?? const {},
-        );
+        await MutationQueue.instance.enqueue(operationName: name, document: document, variables: variables ?? const {});
         return ApiException('Queued for sync', code: 'QUEUED');
       } catch (_) {
         // Fall through — caller will see a normal network error.
@@ -329,13 +266,7 @@ class ApiClient {
     final items = await queue.pending();
     for (final item in items) {
       try {
-        await _execute(
-          document: item.document,
-          variables: item.variables,
-          operationName: item.operationName,
-          requiresAuth: true,
-          isRetry: true,
-        );
+        await _execute(document: item.document, variables: item.variables, operationName: item.operationName, requiresAuth: true, isRetry: true);
         await queue.markSuccess(item.id);
       } on ApiException catch (e) {
         if (e.code == 'NETWORK_ERROR' || e.code == 'QUEUED') {
@@ -354,8 +285,8 @@ class ApiClient {
     if (refresh == null || refresh.isEmpty) return false;
 
     const mutation = r'''
-      mutation RefreshToken($token: String!) {
-        refreshToken(token: $token) {
+      mutation RefreshToken($refreshToken: String!) {
+        refreshToken(refreshToken: $refreshToken) {
           accessToken
           refreshToken
         }
@@ -363,14 +294,16 @@ class ApiClient {
     ''';
 
     try {
-      final res = await _http.post(
-        _uri,
-        headers: {HttpHeaders.contentTypeHeader: 'application/json'},
-        body: jsonEncode({
-          'query': mutation,
-          'variables': {'token': refresh},
-        }),
-      ).timeout(const Duration(seconds: 15));
+      final res = await _http
+          .post(
+            _uri,
+            headers: {HttpHeaders.contentTypeHeader: 'application/json'},
+            body: jsonEncode({
+              'query': mutation,
+              'variables': {'refreshToken': refresh},
+            }),
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (res.statusCode != 200) return false;
       final decoded = jsonDecode(res.body) as Map<String, dynamic>;

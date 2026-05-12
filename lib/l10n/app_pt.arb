@@ -571,5 +571,7 @@
   "continueWithApple2": "Continuar com Apple",
   "continueWithGoogle2": "Continuar com Google",
   "searchLabel2": "Pesquisar",
-  "searchFoodsHint2": "Pesquisar alimentos..."
+  "searchFoodsHint2": "Pesquisar alimentos...",
+  "shareCta": "Partilhar",
+  "shareWeekCta": "Partilhar semana"
 }

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>D1-D — Magazine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fraunces:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.mag-photo {
+  position: absolute;
+  top: 240px; left: 0; right: 0;
+  height: 1100px;
+  background: linear-gradient(135deg, #4a3520, #8b5a2b);
+  overflow: hidden;
+}
+.mag-photo::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 30% 40%, #d4622a 0%, transparent 45%),
+    radial-gradient(circle at 70% 60%, #f4a050 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, #2a5a2a 0%, transparent 35%);
+}
+.mag-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 30%, rgba(15,15,20,0.3) 70%, rgba(15,15,20,0.95));
+}
+
+.eyebrow-tag {
+  position: absolute;
+  top: 200px; left: 60px;
+  z-index: 5;
+  display: flex; align-items: center; gap: 16px;
+  font-size: 18px;
+  color: var(--lime);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-weight: 700;
+}
+.eyebrow-tag::before, .eyebrow-tag::after {
+  content: '';
+  flex: 0 0 40px;
+  height: 1.5px;
+  background: var(--lime);
+}
+
+.mag-title {
+  position: absolute;
+  bottom: 600px; left: 60px; right: 60px;
+  z-index: 5;
+  font-family: 'Fraunces', serif;
+  font-size: 140px;
+  font-weight: 900;
+  color: var(--snow);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+.mag-title em {
+  font-style: italic;
+  color: var(--lime);
+}
+
+.mag-meta-row {
+  position: absolute;
+  bottom: 400px; left: 60px; right: 60px;
+  z-index: 5;
+  display: flex; gap: 60px;
+  align-items: baseline;
+}
+.mag-meta-item .v {
+  font-family: 'Fraunces', serif;
+  font-size: 72px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.mag-meta-item .l {
+  font-size: 14px; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.2em;
+  font-weight: 600;
+  margin-top: 8px;
+  font-family: 'Inter', sans-serif;
+}
+.mag-meta-item.kcal .v { color: var(--lime); font-size: 96px; }
+
+.mag-divider {
+  position: absolute;
+  bottom: 360px; left: 60px; right: 60px;
+  z-index: 5;
+  height: 1.5px;
+  background: rgba(255,255,255,0.15);
+}
+
+.mag-meta-bottom {
+  position: absolute;
+  bottom: 240px; left: 60px; right: 60px;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+}
+.mag-meta-bottom strong {
+  color: var(--snow);
+  font-weight: 700;
+}
+</style>
+</head>
+<body>
+<div class="story">
+  <div class="bg-base"></div>
+  <div class="grain"></div>
+
+  <div class="header">
+    <div class="brand"><div class="brand-dot">e</div><span>eatiq</span></div>
+    <div class="date-pill">29 Nis · Salı</div>
+  </div>
+
+  <!-- Eyebrow -->
+  <div class="eyebrow-tag">Bugünün Öğünü · Vol. 01</div>
+
+  <!-- Photo -->
+  <div class="mag-photo"></div>
+
+  <!-- Magazine title -->
+  <div class="mag-title">Tabakta<br><em>denge</em>.</div>
+
+  <!-- Stats -->
+  <div class="mag-meta-row">
+    <div class="mag-meta-item kcal">
+      <div class="v">487</div>
+      <div class="l">Kalori</div>
+    </div>
+    <div class="mag-meta-item">
+      <div class="v protein-color">42<span style="font-size:36px; opacity:0.7;">g</span></div>
+      <div class="l">Protein</div>
+    </div>
+    <div class="mag-meta-item">
+      <div class="v carb-color">38<span style="font-size:36px; opacity:0.7;">g</span></div>
+      <div class="l">Karb</div>
+    </div>
+    <div class="mag-meta-item">
+      <div class="v fat-color">15<span style="font-size:36px; opacity:0.7;">g</span></div>
+      <div class="l">Yağ</div>
+    </div>
+  </div>
+
+  <div class="mag-divider"></div>
+
+  <div class="mag-meta-bottom">
+    <span><strong>Issue 042</strong> · Salı</span>
+    <span>1 öğün · <strong>Kayıtlı</strong></span>
+  </div>
+
+  <div class="footer">
+    <div class="footer-handle">@eatiq</div>
+    <div class="footer-cta">Sen de dene →</div>
+  </div>
+</div>
+</body>
+</html>
